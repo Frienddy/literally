@@ -1,6 +1,38 @@
 # DEBT-003 — `esbuild`/`vite` dev-server advisory (dev-only)
 
-**Status:** Open (deferred) · **Severity:** Low (development-only) · **Surfaced by:** PRD-001
+**Status:** ✅ Resolved (2026-06-21) · **Severity:** Low (development-only) · **Surfaced by:** PRD-001
+
+## Resolution
+
+The documented root cause — **GHSA-67mh-4wv8-2f99** in `esbuild <= 0.24.2` — is
+resolved **without** the breaking Vite 8 migration, by pinning the patched esbuild
+via an npm `overrides` block in `package.json`:
+
+```json
+"overrides": { "esbuild": "^0.25.0" }
+```
+
+This forces every transitive consumer (`vite@5`, `vitest`, `vite-node`,
+`vite-plugin-pwa`) onto `esbuild@0.25.12`, which carries the fix, while keeping
+Vite pinned at `5.4.21` and `vite-plugin-pwa` at `0.20.5` (no toolchain
+migration). `npm audit` dropped from 7 advisories to 6, and the esbuild advisory
+is gone. Verified end-to-end on the override: `npm run build` (incl. PWA
+service-worker generation), 167 unit tests, ESLint, the bundle-size gate, and all
+40 Playwright e2e flows (Mobile Safari + Chrome, which exercise the Vite
+dev/preview server where esbuild actually runs) — all green. So Vite 5.4 runs
+correctly against esbuild 0.25 despite its declared `^0.21.3` range.
+
+> **Residual, now tracked separately:** clearing the esbuild advisory uncovered
+> three *independent* Vite dev-server advisories (path traversal in optimized-deps
+> `.map` handling; two Windows-only) that did **not** exist when this note was
+> written and are first patched only in **Vite ≥ 6.4.3** (no patched Vite 5.x).
+> Those still require the deferred Vite-major bump and are logged as
+> **[DEBT-007](../007-vite-dev-server-advisories.md)**. Same risk profile: dev-only,
+> zero production exposure (ADR-001 ships static precached files, no runtime server).
+
+The original note follows for history.
+
+---
 
 > **Reviewed 2026-06-21 (tech-debt pass): still deferred.** `npm audit` still traces
 > every advisory to esbuild `<= 0.24.2` via `vite@5`/`vitest`/`vite-plugin-pwa`. The
