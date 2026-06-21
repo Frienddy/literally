@@ -9,5 +9,17 @@ export const useDraft = () => useGameStore((s) => s.draft);
 export const useLatestSession = () =>
   useGameStore((s) => s.sessions[0] ?? null);
 export const useSessions = () => useGameStore((s) => s.sessions);
+/**
+ * The session the Reflection screen should render: the one explicitly opened from
+ * History (`selectedSessionId`), else the most recently finalized one (PRD-008
+ * R08-1/R08-11). Returns the stored session object (a stable reference), or null.
+ */
+export const useReflectionSession = () =>
+  useGameStore(
+    (s) =>
+      (s.selectedSessionId
+        ? s.sessions.find((x) => x.id === s.selectedSessionId)
+        : s.sessions[0]) ?? null,
+  );
 export const useReducedIntensity = () =>
   useGameStore((s) => s.reducedIntensity);

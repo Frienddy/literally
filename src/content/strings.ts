@@ -50,19 +50,44 @@ export const strings = {
     confidenceQuestion: 'How sure are you that you did it right?',
   },
   reflection: {
-    title: 'Two tries, one little house',
+    // Subject-aware so the payoff names the task the player actually drew.
+    title: (subject: string) => `Two tries at ${subject}`,
     withoutSteps: 'Without steps',
     withSteps: 'With steps',
-    // The reveal copy (the one place autism is named) is owned by PRD-009.
-    revealPlaceholder:
-      'Same simple task — easy with clear steps, hard without them.',
+    // The reveal copy (the one place autism is named) lives in `content/reveal.ts`.
+    // These reflection chrome strings stay strictly neutral (content boundary test).
+    // Read-aloud summaries of the two saved drawings (a11y, PRD-008 §6).
+    summaryWithout: (subject: string) =>
+      `Your freehand drawing of ${subject}, made without clear steps.`,
+    summaryWith: (subject: string) =>
+      `Your snap-to-grid drawing of ${subject}, made with clear steps.`,
+    targetSummary: (subject: string) => `The intended ${subject}.`,
+    // Per-attempt score line (stress + "how sure"), never framed as a grade.
+    scoreLine: (stress: number | null, confidence: number | null) =>
+      `stress ${stress ?? '–'} · sure? ${confidence ?? '–'}`,
+    // Personal deltas (R08-6) — an arrow from Mode 1 to Mode 2, not a verdict.
+    delta: (label: string, from: number | null, to: number | null) =>
+      `${label} ${from ?? '–'} → ${to ?? '–'}`,
+    stressLabel: 'Stress',
+    confidenceLabel: 'Sure?',
+    saved: '✓ Saved on this device',
+    exportImage: 'Save image',
+    exportAria: 'Save a picture of both drawings to this device',
     playAgain: 'Play again',
-    history: 'History',
+    history: 'View past sessions',
   },
   history: {
     title: 'Past sessions',
     empty: 'No past sessions yet.',
+    // Newest-first list item: date + the Mode 1 → Mode 2 stress arc (R08-9).
+    arc: (date: string, from: number | null, to: number | null) =>
+      `${date} · stress ${from ?? '–'} → ${to ?? '–'}`,
+    openAria: (date: string) => `Open the session from ${date}`,
     deleteAll: 'Delete all my data',
+    // Destructive wipe needs an explicit confirm step (R08-10, PRD-010).
+    confirmPrompt: 'Delete everything on this device?',
+    confirmYes: 'Yes, delete it all',
+    confirmNo: 'Keep my sessions',
   },
   install: {
     cta: 'Add to Home Screen',

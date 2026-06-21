@@ -19,6 +19,7 @@ const reset = () =>
     screen: 'welcome' as Screen,
     draft: null,
     sessions: [],
+    selectedSessionId: null,
     reducedIntensity: false,
   });
 
@@ -164,6 +165,36 @@ describe('history & privacy', () => {
   it('setReducedIntensity toggles the flag', () => {
     useGameStore.getState().setReducedIntensity(true);
     expect(useGameStore.getState().reducedIntensity).toBe(true);
+  });
+});
+
+describe('viewing a past session (PRD-008)', () => {
+  it('viewSession selects a session and opens Reflection', () => {
+    useGameStore.getState().startNewSession();
+    useGameStore.getState().finalizeSession(); // older
+    const older = useGameStore.getState().sessions[0].id;
+    useGameStore.getState().startNewSession();
+    useGameStore.getState().finalizeSession(); // newer → sessions[0]
+
+    useGameStore.getState().go('history');
+    useGameStore.getState().viewSession(older);
+
+    const state = useGameStore.getState();
+    expect(state.selectedSessionId).toBe(older);
+    expect(state.screen).toBe('reflection');
+  });
+
+  it('finalize and startNewSession both clear the selection', () => {
+    useGameStore.getState().startNewSession();
+    useGameStore.getState().finalizeSession();
+    useGameStore.getState().viewSession(useGameStore.getState().sessions[0].id);
+    expect(useGameStore.getState().selectedSessionId).not.toBeNull();
+
+    // Starting a fresh play drops back to "show the latest" semantics.
+    useGameStore.getState().startNewSession();
+    expect(useGameStore.getState().selectedSessionId).toBeNull();
+    useGameStore.getState().finalizeSession();
+    expect(useGameStore.getState().selectedSessionId).toBeNull();
   });
 });
 

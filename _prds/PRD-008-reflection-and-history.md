@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done** — code + automated tests complete; real-device share-sheet/PNG-save + reduced-motion reveal checks pending hardware (see §9) |
 | **Source docs** | [01 §6](../_docs/01-game-design.md), [06 §3.5–3.6](../_docs/06-ui-ux-spec.md), [04 §2.5](../_docs/04-canvas-engine.md), [07 §6](../_docs/07-accessibility-and-ethics.md) |
 | **Roadmap** | Phase 6 |
 | **Depends on** | PRD-002 (store), PRD-003 (render + ghost), PRD-005/006 (drawings), PRD-007 (scores) |
@@ -95,16 +95,33 @@ composes the previews onto an offscreen canvas → `toBlob`. Wireframes:
 
 ## 9. Definition of Done
 
-- Both drawings re-render faithfully; the intended target reveal renders for the
-  session's `task_id`; stress + confidence deltas shown.
-- The reveal names ASD respectfully with required disclaimers; framing blames the
-  instructions, not the player.
-- History works; deletion wipes storage with confirmation.
-- (If in scope) image export produces a PNG locally.
+- [x] Both drawings re-render faithfully (shared `engine/render.ts` via
+  `DrawingPreview`); the intended target reveal renders for the session's
+  `task_id`; stress + confidence deltas shown.
+- [x] The reveal names ASD respectfully with required disclaimers (new
+  `content/reveal.ts`, the only file allowed to name autism); framing blames the
+  instructions, not the player. Content test pins the boundary.
+- [x] History works (newest-first, open the tapped session by id, thumbnails);
+  deletion wipes storage with an explicit confirm step.
+- [x] Image export produces a PNG locally (`lib/exportImage.ts`, FR-14), shown
+  only where supported; no network.
+
+**Implementation note (2026-06-21).** Built on PRDs 001–007. Added the in-store
+`selectedSessionId` + `viewSession(id)` seam so Reflection renders either the
+just-finalized session or one opened from History (`useReflectionSession`).
+Previews use a **light** surface so the dark engine ink stays legible — this
+exposed a Mode 1 live-canvas contrast issue, logged as
+[`_debt/006`](../_debt/006-mode1-ink-contrast.md) (PRD-005 scope). The reveal copy
+is the drafted slot; final wording lands with PRD-009's sensitivity review.
+Verified: `tsc --noEmit`, ESLint, 140 Vitest unit tests, `vite build`
+(~63 KB gzip JS), Playwright reflection + flow E2E on Mobile Safari + Mobile
+Chrome. **Pending hardware:** real-device PNG-save and reduced-motion reveal.
 
 ## 10. Open questions & risks
 
-- **OQ-3** ship image export in v1 vs v1.1 — P2; ship if cheap, else v1.1.
+- **OQ-3** ship image export in v1 vs v1.1 — **resolved: shipped in v1**
+  (`lib/exportImage.ts`); it was cheap and self-contained, local-only, and
+  feature-detected so it's gracefully absent where unsupported.
 - **OQ-9** how explicitly the reveal names autism — name it clearly as *one slice*,
   never universalized; decided in sensitivity review (PRD-009).
 - **Risk:** target reveal could read as "you failed" → strict instructions-not-

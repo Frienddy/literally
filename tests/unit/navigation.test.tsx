@@ -14,6 +14,7 @@ const reset = () =>
     screen: 'welcome',
     draft: null,
     sessions: [],
+    selectedSessionId: null,
     reducedIntensity: false,
   });
 
@@ -141,14 +142,43 @@ describe('ScreenRouter — the flow is walkable with stubs', () => {
     expect(useGameStore.getState().reducedIntensity).toBe(true);
   });
 
-  it('History delete-all wipes sessions and returns to Welcome (FR-15)', () => {
+  it('History delete-all needs a confirm, then wipes + returns to Welcome (FR-15)', () => {
     useGameStore.getState().startNewSession();
     useGameStore.getState().finalizeSession();
     useGameStore.setState({ screen: 'history' });
     render(<ScreenRouter />);
 
+    // First tap only arms the confirm — nothing is deleted yet (R08-10).
     fireEvent.click(screen.getByTestId('history-delete-all'));
+    expect(useGameStore.getState().sessions).toHaveLength(1);
+
+    // Cancel backs out without deleting.
+    fireEvent.click(screen.getByTestId('history-delete-cancel'));
+    expect(useGameStore.getState().sessions).toHaveLength(1);
+
+    // Confirm wipes everything and lands on Welcome.
+    fireEvent.click(screen.getByTestId('history-delete-all'));
+    fireEvent.click(screen.getByTestId('history-delete-confirm'));
     expect(useGameStore.getState().sessions).toHaveLength(0);
     expect(screen.getByTestId('screen-welcome')).toBeInTheDocument();
+  });
+
+  it('History opens the tapped session in Reflection (R08-11)', () => {
+    // Two finalized sessions; the older one is sessions[1].
+    useGameStore.getState().startNewSession();
+    useGameStore.getState().finalizeSession();
+    useGameStore.getState().startNewSession();
+    useGameStore.getState().finalizeSession();
+    const older = useGameStore.getState().sessions[1].id;
+
+    useGameStore.setState({ screen: 'history' });
+    render(<ScreenRouter />);
+
+    const rows = within(screen.getByTestId('history-list')).getAllByRole(
+      'listitem',
+    );
+    fireEvent.click(within(rows[1]).getByRole('button')); // the older row
+    expect(useGameStore.getState().selectedSessionId).toBe(older);
+    expect(screen.getByTestId('screen-reflection')).toBeInTheDocument();
   });
 });

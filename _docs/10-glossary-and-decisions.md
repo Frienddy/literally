@@ -368,3 +368,43 @@ was *built* against the blueprint and any reconciliations.
   - No new tech debt: the shipped custom face set (R07-9) and final face count
     (OQ-12) are already owned by PRD-011 polish; the emoji placeholders are isolated
     to `content/feedback.ts` so that swap is a one-file change.
+- **2026-06-21 — Phase 6 (PRD-008).** Built **Reflection & History — the payoff**,
+  completing the **M2 "playable core"** loop. The real `ReflectionScreen` reveals
+  the hidden target (`TargetReveal`, ADR-010), shows both attempts side by side via
+  a read-only `DrawingPreview` — the Mode 1 freehand with the target **ghosted
+  behind it** (`drawTargetGhost`, ADR-013) — the personal **stress + confidence
+  deltas** (ADR-012), and **"the reveal"**: the first and only place autism is named
+  (ADR-008), authored in the new `content/reveal.ts` with the three required
+  disclaimers. `HistoryScreen` lists sessions newest-first with date + stress arc +
+  thumbnails and opens the *tapped* one; "Delete all my data" (FR-15) now takes an
+  explicit confirm step. Optional **local PNG export** (`lib/exportImage.ts`, FR-14)
+  composes the comparison via the shared engine and downloads it — local-only, no
+  network. `DrawingPreview` + `exportImage` reuse `engine/render.ts`, so saved work
+  re-renders exactly as drawn.
+  - Reconciliations vs the blueprint (no ADRs changed): added a runtime-only
+    **`selectedSessionId` + `viewSession(id)`** seam to the store (not in
+    `partialize`) so Reflection renders either the just-finalized session or one
+    opened from History via the new `useReflectionSession` selector (finalize /
+    startNewSession / clearAllData clear it). The reveal copy migrated out of the
+    `strings` stub into `content/reveal.ts` — now the *only* file allowed to name
+    autism — and a content test (`content.reveal`) pins the boundary both ways
+    (reveal names it + carries the disclaimers; the neutral `strings` deck names it
+    nowhere). Final reveal wording is the drafted slot; PRD-009's sensitivity review
+    owns the shipped copy. Previews render on a **light** surface so the dark engine
+    ink keeps AA contrast; canvases carry `role=img` + text summaries (a11y).
+    **OQ-3 resolved:** image export ships in v1 (cheap, self-contained, feature-
+    detected — absent where unsupported).
+  - Verified: `tsc --noEmit`, ESLint, Prettier clean, **140 Vitest unit tests** (+24:
+    `DrawingPreview`/`TargetReveal` engine wiring + a11y, `Reflection` deltas/reveal/
+    fallback, `History` newest-first/open-by-id/confirm-delete, `exportImage`
+    supported + graceful-unsupported, `viewSession` + selector, the reveal content
+    boundary), production `vite build` (~63 KB gzip JS, well under the ~200 KB
+    budget), **Playwright** reflection + flow E2E on Mobile Safari + Mobile Chrome
+    (full play → reveal + both previews + both deltas + autism named → reload keeps
+    the session → reopen from History re-renders; confirmed delete-all). **Pending
+    hardware:** real-device PNG save / OS share, and the reduced-motion reveal feel
+    (PRD-008 §9, doc 09 §6).
+  - Tech debt logged: [`_debt/006`](../_debt/006-mode1-ink-contrast.md) — building
+    the previews surfaced that Mode 1's live freehand ink (`#111827`) is near-
+    invisible on the storm canvas (`#11162a`); tuning the Mode 1 surface is PRD-005
+    scope, so it's logged rather than fixed mid-PRD (coordinate with `_debt/004`).
