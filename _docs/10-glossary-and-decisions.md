@@ -463,3 +463,35 @@ was *built* against the blueprint and any reconciliations.
     VoiceOver/TalkBack screen-reader passes + the by-feel reduced-motion/intensity
     checks (`_docs/09` §6), signed off with the human sensitivity review (PRD-009 R09-12).
   - No new tech debt.
+- **2026-06-21 — Phase 8 testing/CI + polish (PRD-011).** Closed the **automatable**
+  half of the Testing/QA/Launch PRD; the manual gates (real-device matrix R11-6,
+  screen-reader R11-4, on-device Lighthouse R11-7/9, newcomer playtest R11-11) stay
+  the pre-release human gate, as do the PRD-009 sensitivity review + the "pending
+  hardware" feel checks across PRDs 001–010.
+  - **CI (R11-13):** added `.github/workflows/ci.yml` — a `quality` job (prettier,
+    eslint, `tsc --noEmit`, vitest+coverage, build, bundle budget) and an `e2e` job
+    (Playwright on iPhone 13 + Pixel 7, report uploaded). Runs on PRs + pushes to
+    main, concurrency-cancels superseded runs. This is the first CI in the repo;
+    the automated layers had run only locally.
+  - **Bundle budget (R11-8 / NFR-3):** added `scripts/check-bundle-size.mjs`
+    (`npm run check:size`) — sums the gzipped size of every `dist/assets/*.js` chunk
+    (main + lazy + workbox-window glue) and fails over the ~200 KB ceiling. Current:
+    **65.8 KB of 200 KB (33%)**. SW runtime + precached media sit outside the gate.
+  - **Zero-latency invariant (R11-7, ADR-006):** the "no React re-render during a
+    stroke" claim was only ever checked by hand with the profiler. Added an automated
+    stand-in (`tests/unit/useCanvas.render.test.tsx`) that drives a full native-pointer
+    stroke through `useCanvas` and asserts the React render count never moves mid-stroke
+    (freehand + grid), `onChange` fires exactly once on completion, and a stroke-end
+    state write re-renders exactly once.
+  - **Polish — app-shipped faces (R11-10 / R07-9; resolves OQ-12's glyph half):**
+    replaced the placeholder platform emoji on the rating scales with one parameterized
+    `Face` SVG driven by a data `mood` (−2…+2) on each `RatingFace`, so the five faces
+    look identical on every device. Static geometry (nothing for reduced-motion to
+    collapse); the radio's word still carries meaning (R07-8). The swap was the
+    one-file change `content/feedback.ts` was designed for, plus the component + tests.
+  - Verified: `tsc --noEmit`, ESLint, Prettier clean, **161 Vitest unit tests** (+7:
+    the no-re-render invariant ×3, the `Face` glyph ×4), production `vite build`
+    (65.8 KB gzip JS, budget-checked), **40 Playwright E2E** green on Mobile Safari +
+    Mobile Chrome (full suite, incl. the feedback flow through the new faces).
+  - No new tech debt. Remaining PRD-011 items are the manual/hardware gates above and
+    the PWA-icon art (`_debt/001`, OQ-11 mascot) — design work, not code.
