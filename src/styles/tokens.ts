@@ -1,0 +1,60 @@
+/**
+ * Design tokens — the single source of truth for the visual language (PRD-004
+ * R04-1, lifted from _docs/06 §4). These are mirrored into `tailwind.config.ts`
+ * so every screen styles itself through Tailwind utilities (`bg-bg`, `text-text`,
+ * `rounded-card`, …) with **no magic hex in components**.
+ *
+ * The palette deliberately encodes the game's thesis as two visual worlds: the
+ * Mode 1 "storm" colors are desaturated and low-contrast (uneasy); the Mode 2
+ * "anchor" colors are bright and high-contrast (trustworthy). See `tokens.theme`
+ * for the per-mode wrapper treatment (ADR-013, FR-23).
+ */
+export const tokens = {
+  color: {
+    // Shared shell
+    bg: '#0b1020', // deep calm navy
+    surface: '#141a33',
+    text: '#e7ecff',
+    textMuted: '#8b93b8',
+    // Mode 1 (storm) — desaturated, low-contrast, uneasy
+    stormText: '#5b6384', // deliberately hard-to-read vague text
+    stormWarn: '#b45a5a',
+    // Mode 2 (anchor) — high contrast, trustworthy
+    gridNode: '#1f6feb',
+    ink: '#0f172a', // drawing stroke on light canvas
+    anchorBg: '#f8fafc', // bright, clear canvas
+    success: '#1f9d57',
+    primary: '#3b82f6',
+  },
+  radius: { card: '16px', button: '14px' },
+  space: { touch: '44px' }, // min touch target
+  font: {
+    body: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
+    sizeBody: '17px',
+    sizeStep: '22px', // Mode 2 instruction — big & clear
+    lineRelaxed: '1.6',
+  },
+  motion: {
+    fadeMs: 12000, // Mode 1 instruction decay
+    notifyEveryMs: [4000, 8000], // jittered distraction cadence
+    notifyVisibleMs: 2200,
+    giverBeatMs: 2000, // "not quite right" / "Perfect!" beat duration
+    themeTransitionMs: 900, // storm → anchor "fog clearing"
+    snapPopMs: 140, // node snap micro-pop
+  },
+  // Two visual worlds (_docs/06 §D). Apply as a wrapper filter/overlay per mode.
+  theme: {
+    storm: { canvas: '#11162a', vignette: 0.45, saturate: 0.6, blurPx: 0.4 },
+    anchor: { canvas: '#f8fafc', vignette: 0.0, saturate: 1.0, blurPx: 0.0 },
+  },
+  // Mode 2 on-grid guidance (_docs/06 §3.4).
+  guidance: {
+    startNode: '#1f9d57', // pulsing start node
+    ghostPath: 'rgba(31,111,235,.28)', // faint target hint
+    targetNode: '#1f6feb',
+  },
+} as const;
+
+export type Tokens = typeof tokens;
+export type ModeTheme = keyof Tokens['theme'];
+export type ThemeValues = Tokens['theme'][ModeTheme];

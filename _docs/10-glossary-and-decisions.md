@@ -240,3 +240,29 @@ was *built* against the blueprint and any reconciliations.
     Android snap haptic, and the no-re-render-during-stroke profiler check
     (PRD-003 §9/§10, doc 09 §6) — the project's highest risk.
   - No new tech debt: the work is complete within PRD-003 scope.
+- **2026-06-21 — Phase 3 (PRD-004).** Built the design-token system and the
+  navigation skeleton — the M1 "walkable skeleton" milestone. `src/styles/tokens.ts`
+  (single source, mirrored into `tailwind.config.ts`), the in-store FSM
+  (`app/routes.ts` + `app/ScreenRouter.tsx`), all seven screen shells, the shared
+  presentational components, and the "two visual worlds" `ModeTheme` seam +
+  storm→anchor fog-clear transition. The full flow now walks
+  `welcome→…→reflection→history→welcome` with stubs.
+  - Reconciliations vs the reference code (no ADRs changed): the `ink` token was
+    reclaimed for its doc-06 meaning (drawing stroke `#0f172a`) and the shell base
+    moved to a new `bg` token (the Phase-0 stub had aliased `ink→#0b1020`); AppShell
+    updated to `bg-bg`/`text-text`. `ModeTheme` applies the saturate/blur/vignette
+    treatment to the mode wrapper only (not the whole screen) so dark-shell chrome
+    stays legible in both worlds — the per-theme `canvas` color belongs to the
+    drawing area, set by each screen. Copy lives in a single `content/strings.ts`
+    stub for now; PRD-009 splits it into the reviewed decks (`welcome.copy.ts`,
+    `reveal.ts`, …) + the full content test. An early content guard already asserts
+    Welcome names no ASD terms (ADR-008).
+  - Verified: `tsc --noEmit`, ESLint, Prettier, **71 Vitest unit tests**, **18
+    Playwright E2E** (full flow on Mobile Safari + Chrome; FSM pushes no history /
+    no URL change — SC-4), production `vite build` (main bundle ~55 KB gzip,
+    CanvasDemo still code-split). **Pending hardware:** low-end-device perf of the
+    theme filters (blur/saturate) (PRD-004 §10 risk).
+  - Tech debt logged: [`_debt/004`](../_debt/004-engine-palette-vs-tokens.md) —
+    the PRD-003 engine palette now duplicates / slightly diverges from
+    `styles/tokens.ts` (engine `INK #111827` vs token `#0f172a`); reconcile in a
+    PRD-003/008 follow-up.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done** — code + automated tests complete; low-end-device theme-filter perf check pending hardware (see §10 risk) |
 | **Source docs** | [02 §3](../_docs/02-architecture.md), [06 (all)](../_docs/06-ui-ux-spec.md), [01 §7](../_docs/01-game-design.md) |
 | **Roadmap** | Phase 3 |
 | **Depends on** | PRD-001 (shell), PRD-002 (store FSM) |
@@ -92,12 +92,28 @@ villain.
   assert transitions; browser-back does nothing.
 - **a11y (axe, smoke):** shells have landmarks/labels (deepened in PRD-010).
 
-## 9. Definition of Done
+## 9. Definition of Done — complete ✅
 
-- Can traverse `welcome→…→reflection→history→welcome` with stub UIs; transitions
-  correct; back-swipe does nothing (single document).
-- Tokens drive all styling; no hard-coded colors in components.
-- `FlowProgress` and shared primitives in place; theming seam ready for modes.
+- [x] Can traverse `welcome→…→reflection→history→welcome` with stub UIs;
+  transitions correct (unit `ScreenRouter` walkthrough + Playwright E2E on Mobile
+  Safari + Chrome). Navigation is a single-document, in-store FSM — transitions
+  push **no** browser history and never change the URL (E2E asserts this; SC-4).
+- [x] Tokens drive all styling: `src/styles/tokens.ts` is the single source,
+  mirrored into `tailwind.config.ts`; components use utilities, no magic hex.
+- [x] `FlowProgress` + shared primitives (`Button`, `ProgressDots`,
+  `Notification`, `GuideMascot`, `StepCard`, `InstallHint`, `ExitButton`) in place;
+  `Button` meets the 44×44pt target. The "two visual worlds" `ModeTheme` seam +
+  storm→anchor fog-clear transition are wired into the Mode 1/2 shells (FR-23).
+- [x] Verified: `tsc --noEmit`, ESLint, Prettier, **71 Vitest unit tests**, **18
+  Playwright E2E** (incl. the full flow), production `vite build` (main bundle
+  ~55 KB gzip, CanvasDemo still code-split — under the ~200 KB NFR-3 budget).
+
+> Stubs intentionally deferred to their owning PRDs (not debt): the mode canvases
+> (PRD-005/006), the emoji-face `RatingScale` (PRD-007), the target reveal +
+> saved-drawing previews + reviewed reveal copy (PRD-008/009), per-session history
+> detail (PRD-008), and a confirm step on delete-all (PRD-010). One new tracked
+> item: [`_debt/004`](../_debt/004-engine-palette-vs-tokens.md) (engine palette vs
+> tokens).
 
 ## 10. Open questions & risks
 
