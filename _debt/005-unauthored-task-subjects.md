@@ -1,6 +1,20 @@
 # DEBT-005 — `cat` / `flower` task subjects are unauthored (fall back to house)
 
-**Status:** Open · **Severity:** Low · **Surfaced by:** PRD-006 (Mode 2 — Anchor Point)
+**Status:** ✅ Resolved in PRD-009 (2026-06-21) · **Severity:** Low · **Surfaced by:** PRD-006 (Mode 2 — Anchor Point)
+
+## Resolution (PRD-009)
+
+Authored `cat` (8-step face + ears) and `flower` (6-step stem + diamond blossom +
+leaf) in `content/mode2.steps.ts`, each with a vague Mode-1 block in
+`content/mode1.instructions.ts`, and populated `TASK_CONTENT` so all three subjects
+resolve to their own content. The `?? house` fallback is **gone** — `resolveTask`
+returns `TASK_CONTENT[id]` directly (every `TaskId` is authored). Mode 1 now reads
+the session's per-task vague block (it previously hard-coded the house, a latent
+mismatch once the pool varied), and `content.mode2.test.ts` asserts every pool
+subject is authored and in-bounds. The original note follows for history.
+
+---
+
 
 ## What
 

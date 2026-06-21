@@ -130,6 +130,11 @@ export function AnchorPointScreen() {
         <div data-testid="mode2-drawing" hidden>
           {JSON.stringify(drawing)}
         </div>
+        {/* The session's authored step segments — lets E2E drive any subject in
+            the (now-closed) task pool without hard-coding one. */}
+        <div data-testid="mode2-steps" hidden>
+          {JSON.stringify(steps.map((s) => s.segment))}
+        </div>
 
         <StepInstruction
           className="mt-4 flex-1"

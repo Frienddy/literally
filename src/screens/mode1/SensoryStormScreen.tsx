@@ -20,7 +20,7 @@
  */
 import { useCallback, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import { useReducedIntensity } from '../../store/selectors';
+import { useDraft, useReducedIntensity } from '../../store/selectors';
 import { useCanvas } from '../../hooks/useCanvas';
 import { useHaptics } from '../../hooks/useHaptics';
 import { config } from '../../config';
@@ -34,7 +34,7 @@ import { GiverBeat } from '../../components/GiverBeat';
 import { ModeTheme } from '../../components/ModeTheme';
 import { VagueInstruction } from '../../components/VagueInstruction';
 import { FakeNotifications } from '../../components/FakeNotifications';
-import { mode1Content } from '../../content/mode1';
+import { resolveTask } from '../../content/tasks';
 import { giver } from '../../content/giver.copy';
 import { notifications } from '../../content/notifications';
 import { strings } from '../../content/strings';
@@ -51,6 +51,11 @@ export function SensoryStormScreen() {
   const setReducedIntensity = useGameStore((s) => s.setReducedIntensity);
   const reduced = useReducedIntensity();
   const { vibrate } = useHaptics();
+
+  // The session's shared subject drives the vague ask (so a cat session asks for a
+  // cat, not a house). Falls back to the house if somehow opened without a draft.
+  const draft = useDraft();
+  const task = resolveTask(draft?.task_id ?? 'house');
 
   // The committed drawing is updated once per finished stroke (ADR-006 — not per
   // pointer event), then saved once on Done (R05-9). No undo anywhere (R05-2).
@@ -90,8 +95,8 @@ export function SensoryStormScreen() {
               className="min-h-touch rounded-button px-3 text-sm text-textMuted active:text-text"
             >
               {reduced
-                ? mode1Content.intensityReduced
-                : mode1Content.reduceIntensity}
+                ? strings.mode1.intensityReduced
+                : strings.mode1.reduceIntensity}
             </button>
             <ExitButton onExit={() => go('welcome')} />
           </div>
@@ -126,7 +131,7 @@ export function SensoryStormScreen() {
           <canvas
             ref={setCanvas}
             data-testid="mode1-canvas"
-            aria-label={mode1Content.canvasLabel}
+            aria-label={strings.mode1.canvasLabel}
             className="absolute inset-0 h-full w-full touch-none"
           />
 
@@ -135,7 +140,7 @@ export function SensoryStormScreen() {
             <GuideMascot mood="vague" />
             <VagueInstruction
               ask={giver.vagueAsk}
-              instruction={mode1Content.instruction}
+              instruction={task.vague.block}
               reduced={reduced}
               className="flex-1"
             />

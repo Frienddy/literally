@@ -66,6 +66,11 @@ async function readJson<T>(page: Page, testId: string): Promise<T> {
 
 /** Navigate Welcome → Mode 1 (stub) → Feedback #1 → Mode 2. */
 async function reachMode2(page: Page) {
+  // Pin the random task pick to the pool's first subject (house) so this spec's
+  // house-specific assertions ("Step X of 9", closed-loop geometry) are stable.
+  await page.addInitScript(() => {
+    Math.random = () => 0;
+  });
   await page.goto('/');
   await page.getByTestId('welcome-start').click();
   await page.getByTestId('mode1-done').click();
