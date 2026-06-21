@@ -14,15 +14,20 @@
  *   the goal's key signal (SC-2c) — the question must not feel judgmental.
  * - Labels carry the meaning for screen readers (R07-8): each face announces a word
  *   ("Calm" … "Very stressed"), not just a position or a color gradient.
- * - The emoji are **placeholders** (R07-9): platform emoji vary by device, so a
- *   consistent app-shipped face set replaces these in PRD-011's polish pass. Keeping
- *   them as data here means that swap touches only this file.
+ * - Faces are an app-shipped SVG set, not platform emoji (R07-9 / R11-10): each face
+ *   carries a `mood` the `Face` component draws, so the glyphs look identical on every
+ *   device. The drawn mood follows the label's *sentiment*, not the numeric value —
+ *   so stress (low value = calm = positive) and confidence (low value = unsure =
+ *   negative) read correctly from the same component.
  */
 
 /** One face on a rating scale. */
 export interface RatingFace {
-  /** Placeholder glyph until the shipped face set lands (R07-9 / PRD-011). */
-  emoji: string;
+  /**
+   * Sentiment the `Face` component draws, −2 (very negative) … +2 (very positive)
+   * (R07-9 / R11-10). Independent of `value`: it mirrors how the label *feels*.
+   */
+  mood: -2 | -1 | 0 | 1 | 2;
   /** The announced meaning of this face — words, not a number (R07-8, a11y). */
   label: string;
   /** Stored integer in [1,10] (R07-5). Strictly increasing across the scale. */
@@ -46,11 +51,11 @@ export const stressScale: RatingScaleContent = {
   lowAnchor: 'Calm',
   highAnchor: 'Overwhelmed',
   faces: [
-    { emoji: '😌', label: 'Calm', value: VALUES[0] },
-    { emoji: '🙂', label: 'A little tense', value: VALUES[1] },
-    { emoji: '😐', label: 'Tense', value: VALUES[2] },
-    { emoji: '😟', label: 'Stressed', value: VALUES[3] },
-    { emoji: '😣', label: 'Overwhelmed', value: VALUES[4] },
+    { mood: 2, label: 'Calm', value: VALUES[0] },
+    { mood: 1, label: 'A little tense', value: VALUES[1] },
+    { mood: 0, label: 'Tense', value: VALUES[2] },
+    { mood: -1, label: 'Stressed', value: VALUES[3] },
+    { mood: -2, label: 'Overwhelmed', value: VALUES[4] },
   ],
 };
 
@@ -63,10 +68,10 @@ export const confidenceScale: RatingScaleContent = {
   lowAnchor: 'Not sure',
   highAnchor: 'Very sure',
   faces: [
-    { emoji: '🤷', label: 'Not sure at all', value: VALUES[0] },
-    { emoji: '😕', label: 'A little unsure', value: VALUES[1] },
-    { emoji: '🙂', label: 'Fairly sure', value: VALUES[2] },
-    { emoji: '😀', label: 'Sure', value: VALUES[3] },
-    { emoji: '💯', label: 'Very sure', value: VALUES[4] },
+    { mood: -2, label: 'Not sure at all', value: VALUES[0] },
+    { mood: -1, label: 'A little unsure', value: VALUES[1] },
+    { mood: 0, label: 'Fairly sure', value: VALUES[2] },
+    { mood: 1, label: 'Sure', value: VALUES[3] },
+    { mood: 2, label: 'Very sure', value: VALUES[4] },
   ],
 };

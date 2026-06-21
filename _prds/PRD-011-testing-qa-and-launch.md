@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done (automatable)** — CI + the full automated test pyramid, bundle budget, the no-re-render invariant, and the polish face set are complete and green. The **manual pre-release gates** remain: real-device matrix (R11-6), screen-reader passes (R11-4), on-device Lighthouse perf/PWA (R11-7/R11-9), and the newcomer-comprehension playtest (R11-11) — all need hardware/humans (see §9). |
 | **Source docs** | [09 (all)](../_docs/09-testing-and-qa.md), [08 Phase 8](../_docs/08-implementation-roadmap.md) |
 | **Roadmap** | Phase 8 (+ continuous CI from Phase 0) |
 | **Depends on** | All feature PRDs (001–010) |
@@ -83,15 +83,25 @@ PWA ✓.
 
 ## 9. Definition of Done (and launch gate)
 
-- All P0 functional + non-functional requirements met across PRDs 001–010.
-- Unit/component/E2E/a11y/content suites green in CI; bundle budget enforced.
-- Real-device matrix green (iPhone + Android, installed + browser; small + large).
-- Perf targets met (input→ink, 60fps, no per-stroke re-render); Lighthouse PWA ✓,
-  Perf ≥90, Best Practices ≥95.
-- Newcomer-comprehension playtest passed (SC-2b); SC-1…SC-6 evidenced.
-- **Ethics + a11y release gate** ([07 §7](../_docs/07-accessibility-and-ethics.md))
-  fully green.
-- Verified offline (airplane mode) with **no network calls** (DevTools).
+**Automatable — done (green in CI):**
+- ✅ All P0 *automatable* functional + non-functional requirements met across PRDs
+  001–010 (the per-PRD "pending hardware" feel checks excepted).
+- ✅ Unit/component/E2E/a11y/content suites green in CI (**161 Vitest + 40 Playwright**
+  on iPhone 13 + Pixel 7; axe clean on the non-deliberate surfaces); **bundle budget
+  enforced** (`check:size`, 65.8 KB of 200 KB).
+- ✅ The **no per-stroke re-render** invariant is now an automated test (R11-7,
+  ADR-006), not just a profiler check.
+- ✅ R11-8 (bundle budget), R11-10 (app-shipped face set), R11-13 (CI) shipped.
+
+**Manual pre-release gate — pending hardware/humans:**
+- ⏳ Real-device matrix green (iPhone + Android, installed + browser; small + large) — R11-6.
+- ⏳ On-device perf: input→ink, 60fps, Lighthouse PWA ✓, Perf ≥90, Best Practices ≥95 — R11-7/R11-9.
+- ⏳ Newcomer-comprehension playtest passed (SC-2b); SC-1…SC-6 evidenced — R11-11.
+- ⏳ Manual VoiceOver + TalkBack screen-reader passes — R11-4.
+- ⏳ **Ethics + a11y release gate** ([07 §7](../_docs/07-accessibility-and-ethics.md))
+  signed off — incl. the PRD-009 human sensitivity review (R09-12).
+- ⏳ Verified offline (airplane mode) with **no network calls** (DevTools) on a device —
+  the static `grep` proof of no runtime egress is already green.
 
 ## 10. Open questions & risks
 

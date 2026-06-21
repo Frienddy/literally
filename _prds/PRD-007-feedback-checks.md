@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Done** — code + automated tests complete; the shipped custom face set (R07-9) lands with PRD-011 polish; SR/face-count playtest pending hardware (see §10) |
+| **Status** | **Done** — code + automated tests complete; the shipped custom face set (R07-9) **landed** in PRD-011 polish (app-shipped `Face` SVG, no platform emoji); face-count playtest (OQ-12) pending hardware (see §10) |
 | **Source docs** | [01 §5](../_docs/01-game-design.md), [06 §3.3](../_docs/06-ui-ux-spec.md), [03 §2](../_docs/03-data-model-and-state.md) |
 | **Roadmap** | Phases 3–5 (scaffold with navigation, complete with the modes) |
 | **Depends on** | PRD-002 (store), PRD-004 (shell/router/components) |
