@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Rigid mobile shell: block native gestures everywhere by default ---- */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none; /* kill pull-to-refresh & scroll chaining */
+  -webkit-user-select: none;
+  user-select: none; /* no text selection / callout */
+  -webkit-touch-callout: none; /* no iOS long-press menu */
+  touch-action: pan-y; /* allow vertical scroll in scrollable areas only */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Lock the app frame: no document scroll; screens manage their own overflow. */
+#root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* The drawing surface must own the gesture entirely. */
+canvas {
+  touch-action: none; /* no pan/zoom/scroll while drawing */
+  display: block;
+}
+
+/* Inputs are the one place selection is OK (none here today, but future-proof). */
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Respect users who ask for less motion (sensory safety, see doc 07). */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
