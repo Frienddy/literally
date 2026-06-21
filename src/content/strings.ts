@@ -32,11 +32,9 @@ export const strings = {
     reduceIntensity: 'Reduce intensity',
     viewHistory: 'View past sessions',
   },
-  mode1: {
-    // The vague, fading ask is authored for real in PRD-005/009; placeholder here.
-    giverAsk: "the grown-up's ask:",
-    vague: 'Draw a normal house, make the walls standard, add a roof…',
-  },
+  // Mode 1's player-facing copy (the vague ask, the fading instruction, the
+  // "not quite right" beat, the fake notifications) is authored as data in
+  // `content/mode1.ts` (PRD-005); PRD-009 migrates it into the reviewed decks.
   mode2: {
     // The per-step instruction text + target coords are authored as data in
     // `content/mode2.steps.ts` (PRD-006). These are the surrounding chrome strings;
