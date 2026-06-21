@@ -1,6 +1,13 @@
 # DEBT-003 — `esbuild`/`vite` dev-server advisory (dev-only)
 
-**Status:** Open · **Severity:** Low (development-only) · **Surfaced by:** PRD-001
+**Status:** Open (deferred) · **Severity:** Low (development-only) · **Surfaced by:** PRD-001
+
+> **Reviewed 2026-06-21 (tech-debt pass): still deferred.** `npm audit` still traces
+> every advisory to esbuild `<= 0.24.2` via `vite@5`/`vitest`/`vite-plugin-pwa`. The
+> only fix remains `npm audit fix --force` → **Vite 8** (a breaking major) plus a
+> `vite-plugin-pwa` release that supports it — a toolchain migration, not a debt-pass
+> change. Dev-only, zero production exposure (ADR-001 ships static precached files,
+> no runtime server). Belongs to the PRD-011 / CI-hardening track.
 
 ## What
 

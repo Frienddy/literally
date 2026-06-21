@@ -1,6 +1,11 @@
 # DEBT-001 — Placeholder PWA icons
 
-**Status:** Open · **Severity:** Low · **Surfaced by:** PRD-001 (Platform Shell & PWA)
+**Status:** Open (deferred) · **Severity:** Low · **Surfaced by:** PRD-001 (Platform Shell & PWA)
+
+> **Reviewed 2026-06-21 (tech-debt pass): still deferred.** Blocked on the
+> mascot/brand direction, which is explicitly **P2 / v1.1** (PRD-000 §6, OQ-11) and
+> unowned — there is no brand art to ship, so any work now would be thrown away.
+> Resolve when the mascot art lands; no code action available in the meantime.
 
 ## What
 
