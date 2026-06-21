@@ -1,7 +1,24 @@
 # DEBT-006 — Mode 1 freehand ink is near-invisible on the storm canvas
 
-**Status:** Open · **Severity:** Medium · **Surfaced by:** PRD-008 (Reflection &
+**Status:** ✅ Resolved (2026-06-21) · **Severity:** Medium · **Surfaced by:** PRD-008 (Reflection &
 History)
+
+## Resolution
+
+Introduced two **distinct Mode 1 ink tokens** (not a reuse of `tokens.color.ink`,
+per the DEBT-004 coordination note): `tokens.color.stormInk = '#5d6486'` (≈3.1:1
+on the storm canvas `#11162a` — deliberately low-but-nonzero, *legible yet
+effortful*) and `tokens.color.stormInkReduced = '#7e87ab'` (≈5:1 — clearly legible)
+used under reduced-intensity. `engine/render.ts` `drawFreehand` now takes an
+optional `ink` param (defaulting to the committed ink, so saved previews on the
+light surface are unchanged); `useCanvas` exposes an `ink` option and the live
+freehand render passes it through; `SensoryStormScreen` selects
+`stormInk`/`stormInkReduced` from the `reducedIntensity` flag, so the stroke-ink
+legibility is raised alongside the other reduced-intensity channels (R05-11). The
+ghost/grid/node palette is untouched. Covered by an `engine.render` test (default
+ink vs override). The original note follows for history.
+
+---
 
 ## What
 

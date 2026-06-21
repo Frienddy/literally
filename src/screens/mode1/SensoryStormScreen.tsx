@@ -66,6 +66,10 @@ export function SensoryStormScreen() {
     mode: 'freehand',
     wobble: config.wobble,
     onHaptic: vibrate, // erratic move buzz; suppressed under reduced-intensity
+    // A distinct, legible ink on the dark storm canvas (DEBT-006). Low-but-nonzero
+    // contrast at full intensity (effortful), raised under reduced-intensity so the
+    // line is clearly legible — the same softening as the fade/notifications (R05-11).
+    ink: reduced ? tokens.color.stormInkReduced : tokens.color.stormInk,
     onChange: (d) => {
       if (d.kind === 'freehand') setDrawing(d);
     },

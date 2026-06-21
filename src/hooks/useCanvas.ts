@@ -55,6 +55,13 @@ export interface UseCanvasOptions {
   onChange?: (drawing: FreehandDrawing | GridDrawing) => void;
   /** Freehand stroke width in px. */
   strokeWidth?: number;
+  /**
+   * Freehand stroke colour for the *live* canvas (ignored in grid mode). Mode 1
+   * passes a distinct, legible `stormInk` so the line shows on the dark storm
+   * canvas (DEBT-006); omit to use the committed ink. Saved previews always
+   * re-render with the committed ink on their light surface.
+   */
+  ink?: string;
 }
 
 export interface UseCanvasApi {
@@ -121,7 +128,7 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
     const ctx = ctxRef.current;
     if (!ctx) return;
     const { w, h } = sizeRef.current;
-    const { mode, grid } = optsRef.current;
+    const { mode, grid, ink } = optsRef.current;
     clear(ctx, w, h);
 
     if (mode === 'grid' && grid) {
@@ -148,11 +155,15 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
             { points: currentRef.current, width: strokeWidth() },
           ]
         : strokesRef.current;
-      drawFreehand(ctx, {
-        kind: 'freehand',
-        strokes: live,
-        canvas: { width: w, height: h },
-      });
+      drawFreehand(
+        ctx,
+        {
+          kind: 'freehand',
+          strokes: live,
+          canvas: { width: w, height: h },
+        },
+        ink,
+      );
     }
   }, []);
 

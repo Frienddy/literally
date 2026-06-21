@@ -9,6 +9,7 @@ import {
 } from '../../src/engine/render';
 import type { GridSpec } from '../../src/engine/snap';
 import type { FreehandDrawing, GridDrawing } from '../../src/types/session';
+import { tokens } from '../../src/styles/tokens';
 
 /**
  * jsdom has no real 2D context, so we record calls against a minimal stub. This
@@ -101,6 +102,31 @@ describe('drawFreehand', () => {
     expect(m.calls.moveTo).toBe(1); // only the valid stroke
     expect(m.calls.lineTo).toBe(2); // points.length - 1
     expect(m.calls.stroke).toBe(1);
+  });
+
+  it('defaults to the committed ink but honours an override (DEBT-006)', () => {
+    const d: FreehandDrawing = {
+      kind: 'freehand',
+      strokes: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 5, y: 5 },
+          ],
+          width: 3,
+        },
+      ],
+      canvas: { width: 50, height: 50 },
+    };
+
+    const def = createMockCtx();
+    drawFreehand(def.ctx, d);
+    expect(def.ctx.strokeStyle).toBe(tokens.color.ink);
+
+    // Mode 1 passes a distinct, legible storm ink for the dark canvas.
+    const storm = createMockCtx();
+    drawFreehand(storm.ctx, d, tokens.color.stormInk);
+    expect(storm.ctx.strokeStyle).toBe(tokens.color.stormInk);
   });
 });
 

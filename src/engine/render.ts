@@ -49,11 +49,15 @@ export function drawGrid(ctx: CanvasRenderingContext2D, g: GridSpec): void {
 export function drawFreehand(
   ctx: CanvasRenderingContext2D,
   d: FreehandDrawing,
+  // Stroke colour. Defaults to the committed ink (used by saved previews on a
+  // light surface). The live Mode 1 canvas passes a distinct `stormInk` so the
+  // line stays legible on the dark storm background (DEBT-006).
+  ink: string = INK,
 ): void {
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.strokeStyle = INK;
+  ctx.strokeStyle = ink;
   for (const stroke of d.strokes) {
     if (stroke.points.length < 2) continue;
     ctx.lineWidth = stroke.width;

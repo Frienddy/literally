@@ -19,6 +19,14 @@ export const tokens = {
     // Mode 1 (storm) — desaturated, low-contrast, uneasy
     stormText: '#5b6384', // deliberately hard-to-read vague text
     stormWarn: '#b45a5a',
+    // Mode 1 freehand stroke. A *distinct* ink (not tokens.color.ink, which is
+    // near-invisible on the storm canvas — DEBT-006): deliberately low-but-nonzero
+    // contrast so the line is legible yet effortful (≈3.1:1 on theme.storm.canvas
+    // #11162a). Raised under reduced-intensity to ≈5:1 (clearly legible), matching
+    // the fade/notification softening (R05-11). Only the live Mode 1 canvas uses
+    // these; saved previews re-render on a light surface with the committed `ink`.
+    stormInk: '#5d6486',
+    stormInkReduced: '#7e87ab',
     // Mode 2 (anchor) — high contrast, trustworthy
     gridNode: '#1f6feb',
     ink: '#0f172a', // drawing stroke on light canvas

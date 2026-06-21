@@ -120,6 +120,11 @@ drift is tasteful and reduced-motion aware.
   (R05-10); reducing intensity verifiably softens all four channels — haptics,
   notifications (fewer/slower, off-canvas), text fade (gentler), vague-text
   contrast (raised) (R05-11).
+- [x] **Freehand stroke ink (DEBT-006, follow-up):** the Mode 1 stroke uses a
+  distinct `tokens.color.stormInk` (≈3.1:1 on the storm canvas — legible yet
+  effortful) instead of the near-invisible committed ink, raised to
+  `stormInkReduced` (≈5:1) under reduce-intensity. Saved previews still re-render
+  with the committed ink on their light surface.
 - [x] Verified: `tsc`/ESLint/Prettier clean, **98 Vitest unit** (fade curve,
   `VagueInstruction` no-recall + raised contrast, `FakeNotifications`
   cadence/auto-dismiss/non-interactive, the beat walk in `navigation.test`),

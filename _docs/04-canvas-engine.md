@@ -195,11 +195,17 @@ export function drawGrid(ctx: CanvasRenderingContext2D, g: GridSpec) {
   ctx.restore();
 }
 
-export function drawFreehand(ctx: CanvasRenderingContext2D, d: FreehandDrawing) {
+// `ink` defaults to the committed ink (saved previews on a light surface); the
+// live Mode 1 canvas passes a distinct, legible `tokens.color.stormInk` (DEBT-006).
+export function drawFreehand(
+  ctx: CanvasRenderingContext2D,
+  d: FreehandDrawing,
+  ink: string = tokens.color.ink,
+) {
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.strokeStyle = tokens.color.ink;
+  ctx.strokeStyle = ink;
   for (const stroke of d.strokes) {
     if (stroke.points.length < 2) continue;
     ctx.lineWidth = stroke.width;
