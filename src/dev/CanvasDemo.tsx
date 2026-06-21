@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { Canvas } from '../components/Canvas';
 import { useHaptics, type HapticKind } from '../hooks/useHaptics';
 import { config } from '../config';
-import type { GridSpec } from '../engine/snap';
+import { computeGridSpec } from '../engine/grid';
 import type { FreehandDrawing, GridDrawing } from '../types/session';
 
 // Fixed canvas CSS size so the demo grid + Playwright coordinates are
@@ -20,27 +20,15 @@ import type { FreehandDrawing, GridDrawing } from '../types/session';
 const CANVAS_W = 320;
 const CANVAS_H = 400;
 
-/** A centered grid spec for the demo canvas. */
-function computeGrid(w: number, h: number): GridSpec {
-  const { cols, rows } = config.grid;
-  const pad = 24;
-  const cell = Math.min((w - pad * 2) / (cols - 1), (h - pad * 2) / (rows - 1));
-  const span = (n: number) => cell * (n - 1);
-  return {
-    cols,
-    rows,
-    cell,
-    originX: (w - span(cols)) / 2,
-    originY: (h - span(rows)) / 2,
-  };
-}
-
 export default function CanvasDemo() {
   const mode =
     new URLSearchParams(window.location.search).get('mode') === 'grid'
       ? 'grid'
       : 'freehand';
-  const grid = mode === 'grid' ? computeGrid(CANVAS_W, CANVAS_H) : undefined;
+  const grid =
+    mode === 'grid'
+      ? computeGridSpec(CANVAS_W, CANVAS_H, config.grid.cols, config.grid.rows)
+      : undefined;
 
   const { vibrate, supported } = useHaptics();
   const [last, setLast] = useState<FreehandDrawing | GridDrawing | null>(null);
