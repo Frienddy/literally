@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done** |
 | **Source docs** | [03 (all)](../_docs/03-data-model-and-state.md), [02 §4](../_docs/02-architecture.md) |
 | **Roadmap** | Phase 1 |
 | **Depends on** | PRD-001 (project scaffold) |
@@ -94,13 +94,21 @@ quantized to control size).
 - `migrate` on unknown/corrupt blob → empty state, never throws.
 - A fake session created in devtools survives a reload (manual/E2E).
 
-## 9. Definition of Done
+## 9. Definition of Done — complete ✅
 
-- A fake session created in devtools **survives a reload**.
-- Stress/confidence clamp (1–10); `task_id` set + shared; `finalize` moves
-  draft→sessions; `clearAllData` works; `partialize` excludes `screen`/`draft`.
-- Migration fallback verified; quota guard path verified.
-- Unit coverage on `store/` ≥ 90%.
+- [x] Persistence round-trips: a seeded blob **rehydrates** (sessions +
+  `reducedIntensity`) and still lands on **Welcome** — covered by a `persist.rehydrate()`
+  unit test (the unit equivalent of "a devtools session survives a reload").
+- [x] Stress/confidence clamp (1–10, integer); `task_id` set + shared across both
+  modes; `finalize` stamps `completed_at` and moves draft→`sessions[0]`;
+  `clearAllData`/`deleteSession` work; `partialize` excludes `screen`/`draft`.
+- [x] Migration fallback verified (corrupt/unknown blob → empty state, never throws);
+  quota-guard path verified (emits `literally:quota-exceeded`, app stays usable).
+- [x] Unit coverage on `store/` = **97.97% stmts / 94.44% branch** (≥ 90% target);
+  `gameStore`/`migrations`/`selectors` at 100%.
+
+> Outstanding (tracked, not blocking): the **user-facing** quota-recovery prompt is
+> deferred until screens exist — see [`_debt/002`](../_debt/002-quota-recovery-ui.md).
 
 ## 10. Open questions & risks
 

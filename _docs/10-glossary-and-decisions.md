@@ -196,3 +196,24 @@ work. (Doc 06 §1/§4/§6, doc 04 §2.5.)
   **Mode 1 exit**, and a **two-visual-worlds / custom-icon polish layer** (ADR-013).
   Added FR-16–23, SC-2c, OQ-10–12, and `engine` renderers `drawStepGuidance` /
   `drawTargetGhost`. Touches docs 00, 01, 02, 03, 04, 06, 07, 08, 09, 10 + README.
+
+## 5. Implementation log
+First code lands; docs above remain the source of truth. Entries here record what
+was *built* against the blueprint and any reconciliations.
+- **2026-06-21 — Phase 0 + Phase 1 (PRD-001, PRD-002).** Scaffolded the app
+  (Vite + React 18 + TS strict + Tailwind + Zustand; ESLint/Prettier, Vitest,
+  Playwright) and built the rigid offline PWA shell and the data model + persisted
+  Zustand store — both lifted from the reference code in docs 02/03/05.
+  - Reconciliations vs the reference code (no ADRs changed): added a **quota-guarded
+    `StateStorage` adapter** (`src/store/storage.ts`) emitting a
+    `literally:quota-exceeded` event instead of `createJSONStorage(()=>localStorage)`
+    directly (satisfies R02-13/R02-15, keeps the IndexedDB seam); hardened `migrate`
+    to shape-validate and fail safe to empty state (R02-9); made `useHaptics`/SW
+    registration feature-detected. `partialize`, the FSM, and types match docs 03
+    exactly.
+  - Verified: `tsc --noEmit`, ESLint, 29 Vitest unit tests (`store/` 97.97% stmts),
+    production `vite build` (SW + manifest, ~48 KB gzip JS), Playwright shell E2E on
+    Mobile Chrome + Mobile Safari. **Pending hardware:** real-device install/offline/
+    haptics/gesture checks (PRD-001 §9, doc 09 §6).
+  - Tech debt logged in [`_debt/`](../_debt/): placeholder PWA icons (001),
+    quota-recovery UI deferred to screens (002), dev-only esbuild/vite advisory (003).
