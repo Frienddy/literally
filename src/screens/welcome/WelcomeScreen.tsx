@@ -3,8 +3,9 @@
  *
  * SHOW, DON'T TELL (ADR-008): this screen sets up a task and gets out of the way.
  * It must **not** name or explain autism/ASD — that happens only at Reflection.
- * Copy lives in `content/strings.ts` (the reviewed `welcome.copy.ts` + content
- * test land with PRD-009).
+ * Copy lives in `content/welcome.copy.ts` (no-spoiler) — a content test forbids any
+ * autism/ASD term here. The sensory-safety note + opt-out are a *consent*
+ * disclosure (never deferred), even though the topic is (doc 07 §1).
  *
  * Thumb-first layout: the primary Start CTA sits in the bottom third (_docs/06 §1).
  */
@@ -14,6 +15,7 @@ import { Button } from '../../components/Button';
 import { GuideMascot } from '../../components/GuideMascot';
 import { InstallHint } from '../../components/InstallHint';
 import { strings } from '../../content/strings';
+import { welcome } from '../../content/welcome.copy';
 
 export function WelcomeScreen() {
   const startNewSession = useGameStore((s) => s.startNewSession);
@@ -34,8 +36,22 @@ export function WelcomeScreen() {
       </header>
 
       <div className="mt-8 flex flex-col items-center gap-1">
-        <p className="text-body">{strings.welcome.hook}</p>
-        <p className="text-body text-textMuted">{strings.welcome.subhook}</p>
+        <p className="text-body">{welcome.hook}</p>
+        <p className="text-body text-textMuted">{welcome.subhook}</p>
+      </div>
+
+      {/* Consent disclosure: the sensory note + the honest "explained at the end"
+          promise. Deferring the topic is deliberate; the sensory risk is not. */}
+      <div className="mt-6 flex flex-col items-center gap-2">
+        <p
+          data-testid="welcome-sensory-note"
+          className="max-w-xs text-sm leading-relaxed text-textMuted"
+        >
+          {welcome.sensoryNote}
+        </p>
+        <p className="max-w-xs text-sm leading-relaxed text-textMuted">
+          {welcome.afterNote}
+        </p>
       </div>
 
       <div className="flex-1" />
@@ -53,7 +69,7 @@ export function WelcomeScreen() {
             data-testid="welcome-reduce-intensity"
             className="h-5 w-5 accent-primary"
           />
-          {strings.welcome.reduceIntensity}
+          {welcome.reduceIntensity}
         </label>
 
         <button
@@ -62,7 +78,7 @@ export function WelcomeScreen() {
           data-testid="welcome-history"
           className="min-h-touch text-sm text-textMuted active:text-text"
         >
-          {strings.welcome.viewHistory} ›
+          {welcome.viewHistory} ›
         </button>
 
         <InstallHint />

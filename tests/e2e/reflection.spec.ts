@@ -15,45 +15,7 @@ type GridSpec = {
   originY: number;
 };
 type GridNode = { col: number; row: number };
-
-const HOUSE: [GridNode, GridNode][] = [
-  [
-    { col: 2, row: 4 },
-    { col: 2, row: 8 },
-  ],
-  [
-    { col: 2, row: 8 },
-    { col: 6, row: 8 },
-  ],
-  [
-    { col: 6, row: 8 },
-    { col: 6, row: 4 },
-  ],
-  [
-    { col: 6, row: 4 },
-    { col: 2, row: 4 },
-  ],
-  [
-    { col: 2, row: 4 },
-    { col: 4, row: 2 },
-  ],
-  [
-    { col: 4, row: 2 },
-    { col: 6, row: 4 },
-  ],
-  [
-    { col: 3, row: 8 },
-    { col: 3, row: 6 },
-  ],
-  [
-    { col: 3, row: 6 },
-    { col: 5, row: 6 },
-  ],
-  [
-    { col: 5, row: 6 },
-    { col: 5, row: 8 },
-  ],
-];
+type Segment = { from: GridNode; to: GridNode };
 
 async function readJson<T>(page: Page, testId: string): Promise<T> {
   const text = await page.getByTestId(testId).textContent();
@@ -94,15 +56,17 @@ async function playFullSession(page: Page) {
   await page.getByTestId('mode1-complete-continue').click();
   await rate(page, 4, 0); // high stress, low confidence
 
-  // Mode 2: build the whole house on the snap grid → Feedback #2.
+  // Mode 2: build whatever subject this session drew, from the authored steps
+  // (subject-agnostic — the pool is house/cat/flower) → Feedback #2.
   await expect(page.getByTestId('mode2-canvas')).toBeVisible();
   const g = await readJson<GridSpec>(page, 'mode2-grid-spec');
+  const steps = await readJson<Segment[]>(page, 'mode2-steps');
   const box = (await page.getByTestId('mode2-canvas').boundingBox())!;
   const px = (n: GridNode) => ({
     x: box.x + g.originX + n.col * g.cell,
     y: box.y + g.originY + n.row * g.cell,
   });
-  for (const [from, to] of HOUSE) {
+  for (const { from, to } of steps) {
     const a = px(from);
     const b = px(to);
     await page.mouse.move(a.x, a.y);

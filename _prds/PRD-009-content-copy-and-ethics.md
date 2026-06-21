@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done (code/content)** — all decks authored + structural ethics gate green; the human **sensitivity review with autistic reviewers (R09-12)** is a release gate that remains **pending sign-off** (see §9) |
 | **Source docs** | [01 §8](../_docs/01-game-design.md), [02 §2](../_docs/02-architecture.md), [07 (all)](../_docs/07-accessibility-and-ethics.md), [06 §8](../_docs/06-ui-ux-spec.md) |
 | **Roadmap** | Phase 7 |
 | **Depends on** | All feature PRDs (they wire the content slots this PRD fills) |
@@ -84,18 +84,56 @@ neurodiver*) and fails if any appear ([09 §9](../_docs/09-testing-and-qa.md)). 
 
 ## 9. Definition of Done
 
-- Every content file authored; no player-facing string hard-coded in components.
-- Welcome no-spoiler test passes; reveal names ASD with full disclaimers.
-- Giver lines + both beats warm/non-blaming; notifications benign; Mode 2 steps
-  reproduce the target.
-- **Ethics release-gate checklist fully green**; sensitivity review complete.
+- [x] Every content file authored in the canonical `src/content/` layout
+  (`strings.ts`, `welcome.copy.ts`, `giver.copy.ts`, `mode1.instructions.ts`,
+  `mode2.steps.ts`, `tasks.ts`, `reveal.ts`, `notifications.ts`); no player-facing
+  string hard-coded in a component.
+- [x] Welcome no-spoiler test passes; reveal names ASD with the full disclaimers
+  (`content.boundary.test.ts` scans every neutral deck + the reveal both ways).
+- [x] Giver lines + both beats warm/non-blaming; notifications benign; Mode 2 steps
+  reproduce the target — all asserted in tests.
+- [x] **Task pool closed** (house/cat/flower authored; `_debt/005` resolved).
+- [~] **Ethics release-gate checklist** (doc 07 §7): the **code/content-verifiable**
+  items are green (walk below); the **human** items (sensitivity review, "verified
+  with sensitive users") remain **pending sign-off**.
+
+### Ethics release-gate walk (doc 07 §7)
+
+Code/content-verifiable — **green now**:
+- ✅ Welcome is minimal: sensory-safety note + opt-out + honest "we'll explain
+  after", and names no ASD (`welcome.copy.ts`; `content.boundary` test).
+- ✅ Reveal carries the three disclaimers; identity-first, no pity/"now you know
+  what it's like" framing (`content.boundary` test).
+- ✅ Sensory risk disclosed up front; no false claim (welcome copy).
+- ✅ Giver reads warm in both modes; the "not quite right" beat is gentle,
+  brief (~2s), skippable (`GiverBeat`), and blames the instructions; no blaming
+  language (`content.boundary` test).
+- ✅ Target reveal frames the gap as the instructions' fault (PRD-008 + reveal copy).
+- ✅ Confidence wording neutral (PRD-007 `content.feedback` test forbids failure
+  language).
+- ✅ No notifications alarming/triggering (`content.boundary` test).
+- ✅ Calm-exit available throughout Mode 1 (PRD-005 + E2E); 44pt targets; AA on
+  non-deliberate text (PRD-004); reduced-motion paths (PRD-005/008).
+- ✅ "Delete all my data" works with confirm (PRD-008 + E2E); **no runtime network
+  egress** — `grep` confirms no `fetch`/sockets/external URLs in `src/` (ADR-001).
+- ✅ `lang="en"` set (`index.html`); copy keyed/structured for i18n (R09-11).
+
+Human gate — **pending sign-off** (cannot be automated):
+- ⏳ **Sensitivity review with autistic reviewers (R09-12, SC-6)** of all copy +
+  Mode 1 intensity; "not quite right" beat verified with sensitive users; reduced-
+  intensity verified to meaningfully soften Mode 1; no-flash/no-startle and
+  screen-reader passes on real hardware. Tracked alongside PRD-011 launch gates and
+  the existing "pending hardware" items. The authored copy was written to satisfy
+  the do/don't + identity-first lists so review starts from a compliant draft.
 
 ## 10. Open questions & risks
 
-- **OQ-9** how explicitly the reveal names autism — clearly, as one slice, never
-  universalized; finalized in sensitivity review.
-- **OQ-10** final task pool + targets — house first; cat/flower P2.
-- **OQ-11** the Grown-up's persona/voice/art — warm teacher/parent; art TBD.
+- **OQ-9** how explicitly the reveal names autism — drafted clearly as one slice,
+  never universalized, identity-first; **final wording pending sensitivity review**.
+- **OQ-10** final task pool + targets — **resolved: house + cat + flower all
+  authored** (`mode2.steps.ts` / `mode1.instructions.ts` / `tasks.ts`).
+- **OQ-11** the Grown-up's persona/voice/art — warm teacher/parent voice authored
+  in `giver.copy.ts`; **art still TBD** (mascot polish owned by PRD-011).
 - **Risk:** copy slips into pity/burden/caricature → mitigated by the do/don't
   lists + sensitivity review + the structural welcome/reveal split.
 

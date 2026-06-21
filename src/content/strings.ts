@@ -25,25 +25,25 @@ export const strings = {
     exit: 'Exit',
     back: 'Back',
   },
-  welcome: {
-    // ONE-LINE hook only — no lecture, no spoiler (ADR-008).
-    hook: 'A tiny drawing game.',
-    subhook: 'Takes about 3 minutes.',
+  // Welcome's no-spoiler copy (hook, sensory note, "explained at the end") lives in
+  // `content/welcome.copy.ts` (PRD-009) — the structural show-don't-tell boundary.
+  mode1: {
+    // Mode 1 chrome. The vague ask + "not quite right" beat are in `giver.copy.ts`;
+    // the per-subject fading instruction block is in `mode1.instructions.ts`.
+    canvasLabel: 'Drawing area — draw with your finger.',
+    // The calm-exit safety rails survive the chaos (R05-10).
     reduceIntensity: 'Reduce intensity',
-    viewHistory: 'View past sessions',
+    intensityReduced: 'Intensity reduced',
   },
   // Mode 1's player-facing copy (the vague ask, the fading instruction, the
   // "not quite right" beat, the fake notifications) is authored as data in
   // `content/mode1.ts` (PRD-005); PRD-009 migrates it into the reviewed decks.
   mode2: {
     // The per-step instruction text + target coords are authored as data in
-    // `content/mode2.steps.ts` (PRD-006). These are the surrounding chrome strings;
-    // PRD-009 migrates the giver lines into the reviewed `giver.copy.ts` deck.
+    // `content/mode2.steps.ts` (PRD-006); the Grown-up's calm intro + completion
+    // beat live in `content/giver.copy.ts` (PRD-009). These are the chrome strings.
     stepLabel: (n: number, total: number) => `Step ${n} of ${total}`,
-    // The Grown-up's calm, patient framing (R06-11) — clear, never blaming.
-    clearAsk: 'We’ll draw it together — one step at a time.',
     finish: 'Finish',
-    complete: 'Perfect — exactly right!',
   },
   feedback: {
     stressQuestion: 'How did that feel?',

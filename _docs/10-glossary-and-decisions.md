@@ -408,3 +408,35 @@ was *built* against the blueprint and any reconciliations.
     the previews surfaced that Mode 1's live freehand ink (`#111827`) is near-
     invisible on the storm canvas (`#11162a`); tuning the Mode 1 surface is PRD-005
     scope, so it's logged rather than fixed mid-PRD (coordinate with `_debt/004`).
+- **2026-06-21 — Phase 7 (PRD-009).** Authored **all player-facing content** into the
+  canonical `src/content/` layout and passed the **structural** ethics gate. Split
+  the scattered copy into the doc-02 §3 files: `welcome.copy.ts` (no-spoiler setup +
+  the previously-missing **sensory-safety note** and "we'll explain after" line —
+  a consent disclosure, never deferred), `giver.copy.ts` (the Grown-up's vague/clear
+  asks + both beats, subject-agnostic), `notifications.ts`, `mode1.instructions.ts`
+  (per-subject vague blocks), and a `strings.mode1` chrome group; deleted the interim
+  `mode1.ts`. The reveal gained an invite-to-action line.
+  - **Task pool closed (FR-20, OQ-10; resolves `_debt/005`):** authored **cat**
+    (8-step face + ears) and **flower** (6-step stem + diamond blossom + leaf) in
+    `mode2.steps.ts`, each with a vague Mode-1 block; `tasks.ts` now resolves all
+    three directly (the `?? house` fallback is gone). This also fixed a **latent
+    mismatch**: Mode 1 hard-coded the house ask, so a cat/flower session would have
+    asked for a house — `SensoryStorm` now reads `resolveTask(task_id).vague`. Added a
+    `mode2-steps` E2E inspection seam so the specs drive any rolled subject; pinned
+    `Math.random→0` where `mode2.spec` makes house-specific assertions.
+  - **Ethics gate (doc 07 §7):** one `content.boundary.test.ts` enforces the
+    show-don't-tell boundary structurally — every neutral deck (strings, welcome,
+    giver, notifications, tasks + all Mode 2 step text) names no autism/ASD term, and
+    `reveal.ts` is the only place it appears — plus the reveal's three disclaimers,
+    identity-first/no-pity language, benign notifications, and the giver never blaming
+    the player. The code/content-verifiable gate items are green (incl. a `grep`
+    proof of **no runtime network egress**); the **human sensitivity review (R09-12,
+    SC-6)** remains a pending release gate, like the "pending hardware" items.
+  - Verified: `tsc --noEmit`, ESLint, Prettier clean, **154 Vitest unit tests** (+14:
+    cat/flower geometry across all subjects, the closed-pool resolver, the full
+    content boundary/ethics scan), production `vite build` (~63 KB gzip JS), **16
+    Playwright E2E** on Mobile Safari + Mobile Chrome (subject-agnostic Mode 2 build
+    via the steps seam; all prior specs green). **Pending sign-off:** sensitivity
+    review of copy + Mode 1 intensity.
+  - No new tech debt; `_debt/005` resolved. (Mascot art, OQ-11, stays with PRD-011
+    polish.)
