@@ -66,7 +66,7 @@ export default defineConfig({
     include: ['tests/unit/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
-      include: ['src/store/**', 'src/lib/**'],
+      include: ['src/store/**', 'src/lib/**', 'src/engine/**'],
       reporter: ['text', 'html'],
     },
   },
