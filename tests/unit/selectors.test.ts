@@ -5,6 +5,7 @@ import {
   useDraft,
   useLatestSession,
   useSessions,
+  useReflectionSession,
   useReducedIntensity,
 } from '../../src/store/selectors';
 import { useGameStore } from '../../src/store/gameStore';
@@ -29,6 +30,7 @@ beforeEach(() => {
     screen: 'history',
     draft: session('draft'),
     sessions: [session('a'), session('b')],
+    selectedSessionId: null,
     reducedIntensity: true,
   });
 });
@@ -45,5 +47,22 @@ describe('selectors', () => {
   it('useLatestSession returns null when there are no sessions', () => {
     useGameStore.setState({ sessions: [] });
     expect(renderHook(() => useLatestSession()).result.current).toBeNull();
+  });
+
+  it('useReflectionSession follows the selection, else the latest', () => {
+    // No selection → the newest session (sessions[0]).
+    expect(renderHook(() => useReflectionSession()).result.current?.id).toBe(
+      'a',
+    );
+
+    // An explicit selection wins, even when it is not the newest.
+    useGameStore.setState({ selectedSessionId: 'b' });
+    expect(renderHook(() => useReflectionSession()).result.current?.id).toBe(
+      'b',
+    );
+
+    // A stale/missing id falls back to null (never throws).
+    useGameStore.setState({ selectedSessionId: 'gone' });
+    expect(renderHook(() => useReflectionSession()).result.current).toBeNull();
   });
 });

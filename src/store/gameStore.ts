@@ -29,11 +29,19 @@ interface GameState {
   draft: GameSession | null;
   /** All finalized sessions, newest first. */
   sessions: GameSession[];
+  /**
+   * Which past session the Reflection screen is viewing (PRD-008 R08-11).
+   * `null` means "the one just finalized" (`sessions[0]`); set when opening a
+   * session from History. Runtime-only — never persisted (not in `partialize`).
+   */
+  selectedSessionId: string | null;
   /** Sensory-safety: user can dial down Mode 1 intensity (see doc 07). */
   reducedIntensity: boolean;
 
   // --- navigation ---
   go: (screen: Screen) => void;
+  /** Open a specific saved session's Reflection from History (R08-9/R08-11). */
+  viewSession: (id: string) => void;
 
   // --- lifecycle ---
   startNewSession: () => void;
@@ -80,11 +88,16 @@ export const useGameStore = create<GameState>()(
       screen: 'welcome',
       draft: null,
       sessions: [],
+      selectedSessionId: null,
       reducedIntensity: false,
 
       go: (screen) => set({ screen }),
 
-      startNewSession: () => set({ draft: newSession(), screen: 'mode1' }),
+      viewSession: (id) => set({ selectedSessionId: id, screen: 'reflection' }),
+
+      // Clearing `selectedSessionId` makes Reflection fall back to sessions[0].
+      startNewSession: () =>
+        set({ draft: newSession(), selectedSessionId: null, screen: 'mode1' }),
 
       saveMode1Drawing: (d) =>
         set((s) =>
@@ -127,6 +140,7 @@ export const useGameStore = create<GameState>()(
           return {
             draft: null,
             sessions: [finalized, ...s.sessions],
+            selectedSessionId: null, // Reflection shows the just-finalized session
             screen: 'reflection',
           };
         }),
@@ -134,7 +148,13 @@ export const useGameStore = create<GameState>()(
       deleteSession: (id) =>
         set((s) => ({ sessions: s.sessions.filter((x) => x.id !== id) })),
 
-      clearAllData: () => set({ sessions: [], draft: null, screen: 'welcome' }),
+      clearAllData: () =>
+        set({
+          sessions: [],
+          draft: null,
+          selectedSessionId: null,
+          screen: 'welcome',
+        }),
 
       setReducedIntensity: (v) => set({ reducedIntensity: v }),
     }),
