@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done** — code + automated a11y gate complete; manual screen-reader (VoiceOver/TalkBack) + real-device sensory passes pending hardware (see §9) |
 | **Source docs** | [07 (all)](../_docs/07-accessibility-and-ethics.md), [05 §1,§4](../_docs/05-pwa-and-mobile-shell.md), [06 §5](../_docs/06-ui-ux-spec.md) |
 | **Roadmap** | Cross-cutting (satisfied incrementally; verified at Phase 8) |
 | **Depends on** | Touches every feature PRD (001–009) |
@@ -89,13 +89,40 @@ together. Contrast/targets enforced via design tokens (PRD-004 §4). Reference:
 
 ## 9. Definition of Done
 
-- Reduced-intensity meaningfully softens Mode 1 (4 channels); reduced-motion path
-  verified; calm exit available throughout Mode 1.
-- No flashing >3Hz; no startling audio.
-- AA contrast on all non-deliberate text; 44pt targets; screen-reader pass on
-  framing/stress/Mode 2/reflection.
-- Meaning survives grayscale and vibration-off.
-- The accessibility + ethics items of the release gate ([07 §7](../_docs/07-accessibility-and-ethics.md)) are green.
+**Code & automated — complete ✅**
+
+- [x] **Automated a11y gate** (`@axe-core/playwright`, `tests/e2e/a11y.spec.ts`):
+  Welcome, the Stress check, Mode 2, and Reflection scan clean of serious/critical
+  WCAG 2.0/2.1 A+AA violations on **Mobile Chrome + Mobile Safari**. Mode 1 is the
+  documented exception (R10-7) and is excluded by design.
+- [x] **AA contrast** enforced on non-deliberate surfaces; the gate caught the
+  primary-CTA failure (white on `#3b82f6` = 3.67:1) — fixed by darkening the
+  `primary` token to `#2563eb` (5.17:1). Mode 1 vague text stays the bounded,
+  documented low-contrast exception (reduced-intensity raises it).
+- [x] **Live canvases labelled** (R10-9): both the Mode 1 freehand and the Mode 2
+  snap-to-grid canvases carry an `aria-label` (the Mode 2 label was the gap closed
+  here); guarded by the a11y spec.
+- [x] **Reduced-intensity** softens Mode 1 across all four channels (haptics /
+  notifications / motion-fade / vague-text contrast) — unit-tested (PRD-005 R05-11:
+  `haptics.test`, `fakeNotifications.test`, `vagueInstruction.test`).
+- [x] **Reduced-motion** path verified: global `index.css` override + every JS-motion
+  consumer (`VagueInstruction`, `StepGuidanceCanvas`, `TargetReveal`) honours the
+  query (unit-tested).
+- [x] **No startling audio** (R10-5): the app ships **no** audio APIs (grep-verified).
+  **No photosensitive triggers** (R10-4): no `setInterval`; all motion is rAF at
+  ≥900 ms periods (≤~1 Hz) — far below the 3 Hz threshold; nothing flashes/strobes.
+- [x] **Calm exit** reachable throughout Mode 1 (`ExitButton`, penalty-free);
+  **44pt targets** via `min-h-touch`/`min-w-touch` on the `Button` primitive +
+  rating faces; **meaning survives grayscale** (RatingScale words/positions, Mode 2
+  completion beat text) and **vibration-off** (every haptic has a visual counterpart).
+
+**Manual real-device / human gates — pending hardware ⏳ (`_docs/09` §6; cannot run in CI/emulator)**
+
+- [ ] **VoiceOver (iOS) + TalkBack (Android)** pass over framing / stress / Mode 2
+  step cards / reflection; values + step cards announced (R10-9).
+- [ ] Reduced-motion + reduced-intensity validated by feel on a real device.
+- [ ] The accessibility items of the release gate ([07 §7](../_docs/07-accessibility-and-ethics.md))
+  are signed off alongside the ethics **sensitivity review** (R10-13 / PRD-009 R09-12).
 
 ## 10. Open questions & risks
 
