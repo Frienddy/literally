@@ -12,13 +12,16 @@ import type {
 } from '../types/session';
 import type { GridSpec } from './snap';
 import { nodeToPixel } from './snap';
+import { tokens } from '../styles/tokens';
 
-// Engine palette. Mirrors the design tokens (_docs/06 §4); kept as local
-// constants so the pure engine has no dependency on the (later) tokens module.
-const INK = '#111827'; // committed strokes / segments
-const GRID_NODE = '#1f6feb'; // high-contrast grid nodes & target
-const GUIDE_START = '#1f9d57'; // pulsing start node
-const GHOST_PATH = 'rgba(31,111,235,.28)'; // faint target hint
+// Engine palette, sourced from the design tokens (DEBT-004) — the single source
+// of truth for the visual language. `tokens.ts` is plain data with no runtime
+// deps, so the engine stays pure/framework-free while a token change now
+// propagates to the canvas instead of silently diverging.
+const INK = tokens.color.ink; // committed strokes / segments (#0f172a)
+const GRID_NODE = tokens.guidance.targetNode; // high-contrast grid nodes & target
+const GUIDE_START = tokens.guidance.startNode; // pulsing start node
+const GHOST_PATH = tokens.guidance.ghostPath; // faint target hint
 
 export function clear(
   ctx: CanvasRenderingContext2D,
