@@ -1,18 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { strings } from '../../src/content/strings';
+import { welcome } from '../../src/content/welcome.copy';
 
 /**
  * Show, don't tell (ADR-008): the Welcome copy must never name or explain autism
  * before the player has *felt* the contrast. Autism is named only at Reflection
- * ("the reveal"). PRD-009 owns the full content test over the reviewed copy decks;
- * this is the early guard on the stub strings so the boundary can't regress.
+ * ("the reveal"). The comprehensive scan across every content deck lives in
+ * `content.boundary.test.ts`; this guards the Welcome no-spoiler rule specifically.
  */
 const FORBIDDEN =
-  /\b(autis\w*|asd|neurodiver\w*|disab\w*|sensory processing)\b/i;
+  /\b(autis\w*|asd|neurodiver\w*|disab\w*|sensory processing|spectrum)\b/i;
 
 describe('show-don’t-tell content boundary (ADR-008)', () => {
-  it('Welcome strings contain no autism/ASD terms', () => {
-    for (const value of Object.values(strings.welcome)) {
+  it('Welcome copy contains no autism/ASD terms (incl. the sensory note)', () => {
+    for (const value of Object.values(welcome)) {
       expect(String(value)).not.toMatch(FORBIDDEN);
     }
   });

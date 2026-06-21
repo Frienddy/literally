@@ -25,13 +25,8 @@ export const strings = {
     exit: 'Exit',
     back: 'Back',
   },
-  welcome: {
-    // ONE-LINE hook only — no lecture, no spoiler (ADR-008).
-    hook: 'A tiny drawing game.',
-    subhook: 'Takes about 3 minutes.',
-    reduceIntensity: 'Reduce intensity',
-    viewHistory: 'View past sessions',
-  },
+  // Welcome's no-spoiler copy (hook, sensory note, "explained at the end") lives in
+  // `content/welcome.copy.ts` (PRD-009) — the structural show-don't-tell boundary.
   // Mode 1's player-facing copy (the vague ask, the fading instruction, the
   // "not quite right" beat, the fake notifications) is authored as data in
   // `content/mode1.ts` (PRD-005); PRD-009 migrates it into the reviewed decks.
