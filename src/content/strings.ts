@@ -96,6 +96,14 @@ export const strings = {
     cta: 'Add to Home Screen',
     iosGuidance: 'To install: tap the Share icon, then “Add to Home Screen”.',
   },
+  // Storage-full recovery prompt (PRD-002 R02-13 / _debt/002). Calm and
+  // non-alarming: the app stays usable; this only offers to free up room.
+  quota: {
+    title: 'This device is out of room',
+    body: 'Your most recent drawing is safe, but there’s no space to keep older sessions. Want to clear the older ones to free up room?',
+    clear: 'Clear older sessions',
+    dismiss: 'Not now',
+  },
 } as const;
 
 export type Strings = typeof strings;

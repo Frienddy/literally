@@ -16,4 +16,5 @@ PRD/phase. Resolved notes move to [`archive/`](./archive/) (kept for history).
 
 | # | Item | Severity | Surfaced by | Resolved by |
 |---|------|----------|-------------|-------------|
+| [002](./archive/002-quota-recovery-ui.md) | Quota-exceeded recovery UI not wired | Low | PRD-002 | debt pass |
 | [005](./archive/005-unauthored-task-subjects.md) | `cat`/`flower` subjects unauthored | Low | PRD-006 | PRD-009 |

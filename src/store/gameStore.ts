@@ -54,6 +54,13 @@ interface GameState {
   // --- history / privacy ---
   deleteSession: (id: string) => void;
   clearAllData: () => void;
+  /**
+   * Free storage by dropping older sessions, keeping only the most recent
+   * (PRD-002 R02-13). The quota-recovery prompt calls this so "clear old
+   * sessions" never discards the result the player is about to view — unlike
+   * `clearAllData`, the newest session, the draft, and the current screen survive.
+   */
+  clearOldSessions: () => void;
   setReducedIntensity: (v: boolean) => void;
 }
 
@@ -155,6 +162,11 @@ export const useGameStore = create<GameState>()(
           selectedSessionId: null,
           screen: 'welcome',
         }),
+
+      // Keep the newest, drop the rest. `sessions` is newest-first, so the
+      // session the player just finished (sessions[0]) is preserved.
+      clearOldSessions: () =>
+        set((s) => ({ sessions: s.sessions.slice(0, 1) })),
 
       setReducedIntensity: (v) => set({ reducedIntensity: v }),
     }),
