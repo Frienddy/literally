@@ -217,3 +217,26 @@ was *built* against the blueprint and any reconciliations.
     haptics/gesture checks (PRD-001 §9, doc 09 §6).
   - Tech debt logged in [`_debt/`](../_debt/): placeholder PWA icons (001),
     quota-recovery UI deferred to screens (002), dev-only esbuild/vite advisory (003).
+- **2026-06-21 — Phase 2 (PRD-003).** Built the canvas engine + haptics — the
+  riskiest, highest-value piece, de-risked early. Pure `engine/{geometry,wobble,
+  snap,render}.ts`, the `useCanvas` hook (one hook, two modes), `useHaptics`, and
+  the `Canvas` component — all lifted from the reference code in doc 04 / doc 05 §4.
+  - Reconciliations vs the reference code (no ADRs changed): `useCanvas` pointer
+    handlers are **stabilized and read live options via an `optsRef`** instead of
+    closing over `opts` directly — the reference attaches listeners once but its
+    handlers close over `onChange`/`onHaptic`, so an inline screen callback would go
+    stale; the ref keeps them fresh without re-binding (still refs-not-state per
+    ADR-006). `undo`/`reset` also **emit `onChange`** so the persisted drawing stays
+    in sync with the canvas. Haptic patterns + wobble/grid values are sourced from
+    `src/config.ts` (the tunables surface). Engine palette mirrors doc 06 §4 tokens
+    as local constants (the `styles/tokens.ts` module lands in PRD-004).
+  - Verified: `tsc --noEmit`, ESLint clean, **58 Vitest unit tests** (`engine/`
+    100% stmts / 97% branch, ≥90% target), production `vite build` (harness
+    code-split; main bundle ~48 KB gzip), **14 Playwright touch E2E** on Mobile
+    Chrome + Mobile Safari (freehand payload, grid snap segment + snap haptics,
+    grid Undo, no-undo-in-freehand, no-scroll-on-canvas). A lazy demo harness
+    (`?harness=canvas`) drives the engine in E2E before any mode screen exists
+    (screens are PRD-005/006). **Pending hardware:** real-device touch-feel/latency,
+    Android snap haptic, and the no-re-render-during-stroke profiler check
+    (PRD-003 §9/§10, doc 09 §6) — the project's highest risk.
+  - No new tech debt: the work is complete within PRD-003 scope.

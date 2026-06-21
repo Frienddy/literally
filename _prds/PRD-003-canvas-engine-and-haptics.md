@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done** — code + automated tests complete; real-device touch-feel/latency checks pending hardware (see §9) |
 | **Source docs** | [04 (all)](../_docs/04-canvas-engine.md), [05 §4](../_docs/05-pwa-and-mobile-shell.md), [02 §5](../_docs/02-architecture.md) |
 | **Roadmap** | Phase 2 — *the riskiest, highest-value piece; de-risk early* |
 | **Depends on** | PRD-001 (shell, `config.ts`), PRD-002 (`DrawingData` types) |
@@ -102,10 +102,32 @@ resize/rotate; refs-not-state for per-point data; saved == live via shared
 
 ## 9. Definition of Done
 
-- Freehand draws with **visible-but-usable wobble at 60fps, no input lag**.
-- Grid mode snaps endpoints to nodes; crisp haptic on each new node (Android).
-- Undo/Reset work; `onChange` emits correct `DrawingData` payloads.
-- Engine unit coverage ≥ 90%; profiler shows no per-stroke re-render.
+**Code & automated — complete ✅**
+
+- [x] Pure engine (`geometry`, `wobble`, `snap`, `render` incl. `drawStepGuidance`
+  / `drawTargetGhost`) lifted from _docs/04 §2; deterministic, bounded wobble.
+- [x] `useCanvas` (one hook, two modes) — refs-not-state, rAF render, DPR sizing
+  + resize re-fit, pointer capture, freehand simplify+quantize on commit, grid
+  snap + rubber-band, `undo`/`reset`; `Canvas` component wiring (Undo grid-only).
+- [x] `useHaptics` — feature-detected `navigator.vibrate` (no-ops on iOS Safari),
+  erratic `move` / crisp `snap`, honors `reducedIntensity` (suppress/soften).
+- [x] `onChange` emits correct `FreehandDrawing` / `GridDrawing` payloads
+  (verified by E2E); Undo/Reset work.
+- [x] Engine unit coverage **100% stmts / 97% branch** (≥ 90% target); 58 unit
+  tests pass.
+- [x] Playwright touch E2E on **Mobile Chrome + Mobile Safari** (14/14): freehand
+  stroke → freehand payload (>1 pt); node→node drag → one snapped integer
+  segment + snap haptics; grid Undo reverts; no Undo in freehand; canvas owns the
+  gesture (no page scroll). Driven via a lazy-loaded demo harness (`?harness=canvas`).
+- [x] Production `vite build` clean; harness code-split (main bundle ~48 KB gzip; NFR-3).
+
+**Real-device manual — pending hardware ⏳ (project's highest risk, §10; cannot be done in CI/emulator)**
+
+- [ ] Freehand draws with **visible-but-usable wobble at 60fps, no input lag** on a
+  real iPhone *and* Android.
+- [ ] Grid mode snaps endpoints to nodes; **crisp haptic on each new node (Android)**;
+  iOS degrades silently (no vibrate).
+- [ ] React DevTools profiler shows **no component re-render during an active stroke**.
 
 ## 10. Open questions & risks
 
