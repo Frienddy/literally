@@ -20,6 +20,7 @@ import { reveal } from '../../content/reveal';
 import { Button } from '../../components/Button';
 import { DrawingPreview } from '../../components/DrawingPreview';
 import { TargetReveal } from '../../components/TargetReveal';
+import { exportComparison, isExportSupported } from '../../lib/exportImage';
 import type { GameSession } from '../../types/session';
 
 function Attempt({
@@ -77,6 +78,8 @@ export function ReflectionScreen() {
   }
 
   const task = resolveTask(session.task_id);
+  // P2 (FR-14): offer a local PNG export only where the platform supports it.
+  const canExport = isExportSupported();
 
   return (
     <main
@@ -183,6 +186,17 @@ export function ReflectionScreen() {
         >
           {strings.reflection.history}
         </Button>
+        {canExport && (
+          <Button
+            variant="ghost"
+            fullWidth
+            onClick={() => void exportComparison(session, task)}
+            aria-label={strings.reflection.exportAria}
+            data-testid="reflection-export"
+          >
+            {strings.reflection.exportImage}
+          </Button>
+        )}
       </div>
     </main>
   );
