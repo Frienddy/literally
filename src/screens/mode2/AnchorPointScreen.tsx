@@ -1,68 +1,178 @@
 /**
- * Mode 2 — Anchor Point (PRD-004 R04-4 shell, _docs/06 §3.4). Wires the navigation
- * skeleton and the calm/ordered *look*: top-level progress, a single persistent
- * step card, full Undo/Next control, and the "fog clearing" reveal on entry
- * (`ModeTheme clearFrom="storm"`, R04-10). Exactly one step card shows at a time
- * and Next advances at the player's pace — no timer (_docs/06 §1.3 one decision).
+ * Mode 2 — "Anchor Point" (PRD-006, _docs/01 §4, _docs/06 §3.4). The structured
+ * half of the core contrast: a high-contrast snap-to-grid canvas, one literal
+ * instruction at a time, explicit progress, on-grid guidance (pulsing start node
+ * + ghost target), full Undo, crisp confirming haptics, **no timers**, and a calm
+ * completion moment. Emotional target: total control, predictability, mastery —
+ * the opposite of Mode 1's nothing.
  *
- * Out of scope here (PRD-006): the snap-to-grid canvas, the pulsing start node +
- * ghost target, crisp snap haptics, and the real per-task step sequence. The grid
- * and step count below are placeholders.
+ * Composition: `useCanvas({mode:'grid'})` (PRD-003) owns the drawing as an
+ * imperative island (ADR-006); `StepInstruction` paginates the authored
+ * `mode2.steps` (PRD-006 content); `StepGuidanceCanvas` overlays the guidance for
+ * the current step; `GiverBeat` plays the "Perfect — exactly right!" beat, then
+ * the drawing is saved and the flow advances to Feedback #2. The anchor theme +
+ * storm→anchor "fog clearing" reveal come from `ModeTheme` (PRD-004, FR-23).
  */
-import { useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import { Button } from '../../components/Button';
+import { useDraft } from '../../store/selectors';
+import { useCanvas } from '../../hooks/useCanvas';
+import { useHaptics } from '../../hooks/useHaptics';
+import { computeGridSpec } from '../../engine/grid';
+import type { GridSpec } from '../../engine/snap';
+import type { GridDrawing } from '../../types/session';
 import { FlowProgress } from '../../components/FlowProgress';
-import { GuideMascot } from '../../components/GuideMascot';
 import { ModeTheme } from '../../components/ModeTheme';
-import { StepCard } from '../../components/StepCard';
+import { StepInstruction } from '../../components/StepInstruction';
+import { StepGuidanceCanvas } from '../../components/StepGuidanceCanvas';
+import { GiverBeat } from '../../components/GiverBeat';
+import { resolveTask } from '../../content/tasks';
 import { strings } from '../../content/strings';
 
-const TOTAL_STEPS = 8; // placeholder; PRD-006 derives this from the task target
+const emptyGrid = (cols: number, rows: number): GridDrawing => ({
+  kind: 'grid',
+  segments: [],
+  grid: { cols, rows },
+});
 
 export function AnchorPointScreen() {
   const go = useGameStore((s) => s.go);
-  const [step, setStep] = useState(1);
-  const isLast = step >= TOTAL_STEPS;
+  const saveMode2Drawing = useGameStore((s) => s.saveMode2Drawing);
+  const draft = useDraft();
+  const task = resolveTask(draft?.task_id ?? 'house');
+  const { steps } = task;
+  const total = steps.length;
+
+  const { vibrate } = useHaptics();
+
+  const [step, setStep] = useState(0); // 0-indexed current step card
+  const [completing, setCompleting] = useState(false);
+  // The committed drawing is updated once per finished segment (not per pointer
+  // event — ADR-006), then saved once at completion (R06-13).
+  const [drawing, setDrawing] = useState<GridDrawing>(() =>
+    emptyGrid(task.grid.cols, task.grid.rows),
+  );
+
+  // Measure the drawing area → a centered grid spec shared by the snap canvas and
+  // the guidance overlay so both derive identical geometry.
+  const areaRef = useRef<HTMLDivElement | null>(null);
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = areaRef.current;
+    if (!el) return;
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) setSize({ w: r.width, h: r.height });
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const grid: GridSpec | null = useMemo(
+    () =>
+      size
+        ? computeGridSpec(size.w, size.h, task.grid.cols, task.grid.rows)
+        : null,
+    [size, task.grid.cols, task.grid.rows],
+  );
+
+  const { setCanvas, undo } = useCanvas({
+    mode: 'grid',
+    grid: grid ?? undefined,
+    onHaptic: vibrate, // crisp snap "click" on each new node (R06-8)
+    onChange: (d) => {
+      if (d.kind === 'grid') setDrawing(d);
+    },
+  });
+
+  const isLast = step >= total - 1;
+  const canUndo = drawing.segments.length > 0;
+  // The move to highlight this step (hidden once the completion beat plays).
+  const currentSegment = completing ? null : (steps[step]?.segment ?? null);
+
+  const onUndo = useCallback(() => {
+    undo(); // revert the last committed segment...
+    setStep((s) => Math.max(0, s - 1)); // ...and return to the prior card (R06-5)
+  }, [undo]);
+
+  const onNext = useCallback(() => {
+    if (isLast) {
+      setCompleting(true);
+      vibrate('snap'); // soft confirm pulse on completion (R06-12)
+      return;
+    }
+    setStep((s) => Math.min(total - 1, s + 1));
+  }, [isLast, total, vibrate]);
+
+  const finish = useCallback(() => {
+    saveMode2Drawing(drawing); // grid segments + grid spec (R06-13)
+    go('stress2');
+  }, [saveMode2Drawing, drawing, go]);
 
   return (
     <ModeTheme mode="anchor" clearFrom="storm">
       <main
         data-testid="screen-mode2"
-        className="flex h-full flex-col px-5 pb-6 pt-4"
+        className="relative flex h-full flex-col px-5 pb-6 pt-4"
       >
         <FlowProgress className="self-start" />
 
-        <StepCard
-          className="mt-4"
-          label={strings.mode2.stepLabel(step, TOTAL_STEPS)}
-          hint={isLast ? strings.mode2.complete : strings.mode2.stepHint}
-          lead={<GuideMascot mood={isLast ? 'beaming' : 'clear'} />}
-        />
-
-        {/* Placeholder grid (PRD-006 mounts the snap-to-grid canvas here). */}
-        <div
-          className="mt-4 flex-1 rounded-card bg-anchorBg"
-          data-testid="mode2-grid"
-          aria-hidden
-        />
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <Button
-            variant="secondary"
-            onClick={() => setStep((s) => Math.max(1, s - 1))}
-            disabled={step === 1}
-            data-testid="mode2-undo"
-          >
-            {strings.common.undo}
-          </Button>
-          <Button
-            onClick={() => (isLast ? go('stress2') : setStep((s) => s + 1))}
-            data-testid="mode2-next"
-          >
-            {isLast ? strings.common.continue : strings.common.next}
-          </Button>
+        {/* Inspection seam for E2E: the live grid geometry + committed drawing. */}
+        {grid && (
+          <div data-testid="mode2-grid-spec" hidden>
+            {JSON.stringify(grid)}
+          </div>
+        )}
+        <div data-testid="mode2-drawing" hidden>
+          {JSON.stringify(drawing)}
         </div>
+
+        <StepInstruction
+          className="mt-4 flex-1"
+          label={strings.mode2.stepLabel(step + 1, total)}
+          instruction={steps[step]?.text ?? ''}
+          nextLabel={isLast ? strings.mode2.finish : strings.common.next}
+          undoLabel={strings.common.undo}
+          canUndo={canUndo}
+          onNext={onNext}
+          onUndo={onUndo}
+          mascotMood="clear"
+          mascotLabel={step === 0 ? strings.mode2.clearAsk : undefined}
+          hideControls={completing}
+        >
+          <div
+            ref={areaRef}
+            className="absolute inset-0 overflow-hidden rounded-card bg-anchorBg"
+          >
+            {grid && (
+              <>
+                <canvas
+                  ref={setCanvas}
+                  data-testid="mode2-canvas"
+                  className="absolute inset-0 h-full w-full touch-none"
+                />
+                <StepGuidanceCanvas
+                  grid={grid}
+                  segment={currentSegment}
+                  className="absolute inset-0 h-full w-full"
+                />
+              </>
+            )}
+          </div>
+        </StepInstruction>
+
+        {completing && (
+          <GiverBeat
+            mood="beaming"
+            line={strings.mode2.complete}
+            continueLabel={strings.common.continue}
+            onDone={finish}
+            testId="mode2-complete"
+          />
+        )}
       </main>
     </ModeTheme>
   );

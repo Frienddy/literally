@@ -41,4 +41,5 @@ export const TASK_CONTENT: Record<TaskId, TaskContent | undefined> = {
 };
 
 /** Resolve a task id to its content, falling back to the house until PRD-009. */
-export const resolveTask = (id: TaskId): TaskContent => TASK_CONTENT[id] ?? house;
+export const resolveTask = (id: TaskId): TaskContent =>
+  TASK_CONTENT[id] ?? house;

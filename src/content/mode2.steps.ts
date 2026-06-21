@@ -47,7 +47,10 @@ export const houseSteps: Mode2Step[] = [
   { text: 'From the dot, go ⬇️ down 4 squares.', segment: seg(2, 4, 2, 8) },
   { text: 'Go ➡️ right 4 squares.', segment: seg(2, 8, 6, 8) },
   { text: 'Go ⬆️ up 4 squares.', segment: seg(6, 8, 6, 4) },
-  { text: 'Go ⬅️ left 4 squares. The walls are done.', segment: seg(6, 4, 2, 4) },
+  {
+    text: 'Go ⬅️ left 4 squares. The walls are done.',
+    segment: seg(6, 4, 2, 4),
+  },
   {
     text: 'From the top-left corner, go ↗️ up-right 2 squares to the peak.',
     segment: seg(2, 4, 4, 2),

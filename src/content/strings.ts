@@ -45,10 +45,6 @@ export const strings = {
     // The Grown-up's calm, patient framing (R06-11) — clear, never blaming.
     clearAsk: 'We’ll draw it together — one step at a time.',
     finish: 'Finish',
-    // `stepHint` is the PRD-004 stub still read by the placeholder screen; the
-    // real per-step text lives in `content/mode2.steps.ts` and supersedes it when
-    // the Anchor Point screen lands (same PRD-006 commit removes this line).
-    stepHint: 'From the dot, go down 4 squares.',
     complete: 'Perfect — exactly right!',
   },
   feedback: {

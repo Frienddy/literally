@@ -31,13 +31,15 @@ test.describe('walkable flow (FSM)', () => {
     await rate(page);
     await page.getByTestId('feedback-continue').click();
 
-    // Mode 2: step through to the end
+    // Mode 2: step through the literal steps at our own pace (no timers), then
+    // confirm the completion beat.
     await expect(page.getByTestId('screen-mode2')).toBeVisible();
-    for (let i = 0; i < 12; i++) {
-      if (await page.getByTestId('screen-mode2').isVisible()) {
-        await page.getByTestId('mode2-next').click();
-      }
+    for (let i = 0; i < 15; i++) {
+      const next = page.getByTestId('mode2-next');
+      if (await next.isVisible().catch(() => false)) await next.click();
+      else break;
     }
+    await page.getByTestId('mode2-complete-continue').click();
 
     // Feedback #2 → Reflection
     await expect(page.getByTestId('screen-feedback')).toHaveAttribute(
