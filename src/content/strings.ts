@@ -44,6 +44,9 @@ export const strings = {
     // beat live in `content/giver.copy.ts` (PRD-009). These are the chrome strings.
     stepLabel: (n: number, total: number) => `Step ${n} of ${total}`,
     finish: 'Finish',
+    // Names the live snap-to-grid canvas for screen readers (a11y, PRD-010 R10-9),
+    // mirroring Mode 1's `canvasLabel`.
+    canvasLabel: 'Drawing grid — tap or drag to snap a line to the dots.',
   },
   feedback: {
     stressQuestion: 'How did that feel?',

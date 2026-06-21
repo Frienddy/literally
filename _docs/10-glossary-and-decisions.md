@@ -440,3 +440,26 @@ was *built* against the blueprint and any reconciliations.
     review of copy + Mode 1 intensity.
   - No new tech debt; `_debt/005` resolved. (Mascot art, OQ-11, stays with PRD-011
     polish.)
+- **2026-06-21 — Phase 8 a11y (PRD-010).** Closed the **Accessibility & Sensory
+  Safety** PRD's automatable acceptance. The feature PRDs had already built the
+  semantics (landmarks, labelled radiogroups, reduced-intensity's four channels,
+  reduced-motion paths, the calm exit, 44pt targets); PRD-010 is the **acceptance
+  owner**, so the work was to *verify them together* and close the gaps an audit found:
+  - **Automated a11y gate (R10-7/8/9):** added `@axe-core/playwright` +
+    `tests/e2e/a11y.spec.ts` — scans Welcome, the Stress check, Mode 2, and Reflection
+    for serious/critical WCAG A+AA violations on Mobile Chrome + Mobile Safari. **Mode 1
+    is excluded by design** (its fading low-contrast text is the R10-7 documented
+    exception; auditing it would flag the intended discomfort).
+  - **Reconciliation (no ADRs changed):** the gate immediately caught a real **AA
+    contrast failure** — the `primary` token `#3b82f6` carries white CTA text at only
+    3.67:1 (Welcome "Start", Mode 2 "Next step"). Darkened to blue-600 `#2563eb`
+    (5.17:1 on white; still ≥3:1 against the dark surface for the RatingScale ring).
+    Token-only change, mirrored into Tailwind. Also gave the **Mode 2 live canvas an
+    `aria-label`** (`strings.mode2.canvasLabel`) — Mode 1 had one, Mode 2 didn't (R10-9).
+  - Audited and recorded the remaining contract: **no audio** anywhere (R10-5, ADR-005),
+    **no >3Hz flashing** (no `setInterval`; all motion rAF at ≥900 ms, R10-4).
+  - Verified: `tsc --noEmit`, **154 Vitest unit tests** green (unchanged), **+10
+    Playwright a11y assertions** green on both device profiles. **Pending hardware:**
+    VoiceOver/TalkBack screen-reader passes + the by-feel reduced-motion/intensity
+    checks (`_docs/09` §6), signed off with the human sensitivity review (PRD-009 R09-12).
+  - No new tech debt.

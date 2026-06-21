@@ -158,6 +158,7 @@ export function AnchorPointScreen() {
                 <canvas
                   ref={setCanvas}
                   data-testid="mode2-canvas"
+                  aria-label={strings.mode2.canvasLabel}
                   className="absolute inset-0 h-full w-full touch-none"
                 />
                 <StepGuidanceCanvas

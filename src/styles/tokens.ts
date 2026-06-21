@@ -24,7 +24,11 @@ export const tokens = {
     ink: '#0f172a', // drawing stroke on light canvas
     anchorBg: '#f8fafc', // bright, clear canvas
     success: '#1f9d57',
-    primary: '#3b82f6',
+    // Primary CTA fill. Carries white button text, so it must clear WCAG AA for
+    // normal text (≥4.5:1): #2563eb on #ffffff is 5.17:1. The previous #3b82f6 was
+    // only 3.67:1 — a serious contrast failure axe caught on the Start/Next CTAs
+    // (PRD-010 R10-7). Still ≥3:1 against #141a33 for the RatingScale selection ring.
+    primary: '#2563eb',
   },
   radius: { card: '16px', button: '14px' },
   space: { touch: '44px' }, // min touch target
