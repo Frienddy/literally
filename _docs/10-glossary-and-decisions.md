@@ -342,3 +342,29 @@ was *built* against the blueprint and any reconciliations.
     (PRD-005 §9, doc 09 §6).
   - No new tech debt: the work is complete within PRD-005 scope (notification icons
     remain emoji placeholders, already owned by PRD-009's icon set).
+- **2026-06-21 — Phases 3–5 (PRD-007).** Built the real feedback check — the single
+  screen reused after both modes that captures **stress + confidence** on emoji-face
+  scales (ADR-012). The two scales (faces, screen-reader labels, endpoint anchors,
+  1–10 values) are authored as data in `content/feedback.ts` (ADR-007); one reused
+  `RatingScale` radiogroup (`components/RatingScale.tsx`) renders both questions and
+  emits the integer, and `FeedbackCheckScreen` writes `setStress`/`setConfidence`
+  immediately against the active mode (stress1→1, stress2→2), finalizing the session
+  on check #2 → Reflection. This replaces the PRD-004 `StubScale` placeholder.
+  - Reconciliation vs PRD-007 §5 (no ADR changed): **Continue is gated until both
+    questions are answered.** The PRD specifies "one Continue" but not gating; left
+    ungated, a skipped scale would write a `null` that the confidence gap (SC-2c) and
+    the Reflection deltas (PRD-008) then read. Gating is the cheaper guarantee than
+    teaching every downstream consumer to tolerate a partial check. Each face's
+    accessible name is its **word** ("Calm" … "Very sure"), not a number or color, so
+    the scale is never color-only (R07-8); endpoint anchors add a redundant non-color
+    direction cue. Confidence wording is strictly neutral — a content test forbids
+    failure language ("fail"/"wrong"/"mistake") in any confidence label (R07-3).
+  - Verified: `tsc --noEmit`, ESLint, Prettier clean, **116 Vitest unit tests** (+18:
+    `content.feedback` scale invariants + neutral wording, `ratingScale` radiogroup +
+    a11y labels + emitted value, `feedback` store wiring / gating / mode-1→mode2 vs
+    mode-2→finalize→Reflection), and the existing **13 Playwright E2E** on Mobile
+    Chrome green (the walkable flow rates both checks through the real screen; all
+    prior shell/canvas/flow/mode1/mode2 specs still pass).
+  - No new tech debt: the shipped custom face set (R07-9) and final face count
+    (OQ-12) are already owned by PRD-011 polish; the emoji placeholders are isolated
+    to `content/feedback.ts` so that swap is a one-file change.

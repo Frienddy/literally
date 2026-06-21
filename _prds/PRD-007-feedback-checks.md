@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done** — code + automated tests complete; the shipped custom face set (R07-9) lands with PRD-011 polish; SR/face-count playtest pending hardware (see §10) |
 | **Source docs** | [01 §5](../_docs/01-game-design.md), [06 §3.3](../_docs/06-ui-ux-spec.md), [03 §2](../_docs/03-data-model-and-state.md) |
 | **Roadmap** | Phases 3–5 (scaffold with navigation, complete with the modes) |
 | **Depends on** | PRD-002 (store), PRD-004 (shell/router/components) |
@@ -89,6 +89,22 @@ Wireframe: [06 §3.3](../_docs/06-ui-ux-spec.md). Copy from `content/strings.ts`
 - One reused screen + one reused `RatingScale`; single Continue; no back-tracking.
 - Check #2 finalizes the session → Reflection.
 - Faces labeled for screen readers; 44pt targets.
+
+**Implementation status (2026-06-21):** ✅ all of the above met in code + automated
+tests. The scales are authored as data in `content/feedback.ts` (faces + SR labels
++ endpoint anchors + 1–10 values, ADR-007); one reused `RatingScale` radiogroup
+(`components/RatingScale.tsx`) renders both questions on `FeedbackCheckScreen`,
+which writes `setStress`/`setConfidence` immediately against the active mode and
+finalizes on check #2. Each face's accessible name is its word ("Calm" … "Very
+sure"), never color-only; endpoint anchors give a redundant non-color cue.
+**Reconciliation vs §5 (no ADR change):** Continue stays **disabled until both
+questions are answered** — neither the confidence gap (SC-2c) nor the Reflection
+deltas (PRD-008) may read a null. Verified by Vitest (`content.feedback`,
+`ratingScale`, `feedback` — store wiring, gating, mode-1→mode2 vs mode-2→finalize)
+and the existing Playwright flow/mode specs on Mobile Safari + Chrome. ⏳ **Pending:**
+the consistent app-shipped face set (R07-9, platform emoji vary by device) lands in
+PRD-011, and the final face count (OQ-12) + VoiceOver/TalkBack pass are a hardware
+playtest call.
 
 ## 10. Open questions & risks
 
