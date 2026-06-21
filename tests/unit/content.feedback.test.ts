@@ -29,10 +29,12 @@ describe.each(scales)('%s scale shape', (_name, scale) => {
     }
   });
 
-  it('every face carries a non-empty screen-reader label and a glyph (R07-8)', () => {
+  it('every face carries a non-empty screen-reader label and a drawable mood (R07-8/R07-9)', () => {
     for (const face of scale.faces) {
       expect(face.label.trim().length).toBeGreaterThan(0);
-      expect(face.emoji.length).toBeGreaterThan(0);
+      expect(Number.isInteger(face.mood)).toBe(true);
+      expect(face.mood).toBeGreaterThanOrEqual(-2);
+      expect(face.mood).toBeLessThanOrEqual(2);
     }
   });
 

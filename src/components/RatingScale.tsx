@@ -1,8 +1,9 @@
 /**
- * One emoji-anchored rating scale (PRD-007 R07-4) — a controlled radiogroup of
+ * One face-anchored rating scale (PRD-007 R07-4) — a controlled radiogroup of
  * face buttons reused for both the stress and confidence questions. Presentational
  * + a11y only: it knows nothing about the store; the screen maps the emitted
- * integer to `setStress`/`setConfidence`.
+ * integer to `setStress`/`setConfidence`. Faces are the app-shipped `Face` SVG
+ * (R07-9 / R11-10), so they look identical across devices.
  *
  * Accessibility (R07-8, PRD-010):
  * - the group is a labelled `radiogroup` (`aria-labelledby` → the question),
@@ -16,6 +17,7 @@
 import { useId } from 'react';
 import type { RatingScaleContent } from '../content/feedback';
 import { useHaptics } from '../hooks/useHaptics';
+import { Face } from './Face';
 
 export interface RatingScaleProps {
   /** The question this scale answers — names the radiogroup for screen readers. */
@@ -68,13 +70,13 @@ export function RatingScale({
               onClick={() => select(face.value)}
               className={[
                 'grid min-h-touch min-w-touch flex-1 place-items-center',
-                'rounded-button text-3xl transition-[filter,background-color,opacity]',
+                'rounded-button transition-[filter,background-color,opacity]',
                 selected
                   ? 'bg-surface opacity-100 ring-2 ring-primary'
                   : 'opacity-60 active:opacity-100',
               ].join(' ')}
             >
-              <span aria-hidden>{face.emoji}</span>
+              <Face mood={face.mood} className="h-8 w-8" />
             </button>
           );
         })}
