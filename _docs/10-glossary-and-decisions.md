@@ -302,3 +302,43 @@ was *built* against the blueprint and any reconciliations.
   - Tech debt logged: [`_debt/005`](../_debt/005-unauthored-task-subjects.md) —
     `cat`/`flower` subjects are in the pool but unauthored, so `resolveTask` falls
     back to the house until PRD-009 authors them (FR-20 variety is a pool of one).
+- **2026-06-21 — Phase 4 (PRD-005).** Built **Mode 1 — "Sensory Storm"**, the
+  "without clear instruction" half of the contrast — the **M2 "playable core"**
+  milestone now has both modes. The real `SensoryStormScreen` composes the
+  freehand+wobble `useCanvas` island (blank canvas, no grid/guide/reference, **no
+  Undo** — strokes are permanent) under the storm `ModeTheme`, with three new
+  pieces: `VagueInstruction` (the ask + block that fade from memory with no recall
+  control), `FakeNotifications` (mundane toasts on a jittered ~4–8s cadence that
+  always auto-dismiss and never trap input), and the shared `GiverBeat` playing the
+  gently-puzzled "not quite right" beat before saving the drawing and advancing to
+  Feedback #1. Erratic move haptics come from `useHaptics`; the calm **Exit** +
+  **reduce-intensity** rails stay reachable through the chaos and verifiably soften
+  all four channels (haptics, notifications, fade, vague-text contrast). Mode 1
+  copy is authored as data in `content/mode1.ts` (PRD-009 owns the reviewed deck).
+  - Reconciliations vs the blueprint (no ADRs changed): the fade is driven by an
+    **imperative rAF writing `opacity` directly**, not a CSS transition — the global
+    `prefers-reduced-motion` rule (index.css) forces `transition-duration`≈0, which
+    would snap the text to invisible, but R05-12 wants it to *still fade gently*
+    under reduced-motion (only drift suppressed); a direct style write is immune to
+    that rule and costs **zero React re-renders** during the fade (refs-not-state,
+    ADR-006), so it never disturbs the canvas's 60fps. **Retuned `config.fade` +
+    `config.notifications`** to the GDD (fully-legible ~3s then fade, gone by ~12s;
+    notifications `[4000,8000]` jittered) and added reduced-intensity variants
+    (raised opacity floor, slower gaps) — the Phase-0 seed values (1.5s/4s,
+    `intervalMs`) predated the screen. The pure `fadeOpacity` curve lives in
+    `lib/fade.ts` and `usePrefersReducedMotion` (guarded `matchMedia`) in `hooks/`
+    so the components stay components-only (no lint warnings). Mode 1's completion
+    beat is shared with Mode 2, so the Mode-1 walk in `navigation.test`/`flow.spec`
+    now confirms the beat; hidden `mode1-drawing` JSON is the E2E inspection seam.
+  - Verified: `tsc --noEmit`, ESLint, Prettier clean, **98 Vitest unit tests**
+    (the `fadeOpacity` decay curve, `VagueInstruction` no-recall + raised-contrast,
+    `FakeNotifications` cadence/auto-dismiss/non-interactive/paused-while-inactive),
+    production `vite build` (main bundle ~60 KB gzip, harness still code-split),
+    **26 Playwright E2E** on Mobile Safari + Chrome (wobbly stroke → freehand
+    payload, no-undo-in-Mode-1, Done → beat → Feedback #1, reduce-intensity toggles
+    + canvas stays drawable, calm Exit → Welcome; all prior shell/canvas/flow/mode2
+    specs still green). **Pending hardware:** Android erratic move haptic + iOS
+    visual-only feel, and the SC-1 "mildly frustrating not distressing" playtest
+    (PRD-005 §9, doc 09 §6).
+  - No new tech debt: the work is complete within PRD-005 scope (notification icons
+    remain emoji placeholders, already owned by PRD-009's icon set).
