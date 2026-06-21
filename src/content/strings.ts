@@ -38,8 +38,16 @@ export const strings = {
     vague: 'Draw a normal house, make the walls standard, add a roof…',
   },
   mode2: {
-    // Step cards + target coords are authored in PRD-006/009; placeholder here.
+    // The per-step instruction text + target coords are authored as data in
+    // `content/mode2.steps.ts` (PRD-006). These are the surrounding chrome strings;
+    // PRD-009 migrates the giver lines into the reviewed `giver.copy.ts` deck.
     stepLabel: (n: number, total: number) => `Step ${n} of ${total}`,
+    // The Grown-up's calm, patient framing (R06-11) — clear, never blaming.
+    clearAsk: 'We’ll draw it together — one step at a time.',
+    finish: 'Finish',
+    // `stepHint` is the PRD-004 stub still read by the placeholder screen; the
+    // real per-step text lives in `content/mode2.steps.ts` and supersedes it when
+    // the Anchor Point screen lands (same PRD-006 commit removes this line).
     stepHint: 'From the dot, go down 4 squares.',
     complete: 'Perfect — exactly right!',
   },
