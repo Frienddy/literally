@@ -35,6 +35,7 @@ import { ModeTheme } from '../../components/ModeTheme';
 import { VagueInstruction } from '../../components/VagueInstruction';
 import { FakeNotifications } from '../../components/FakeNotifications';
 import { mode1Content } from '../../content/mode1';
+import { notifications } from '../../content/notifications';
 import { strings } from '../../content/strings';
 
 const emptyFreehand = (): FreehandDrawing => ({
@@ -104,7 +105,7 @@ export function SensoryStormScreen() {
         {/* Reduced-intensity keeps the toast rail out of the canvas; full
             intensity lets it slide in over the top edge (R05-4/R05-11). */}
         <FakeNotifications
-          items={mode1Content.notifications}
+          items={notifications}
           reduced={reduced}
           active={!completing}
           className={

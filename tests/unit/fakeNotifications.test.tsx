@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { FakeNotifications } from '../../src/components/FakeNotifications';
 import { config } from '../../src/config';
-import type { FakeNotification } from '../../src/content/mode1';
+import type { FakeNotification } from '../../src/content/notifications';
 
 /**
  * The distraction layer must appear on a jittered cadence and **always

@@ -14,16 +14,9 @@
  * - Tone (ethics, _docs/07 §2): the giver is *warm but assuming*; the failure is
  *   the **instructions'**, never the player's. The "not quite right" beat is
  *   gently puzzled, never blaming.
- * - Notifications stay **mundane**, never alarming (no emergencies/threats) so the
- *   distraction reads as everyday noise, not a scare (GDD §3.4 / sensory safety).
+ *
+ * The fake-notification copy now lives in `content/notifications.ts` (PRD-009).
  */
-
-/** One fake push toast. `icon` is a placeholder glyph until PRD-009's icon set. */
-export interface FakeNotification {
-  icon: string;
-  title: string;
-  body?: string;
-}
 
 export const mode1Content = {
   /** The grown-up's vague ask — warm, assuming you already know what they mean. */
@@ -45,17 +38,7 @@ export const mode1Content = {
   beat: 'Hmm… that’s not quite what I had in mind. But okay!',
 
   /** Accessible name for the drawing surface (a11y, PRD-005 §8). */
-  canvasLabel: 'Drawing area — draw the house with your finger.',
-
-  /** Mundane fake notifications cycled by the distraction layer (R05-4). */
-  notifications: [
-    { icon: '💬', title: 'New message', body: 'Tap to reply' },
-    { icon: '🔋', title: 'Battery 20%', body: 'Low Power Mode?' },
-    { icon: '☁️', title: 'Backup paused', body: 'Not enough space' },
-    { icon: '📷', title: '3 new photos', body: 'Shared album updated' },
-    { icon: '🔔', title: 'Reminder', body: 'Pick up groceries' },
-    { icon: '📅', title: 'Event in 30 min', body: 'Team sync' },
-  ] satisfies FakeNotification[],
+  canvasLabel: 'Drawing area — draw with your finger.',
 
   /** Mode 1 chrome controls (the calm-exit safety rails survive the chaos). */
   reduceIntensity: 'Reduce intensity',

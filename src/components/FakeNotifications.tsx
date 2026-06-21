@@ -18,7 +18,7 @@
 import { useEffect, useState } from 'react';
 import { Notification } from './Notification';
 import { config } from '../config';
-import type { FakeNotification } from '../content/mode1';
+import type { FakeNotification } from '../content/notifications';
 
 /** ms to keep a toast mounted after it starts leaving, so the exit can animate. */
 const EXIT_MS = 320;
