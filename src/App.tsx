@@ -1,5 +1,10 @@
+import { lazy, Suspense } from 'react';
 import { AppShell } from './layout/AppShell';
 import { useInstallPrompt } from './hooks/useInstallPrompt';
+
+// Lazy-loaded so it stays in its own chunk, off the main bundle and the normal
+// app path. Only mounted with `?harness=canvas` (PRD-003 demo harness / E2E).
+const CanvasDemo = lazy(() => import('./dev/CanvasDemo'));
 
 /**
  * Phase-0 placeholder. This is the production-grade *shell* only — the real
@@ -9,6 +14,17 @@ import { useInstallPrompt } from './hooks/useInstallPrompt';
  */
 export default function App() {
   const { canInstall, promptInstall, platform } = useInstallPrompt();
+  const harness = new URLSearchParams(window.location.search).get('harness');
+
+  if (harness === 'canvas') {
+    return (
+      <AppShell>
+        <Suspense fallback={null}>
+          <CanvasDemo />
+        </Suspense>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
