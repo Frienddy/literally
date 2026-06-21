@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col select-none touch-none overflow-hidden bg-ink text-slate-100"
+      className="fixed inset-0 flex flex-col select-none touch-none overflow-hidden bg-bg text-text font-body"
       style={{
         // honor notch / home-indicator insets
         paddingTop: 'env(safe-area-inset-top)',
