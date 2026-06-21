@@ -83,12 +83,14 @@ describe('ScreenRouter — the flow is walkable with stubs', () => {
     fireEvent.click(screen.getByTestId('feedback-continue'));
     expect(screen.getByTestId('screen-mode2')).toBeInTheDocument();
 
-    // Step through Mode 2 until the final-step CTA advances to Feedback #2.
-    for (let i = 0; i < 12; i++) {
-      if (screen.queryByTestId('screen-mode2')) {
+    // Step through Mode 2's literal steps; the final step opens the completion
+    // beat (Next is replaced), which we confirm to advance to Feedback #2.
+    for (let i = 0; i < 15; i++) {
+      if (screen.queryByTestId('mode2-next')) {
         fireEvent.click(screen.getByTestId('mode2-next'));
       }
     }
+    fireEvent.click(screen.getByTestId('mode2-complete-continue'));
     const fb2 = screen.getByTestId('screen-feedback');
     expect(fb2).toHaveAttribute('data-mode', '2');
 

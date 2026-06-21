@@ -266,3 +266,39 @@ was *built* against the blueprint and any reconciliations.
     the PRD-003 engine palette now duplicates / slightly diverges from
     `styles/tokens.ts` (engine `INK #111827` vs token `#0f172a`); reconcile in a
     PRD-003/008 follow-up.
+- **2026-06-21 — Phase 5 (PRD-006).** Built **Mode 2 — "Anchor Point"**, the
+  structured half of the contrast (independent of Mode 1, which remains a PRD-004
+  stub). The real `AnchorPointScreen` measures its drawing area into a shared
+  `GridSpec` (`engine/grid.ts` `computeGridSpec`, extracted from the dev harness so
+  the snap canvas + guidance overlay can't drift) and composes the snap-to-grid
+  `useCanvas` island with three new pieces: `StepInstruction` (one persistent
+  literal step at a time, explicit progress, dominant Next + secondary Undo, **no
+  timer**), `StepGuidanceCanvas` (a pointer-events-none overlay pulsing the start
+  node + ghosting the target move via `drawStepGuidance`, reduced-motion aware),
+  and `GiverBeat` (the skippable, non-blocking "Perfect — exactly right!"
+  completion moment). The canonical **house** is authored as data in
+  `content/mode2.steps.ts` (+ `content/tasks.ts` registry), and on completion the
+  grid drawing is saved and the flow advances to Feedback #2.
+  - Reconciliations vs the blueprint (no ADRs changed): the _docs/01 §4.2 example
+    drew the door/window as multi-segment "boxes" inside one step; here **every
+    step is exactly one segment** so guidance ghosts precisely one move per card and
+    "Step X of N" maps 1:1 to drawing actions — the house finalized at **9
+    single-segment steps** (walls → roof → inverted-U door) on the 8×10 grid, the
+    window deferred to PRD-009's task expansion. **Undo Step** both reverts the last
+    segment and returns to the prior card (R06-5) in one control (the wireframe's
+    single secondary action). The completion beat is shared with PRD-005, so the
+    Mode-2 walk in `navigation.test`/`flow.spec` now steps then confirms the beat.
+    The screen is jsdom-safe (guarded `ResizeObserver`/`matchMedia`/2D context) so
+    the router test mounts it; hidden `mode2-grid-spec`/`mode2-drawing` JSON are an
+    E2E inspection seam.
+  - Verified: `tsc --noEmit`, ESLint, Prettier, **88 Vitest unit tests** (grid
+    layout, house geometry vs target, task resolver, `StepInstruction` no-auto-
+    advance + Undo state, `GiverBeat` auto-advance/skip/fire-once), production
+    `vite build` (main bundle ~59 KB gzip), **22 Playwright E2E** on Mobile Safari +
+    Chrome (build the full house via literal steps, integer-node snap, Undo reverts
+    + returns to the prior card, completion → Feedback #2; all prior shell/canvas/
+    flow specs still green). **Pending hardware:** Android crisp-snap haptic + iOS
+    visual-snap feel (PRD-006 §8, doc 09 §6).
+  - Tech debt logged: [`_debt/005`](../_debt/005-unauthored-task-subjects.md) —
+    `cat`/`flower` subjects are in the pool but unauthored, so `resolveTask` falls
+    back to the house until PRD-009 authors them (FR-20 variety is a pool of one).

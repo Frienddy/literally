@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done** — code + automated tests complete; real-device snap-haptic / touch-feel checks pending hardware (see §8) |
 | **Source docs** | [01 §4](../_docs/01-game-design.md), [06 §3.4](../_docs/06-ui-ux-spec.md), [04 §2.3,§2.5](../_docs/04-canvas-engine.md) |
 | **Roadmap** | Phase 5 (independent of PRD-005 once 002–004 land) |
 | **Depends on** | PRD-002 (store), PRD-003 (canvas+haptics+guidance), PRD-004 (shell/router) |
@@ -106,6 +106,16 @@ secondary. Cards are big and high-contrast (≥`tokens.font.sizeStep`).
   on-grid guidance work; finishing → Feedback#2; nothing fades, no distractions.
 - Completion moment plays; `mode_2_drawing_data` saved with grid spec.
 - Step coords finalized; guidance points at the right node/target each step.
+
+**Implementation status (2026-06-21):** ✅ all of the above met in code + automated
+tests. House finalized at **9 single-segment steps** on the 8×10 grid (walls →
+roof → inverted-U door); the authored sequence reproduces the hidden target
+(`content/mode2.steps.ts` + `content/tasks.ts`). Verified by Vitest (geometry +
+`StepInstruction`/`GiverBeat` behavior) and Playwright on Mobile Safari + Chrome
+(build the full house, integer-node snap, Undo reverts + returns to prior card,
+completion → Feedback #2). ⏳ **Pending hardware:** Android crisp-snap haptic and
+iOS visual-snap feel (§8 manual). `cat`/`flower` targets fall back to the house
+until PRD-009 authors them ([`_debt/005`](../_debt/005-unauthored-task-subjects.md)).
 
 ## 10. Open questions & risks
 

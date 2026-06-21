@@ -11,3 +11,4 @@ PRD/phase.
 | [002](./002-quota-recovery-ui.md) | Quota-exceeded recovery UI not wired | Low | PRD-002 |
 | [003](./003-dev-dependency-audit-esbuild-vite.md) | `esbuild`/`vite` dev-server advisory | Low (dev-only) | PRD-001 |
 | [004](./004-engine-palette-vs-tokens.md) | Engine palette duplicates/diverges from design tokens | Low | PRD-004 |
+| [005](./005-unauthored-task-subjects.md) | `cat`/`flower` subjects unauthored (fall back to house) | Low | PRD-006 |
