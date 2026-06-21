@@ -27,6 +27,7 @@ import { StepInstruction } from '../../components/StepInstruction';
 import { StepGuidanceCanvas } from '../../components/StepGuidanceCanvas';
 import { GiverBeat } from '../../components/GiverBeat';
 import { resolveTask } from '../../content/tasks';
+import { giver } from '../../content/giver.copy';
 import { strings } from '../../content/strings';
 
 const emptyGrid = (cols: number, rows: number): GridDrawing => ({
@@ -140,7 +141,7 @@ export function AnchorPointScreen() {
           onNext={onNext}
           onUndo={onUndo}
           mascotMood="clear"
-          mascotLabel={step === 0 ? strings.mode2.clearAsk : undefined}
+          mascotLabel={step === 0 ? giver.clearIntro : undefined}
           hideControls={completing}
         >
           <div
@@ -167,7 +168,7 @@ export function AnchorPointScreen() {
         {completing && (
           <GiverBeat
             mood="beaming"
-            line={strings.mode2.complete}
+            line={giver.perfect}
             continueLabel={strings.common.continue}
             onDone={finish}
             testId="mode2-complete"

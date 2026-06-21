@@ -35,6 +35,7 @@ import { ModeTheme } from '../../components/ModeTheme';
 import { VagueInstruction } from '../../components/VagueInstruction';
 import { FakeNotifications } from '../../components/FakeNotifications';
 import { mode1Content } from '../../content/mode1';
+import { giver } from '../../content/giver.copy';
 import { notifications } from '../../content/notifications';
 import { strings } from '../../content/strings';
 
@@ -133,7 +134,7 @@ export function SensoryStormScreen() {
             {/* The grown-up stays present; only the *words* fade (R05-6). */}
             <GuideMascot mood="vague" />
             <VagueInstruction
-              ask={mode1Content.giverAsk}
+              ask={giver.vagueAsk}
               instruction={mode1Content.instruction}
               reduced={reduced}
               className="flex-1"
@@ -154,7 +155,7 @@ export function SensoryStormScreen() {
         {completing && (
           <GiverBeat
             mood="puzzled"
-            line={mode1Content.beat}
+            line={giver.notQuiteRight}
             continueLabel={strings.common.continue}
             onDone={finish}
             testId="mode1-complete"

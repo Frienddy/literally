@@ -15,13 +15,14 @@
  *   the **instructions'**, never the player's. The "not quite right" beat is
  *   gently puzzled, never blaming.
  *
- * The fake-notification copy now lives in `content/notifications.ts` (PRD-009).
+ * The Grown-up's lines (the vague ask + the "not quite right" beat) now live in
+ * `content/giver.copy.ts`, and the fake-notification copy in
+ * `content/notifications.ts` (PRD-009). The per-subject vague *instruction* block
+ * moves to `content/mode1.instructions.ts` next; this module holds only Mode 1's
+ * chrome until then.
  */
 
 export const mode1Content = {
-  /** The grown-up's vague ask — warm, assuming you already know what they mean. */
-  giverAsk: 'Just draw it the usual way — you know the kind I mean.',
-
   /**
    * The single large block of vague instruction that fades from memory (R05-3).
    * Every clause is under-specified on purpose: "standard", "a bit", "somewhere
@@ -29,13 +30,6 @@ export const mode1Content = {
    */
   instruction:
     'Draw a normal house. Make the walls a standard size. Add a roof that sticks out a bit. Put a door somewhere sensible, and maybe a window or two. Don’t make it too big or too small.',
-
-  /**
-   * The mildly-puzzled "not quite right" beat shown on Done (R05-8). Reads as the
-   * *ask* falling short — "I had something in mind, I just never told you" — and
-   * still ends warmly ("But okay!"). Never scolds.
-   */
-  beat: 'Hmm… that’s not quite what I had in mind. But okay!',
 
   /** Accessible name for the drawing surface (a11y, PRD-005 §8). */
   canvasLabel: 'Drawing area — draw with your finger.',

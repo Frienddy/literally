@@ -37,13 +37,10 @@ export const strings = {
   // `content/mode1.ts` (PRD-005); PRD-009 migrates it into the reviewed decks.
   mode2: {
     // The per-step instruction text + target coords are authored as data in
-    // `content/mode2.steps.ts` (PRD-006). These are the surrounding chrome strings;
-    // PRD-009 migrates the giver lines into the reviewed `giver.copy.ts` deck.
+    // `content/mode2.steps.ts` (PRD-006); the Grown-up's calm intro + completion
+    // beat live in `content/giver.copy.ts` (PRD-009). These are the chrome strings.
     stepLabel: (n: number, total: number) => `Step ${n} of ${total}`,
-    // The Grown-up's calm, patient framing (R06-11) — clear, never blaming.
-    clearAsk: 'We’ll draw it together — one step at a time.',
     finish: 'Finish',
-    complete: 'Perfect — exactly right!',
   },
   feedback: {
     stressQuestion: 'How did that feel?',
