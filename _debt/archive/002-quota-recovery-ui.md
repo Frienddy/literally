@@ -1,6 +1,22 @@
 # DEBT-002 — Quota-exceeded recovery UI not yet wired
 
-**Status:** Open · **Severity:** Low · **Surfaced by:** PRD-002 (Data Model & Persistence)
+**Status:** ✅ Resolved (2026-06-21) · **Severity:** Low · **Surfaced by:** PRD-002 (Data Model & Persistence)
+
+## Resolution
+
+Now that screens exist, the missing **UI listener** is wired: `src/components/
+QuotaNotice.tsx` is mounted globally in `App` (over the `ScreenRouter`), listens
+for the `literally:quota-exceeded` `CustomEvent` exported from `store/storage.ts`,
+and surfaces a calm "this device is out of room — clear older sessions?" prompt
+(copy in `content/strings.ts` `quota`). Its primary action calls a new, focused
+store action `clearOldSessions()` which keeps only the most recent session
+(`sessions.slice(0, 1)`) — chosen over `clearAllData()` so "clear old sessions"
+never discards the result the player is about to view, nor their place in the flow.
+Covered by `tests/unit/quotaNotice.test.tsx` (hidden until the event, clear keeps
+newest + dismisses, "not now" leaves data intact) and a `clearOldSessions` store
+test. The original note follows for history.
+
+---
 
 ## What
 

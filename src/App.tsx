@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { AppShell } from './layout/AppShell';
 import { ScreenRouter } from './app/ScreenRouter';
+import { QuotaNotice } from './components/QuotaNotice';
 
 // Lazy-loaded so it stays in its own chunk, off the main bundle and the normal
 // app path. Only mounted with `?harness=canvas` (PRD-003 demo harness / E2E).
@@ -28,6 +29,8 @@ export default function App() {
   return (
     <AppShell>
       <ScreenRouter />
+      {/* Global, screen-agnostic: a persist failure can fire on any screen. */}
+      <QuotaNotice />
     </AppShell>
   );
 }

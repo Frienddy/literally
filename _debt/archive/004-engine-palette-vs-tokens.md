@@ -1,6 +1,23 @@
 # DEBT-004 — Engine color palette duplicates (and slightly diverges from) design tokens
 
-**Status:** Open · **Severity:** Low · **Surfaced by:** PRD-004 (Design System & Navigation)
+**Status:** ✅ Resolved (2026-06-21) · **Severity:** Low · **Surfaced by:** PRD-004 (Design System & Navigation)
+
+## Resolution
+
+`src/engine/render.ts` now imports `tokens` and sources its palette from it
+instead of redeclaring local constants: `INK = tokens.color.ink`,
+`GRID_NODE = tokens.guidance.targetNode`, `GUIDE_START = tokens.guidance.startNode`,
+`GHOST_PATH = tokens.guidance.ghostPath`. The drifted ink is reconciled — committed
+strokes/segments now render with `tokens.color.ink` (`#0f172a`) rather than the old
+`#111827`. `tokens.ts` is plain data with no runtime deps, so the engine stays
+pure/framework-free (per the note below), and a future token change propagates to
+the canvas instead of silently diverging. No render test asserts on colour, so the
+engine suite is unchanged. The `_docs/04` reference snippets were reconciled to
+match. The live Mode 1 stroke colour is handled separately by **DEBT-006** (a
+distinct, legible `stormInk` override) rather than reusing `tokens.color.ink`. The
+original note follows for history.
+
+---
 
 ## What
 

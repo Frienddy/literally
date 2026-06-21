@@ -166,6 +166,32 @@ describe('history & privacy', () => {
     useGameStore.getState().setReducedIntensity(true);
     expect(useGameStore.getState().reducedIntensity).toBe(true);
   });
+
+  it('clearOldSessions keeps the newest and drops the rest (quota recovery)', () => {
+    useGameStore.getState().startNewSession();
+    useGameStore.getState().finalizeSession(); // older
+    const older = useGameStore.getState().sessions[0].id;
+    useGameStore.getState().startNewSession();
+    useGameStore.getState().finalizeSession(); // newer → sessions[0]
+    const newer = useGameStore.getState().sessions[0].id;
+
+    useGameStore.getState().clearOldSessions();
+
+    const sessions = useGameStore.getState().sessions;
+    expect(sessions).toHaveLength(1);
+    expect(sessions[0].id).toBe(newer); // the just-finished session survives
+    expect(sessions.find((s) => s.id === older)).toBeUndefined();
+  });
+
+  it('clearOldSessions is a safe no-op with zero or one session', () => {
+    useGameStore.getState().clearOldSessions();
+    expect(useGameStore.getState().sessions).toEqual([]);
+
+    useGameStore.getState().startNewSession();
+    useGameStore.getState().finalizeSession();
+    useGameStore.getState().clearOldSessions();
+    expect(useGameStore.getState().sessions).toHaveLength(1);
+  });
 });
 
 describe('viewing a past session (PRD-008)', () => {

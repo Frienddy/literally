@@ -107,8 +107,10 @@ quantized to control size).
 - [x] Unit coverage on `store/` = **97.97% stmts / 94.44% branch** (≥ 90% target);
   `gameStore`/`migrations`/`selectors` at 100%.
 
-> Outstanding (tracked, not blocking): the **user-facing** quota-recovery prompt is
-> deferred until screens exist — see [`_debt/002`](../_debt/002-quota-recovery-ui.md).
+> Resolved (post-PRD-004): the **user-facing** quota-recovery prompt is now wired —
+> a global `QuotaNotice` listens for `literally:quota-exceeded` and offers
+> `clearOldSessions` (keeps the newest session, drops the rest). See the archived
+> note [`_debt/archive/002`](../_debt/archive/002-quota-recovery-ui.md).
 
 ## 10. Open questions & risks
 

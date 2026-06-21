@@ -344,7 +344,10 @@ export function migrate(persisted: unknown, from: number): unknown {
 - **Quota guard:** wrap persistence writes so a `QuotaExceededError` surfaces a
   friendly "storage full — clear old sessions?" rather than a silent failure.
   (Zustand `persist` errors can be observed via `onRehydrateStorage`/try-catch in
-  a custom storage adapter.)
+  a custom storage adapter.) Implemented: `store/storage.ts` swallows the error,
+  keeps the in-memory session, and dispatches `literally:quota-exceeded`; the
+  global `QuotaNotice` component listens for it and offers `clearOldSessions`
+  (keeps the newest session, drops the rest).
 - **Versioned + migratable:** `version` + `migrate` mean a future schema change
   won't brick existing installs.
 - **Privacy:** `clearAllData()` powers a visible "Delete all my data" control

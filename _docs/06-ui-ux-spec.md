@@ -196,6 +196,8 @@ export const tokens = {
     // Mode 1 (storm) — desaturated, low-contrast, uneasy
     stormText: '#5b6384',   // deliberately hard-to-read vague text
     stormWarn: '#b45a5a',
+    stormInk:        '#5d6486',  // freehand stroke: legible-yet-effortful (~3.1:1) on storm canvas (DEBT-006)
+    stormInkReduced: '#7e87ab',  // raised to ~5:1 under reduced-intensity
     // Mode 2 (anchor) — high contrast, trustworthy
     gridNode:  '#1f6feb',
     ink:       '#0f172a',   // drawing stroke on light canvas

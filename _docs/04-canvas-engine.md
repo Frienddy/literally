@@ -163,10 +163,18 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
 Shared by the live hook *and* the read-only previews (reflection/history), so a
 saved drawing always looks exactly like it did live.
 
+> **Palette source (DEBT-004):** the engine sources its colors from
+> `styles/tokens.ts` (the single source of truth), not local hex constants —
+> `tokens.ts` is plain data with no runtime deps, so the engine stays pure while a
+> token change propagates to the canvas. The live Mode 1 stroke colour is the one
+> exception: it's overridden with a *distinct* `tokens.color.stormInk` so the line
+> is legible on the dark storm canvas (DEBT-006).
+
 ```ts
 import type { DrawingData, FreehandDrawing, GridDrawing } from '../types/session';
 import type { GridSpec } from './snap';
 import { nodeToPixel } from './snap';
+import { tokens } from '../styles/tokens';
 
 export function clear(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.clearRect(0, 0, w, h);
@@ -174,7 +182,7 @@ export function clear(ctx: CanvasRenderingContext2D, w: number, h: number) {
 
 export function drawGrid(ctx: CanvasRenderingContext2D, g: GridSpec) {
   ctx.save();
-  ctx.fillStyle = '#1f6feb';                 // high-contrast nodes
+  ctx.fillStyle = tokens.guidance.targetNode;  // high-contrast nodes
   for (let c = 0; c < g.cols; c++) {
     for (let r = 0; r < g.rows; r++) {
       const x = g.originX + c * g.cell;
@@ -187,11 +195,17 @@ export function drawGrid(ctx: CanvasRenderingContext2D, g: GridSpec) {
   ctx.restore();
 }
 
-export function drawFreehand(ctx: CanvasRenderingContext2D, d: FreehandDrawing) {
+// `ink` defaults to the committed ink (saved previews on a light surface); the
+// live Mode 1 canvas passes a distinct, legible `tokens.color.stormInk` (DEBT-006).
+export function drawFreehand(
+  ctx: CanvasRenderingContext2D,
+  d: FreehandDrawing,
+  ink: string = tokens.color.ink,
+) {
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.strokeStyle = '#111827';
+  ctx.strokeStyle = ink;
   for (const stroke of d.strokes) {
     if (stroke.points.length < 2) continue;
     ctx.lineWidth = stroke.width;
@@ -213,7 +227,7 @@ export function drawGridDrawing(
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineWidth = 4;
-  ctx.strokeStyle = '#111827';
+  ctx.strokeStyle = tokens.color.ink;
   for (const seg of d.segments) {
     const a = nodeToPixel(seg.from, g);
     const b = nodeToPixel(seg.to, g);

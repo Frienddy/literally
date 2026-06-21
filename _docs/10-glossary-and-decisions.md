@@ -495,3 +495,30 @@ was *built* against the blueprint and any reconciliations.
     Mobile Chrome (full suite, incl. the feedback flow through the new faces).
   - No new tech debt. Remaining PRD-011 items are the manual/hardware gates above and
     the PWA-icon art (`_debt/001`, OQ-11 mascot) — design work, not code.
+- **2026-06-21 — Tech-debt cleanup pass.** Worked the `_debt/` backlog now that the
+  screens/design-system it was waiting on exist. Resolved notes moved to
+  `_debt/archive/`; no ADRs changed. Three items closed, one was already done, two
+  stay open by design:
+  - **DEBT-002 (quota-recovery UI):** wired the missing listener. `store/storage.ts`
+    already guarded writes and dispatched `literally:quota-exceeded`; added a global
+    `QuotaNotice` (mounted in `App` over the `ScreenRouter`) that surfaces a calm
+    "out of room — clear older sessions?" prompt, plus a focused `clearOldSessions`
+    store action that keeps only the newest session (so recovery never discards the
+    result the player is about to view, unlike `clearAllData`). +5 unit tests.
+  - **DEBT-004 (engine palette vs tokens):** `engine/render.ts` now sources its
+    palette from `styles/tokens.ts` (single source of truth) instead of drifted local
+    hex; committed strokes reconcile to `tokens.color.ink` (`#0f172a`). `tokens.ts` is
+    plain data, so the engine stays pure.
+  - **DEBT-006 (Mode 1 ink invisible, Medium):** added distinct `stormInk` (≈3.1:1 —
+    legible yet effortful) / `stormInkReduced` (≈5:1) tokens; `drawFreehand` takes an
+    optional `ink`, threaded through `useCanvas`; `SensoryStormScreen` raises the
+    stroke ink under reduced-intensity alongside the other R05-11 channels. Saved
+    previews (light surface) keep the committed ink. +1 unit test.
+  - **DEBT-005** was already resolved in PRD-009 — moved to archive.
+  - **Still open (deferred by design):** `_debt/001` PWA-icon art (blocked on the P2
+    mascot/brand direction, OQ-11) and `_debt/003` esbuild/vite dev-server advisory
+    (dev-only; the only fix is a breaking Vite-8 major needing `vite-plugin-pwa`
+    support — a toolchain migration for the PRD-011/CI-hardening track, zero prod
+    exposure under ADR-001).
+  - Verified: `tsc --noEmit`, ESLint clean, **167 Vitest unit tests** green,
+    production `vite build` (64.65 KB gzip JS, budget-checked).
