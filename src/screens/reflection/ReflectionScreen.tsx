@@ -159,6 +159,7 @@ export function ReflectionScreen() {
         {reveal.debrief.map((para, i) => (
           <p key={i}>{para}</p>
         ))}
+        <p className="text-text">{reveal.invite}</p>
         <ul className="mt-1 flex flex-col gap-1 text-xs text-textMuted">
           {reveal.disclaimers.map((d, i) => (
             <li key={i}>{d}</li>

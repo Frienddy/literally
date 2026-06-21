@@ -45,14 +45,20 @@ export const reveal = {
   ],
 
   /**
-   * Required disclaimers (R08-7, _docs/07 §1). Always shown with the debrief:
-   * one slice · not a diagnosis/test · people vary.
+   * Required disclaimers (R08-7, R09-3, _docs/07 §1). Always shown with the
+   * debrief: one slice · not a diagnosis/test · people vary.
    */
   disclaimers: [
     'This is one small slice of one kind of experience — not “what autism is like”.',
     'It’s a short empathy exercise, not a diagnosis or a test.',
     'Every autistic person is different; no single experience speaks for everyone.',
   ],
+
+  /**
+   * Gentle invite to action (doc 07 §6 "Do") — turns the empathy outward without
+   * pity or pressure. Closes the debrief.
+   */
+  invite: 'Where might clearer, more literal steps help someone you know?',
 
   /** Heading over the personal stress/confidence deltas (reflection, not a score). */
   deltaHeading: 'How it felt for you',
