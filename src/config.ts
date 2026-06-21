@@ -23,21 +23,38 @@ export const config = {
     snapTolerance: 0.45,
   },
 
-  /** Mode 1 vague-instruction fade behavior (PRD-005). */
+  /**
+   * Mode 1 vague-instruction fade behavior (PRD-005, GDD §3.2). The ask is fully
+   * legible for ~`startDelayMs`, then decays to `minOpacity` over `durationMs` so
+   * it is gone (from memory) by ~12s — you must act from a fuzzy recollection,
+   * with no way to summon it back. Reduced-intensity keeps it *uncomfortable, not
+   * unreadable* (raised floor + gentler, slower fade — R05-11).
+   */
   fade: {
-    /** ms before the instruction text begins fading. */
-    startDelayMs: 1500,
-    /** ms over which it fades to unreadable. */
-    durationMs: 4000,
-    /** Lowest opacity the text fades to. */
-    minOpacity: 0.05,
+    /** ms the instruction stays fully legible before fading. */
+    startDelayMs: 3000,
+    /** ms over which it fades toward `minOpacity` (gone by ~12s). */
+    durationMs: 9000,
+    /** Lowest opacity the text fades to (full intensity). */
+    minOpacity: 0.06,
+    /** Raised floor under reduced-intensity — readable but still uneasy. */
+    reducedMinOpacity: 0.35,
+    /** Gentler, slower fade under reduced-intensity. */
+    reducedDurationMs: 12000,
+    /** Subtle upward drift in px (suppressed under prefers-reduced-motion). */
+    driftPx: 10,
   },
 
-  /** Mode 1 fake-notification cadence (PRD-005). */
+  /**
+   * Mode 1 fake-notification cadence (PRD-005, GDD §3.4). Jittered toasts slide in
+   * ~every 4–8s and auto-dismiss; reduced-intensity makes them fewer + slower and
+   * keeps them out of the canvas (R05-11). Gaps are `[min, max]` jitter windows.
+   */
   notifications: {
     firstDelayMs: 2500,
-    intervalMs: 3500,
+    gapMs: [4000, 8000],
     visibleMs: 2200,
+    reducedGapMs: [10000, 16000],
   },
 
   /** Haptic pattern presets (PRD-003, _docs/05 §4). Durations in ms. */

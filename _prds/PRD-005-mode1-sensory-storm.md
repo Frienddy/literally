@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready |
+| **Status** | **Done** — code + automated tests complete; real-device haptics + sensory-safety playtest pending hardware (see §9) |
 | **Source docs** | [01 §3](../_docs/01-game-design.md), [06 §3.2](../_docs/06-ui-ux-spec.md), [07 §3](../_docs/07-accessibility-and-ethics.md) |
 | **Roadmap** | Phase 4 (independent of PRD-006 once 002–004 land) |
 | **Depends on** | PRD-002 (store), PRD-003 (canvas+haptics), PRD-004 (shell/router) |
@@ -102,12 +102,39 @@ drift is tasteful and reduced-motion aware.
 
 ## 9. Definition of Done
 
-- Plays as designed; feels **mildly frustrating**; reduced-intensity meaningfully
-  softens it; respects reduced-motion; **calm exit present** throughout.
-- No Undo; vague text fades and cannot be recalled; notifications never trap input;
-  the beat is gentle/brief/skippable and blames the instructions.
-- On Done, `mode_1_drawing_data` saved; flow advances to Feedback#1.
-- Relevant ethics-gate items (beat tone, blame framing, calm exit) green.
+**Code & automated — complete ✅**
+
+- [x] Real `SensoryStormScreen` composes the freehand+wobble `useCanvas` island
+  (blank canvas, no grid/guide/reference — R05-1/R05-14), **no Undo anywhere**
+  (R05-2), the storm theme via `ModeTheme` (R05-13), and saves
+  `mode_1_drawing_data` → `go('stress1')` on finish (R05-9).
+- [x] `VagueInstruction` — the ask + block fade from memory via an **imperative
+  rAF opacity** (immune to the global reduced-motion `transition` kill so it still
+  fades gently — R05-12) with **no recall control** (R05-3/R05-6); the pure
+  `fadeOpacity` curve is unit-tested.
+- [x] `FakeNotifications` — mundane toasts on a jittered ~4–8s cadence, always
+  auto-dismiss, `pointer-events-none` (never trap input — R05-4); erratic move
+  haptics via `useHaptics` (R05-5); the gently-puzzled **`GiverBeat`** ("not quite
+  right") is brief + skippable + blames the instructions (R05-8).
+- [x] Persistent calm **Exit** + **reduce-intensity** toggle reachable throughout
+  (R05-10); reducing intensity verifiably softens all four channels — haptics,
+  notifications (fewer/slower, off-canvas), text fade (gentler), vague-text
+  contrast (raised) (R05-11).
+- [x] Verified: `tsc`/ESLint/Prettier clean, **98 Vitest unit** (fade curve,
+  `VagueInstruction` no-recall + raised contrast, `FakeNotifications`
+  cadence/auto-dismiss/non-interactive, the beat walk in `navigation.test`),
+  **26 Playwright E2E** on Mobile Safari + Chrome (wobbly stroke → freehand
+  payload, no-undo, Done → beat → Feedback #1, reduce-intensity toggles, calm Exit;
+  all prior specs still green), production `vite build` (main ~60 KB gzip).
+
+**Real-device / playtest — pending hardware ⏳ (`_docs/09` §6; cannot be done in CI/emulator)**
+
+- [ ] Erratic move haptic fires on **Android**; **iOS Safari** no-ops cleanly and
+  the discomfort still reads via visual + motion channels.
+- [ ] Plays as designed and feels **mildly frustrating, never distressing**
+  (golden rule / SC-1); reduced-intensity + reduced-motion paths confirmed calming
+  on device; the beat reads as the *instructions* falling short, never the player
+  (ethics-gate / SC-6).
 
 ## 10. Open questions & risks
 

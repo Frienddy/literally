@@ -62,8 +62,9 @@ describe('ScreenRouter — the flow is walkable with stubs', () => {
     expect(useGameStore.getState().draft).not.toBeNull();
     const taskId = useGameStore.getState().draft!.task_id;
 
-    // Mode 1 → Feedback #1.
+    // Mode 1 → the gently-puzzled "not quite right" beat → confirm → Feedback #1.
     fireEvent.click(screen.getByTestId('mode1-done'));
+    fireEvent.click(screen.getByTestId('mode1-complete-continue'));
     const fb1 = screen.getByTestId('screen-feedback');
     expect(fb1).toHaveAttribute('data-mode', '1');
 
