@@ -78,8 +78,8 @@ describe('house geometry (PRD-006 R06-9)', () => {
     expect(key(s[5].to)).toBe(key(s[2].to)); // lands on top-right
     expect(key(s[6].to)).toBe(key(s[7].from)); // door is a connected inverted-U
     expect(key(s[7].to)).toBe(key(s[8].from));
-    expect(s[6].from.row).toBe(8);
-    expect(s[8].to.row).toBe(8);
+    expect(s[6].from.row).toBe(24);
+    expect(s[8].to.row).toBe(24);
   });
 });
 

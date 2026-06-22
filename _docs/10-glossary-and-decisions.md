@@ -249,7 +249,7 @@ screens; doc 06 §4/§D.)
 | OQ-2 | localStorage vs IndexedDB for drawing payloads | localStorage now, IDB if >150KB/session | ADR-002 / measure on device |
 | OQ-3 | Ship image export (FR-14) in v1 or v1.1? | v1.1 unless cheap | Roadmap Phase 8 |
 | OQ-4 | Any audio layer in Mode 1? | No (v1) | ADR-005 |
-| OQ-5 | Exact Mode 2 step coordinates + grid size (cols×rows) | ~8×10, finalize in Phase 5 | GDD §4 / Phase 5 |
+| OQ-5 | ~~Exact Mode 2 step coordinates + grid size (cols×rows)~~ | **Resolved** — **22×28** nodes; house/cat/flower coordinates authored in `content/mode2.steps.ts` (v1.8) | ADR-015 / change log v1.8 |
 | OQ-6 | ~~Wobble amplitude/frequency final values~~ | **Moot** — wobble/freehand removed (ADR-015); both modes snap to grid | ADR-015 |
 | OQ-7 | Persist in-progress draft for "resume"? | No in v1 (land on Welcome) | doc 03 §3 note |
 | OQ-8 | Default language + i18n scope for v1 | English only v1, structure ready | doc 02 §2 |
@@ -304,6 +304,14 @@ screens; doc 06 §4/§D.)
   deleted; `drawStepGuidance` kept (pure, still unit-tested). Touches
   `screens/mode2/AnchorPointScreen.tsx`, `components/StepInstruction.tsx`, doc 10 +
   the affected tests.
+- **v1.8:** **Finer dot grid** (`config.grid` 8×10 → **22×28** nodes). Resolves
+  OQ-5's grid-size question. Each legacy cell is split 3×, so the canvas shows a
+  denser field of dots to draw on. The authored Mode-2 coordinates in
+  `content/mode2.steps.ts` were scaled ×3 (and each step's "go N squares" count
+  tripled to match the new cell counts), so house/cat/flower render in the same
+  place at the same size — just on more dots; their geometry tests are unchanged
+  bar two absolute-row constants. `config.grid` is the single source of truth, so
+  every screen/preview/export recomputes geometry from it (no other code touched).
 
 ## 5. Implementation log
 First code lands; docs above remain the source of truth. Entries here record what
@@ -391,7 +399,8 @@ was *built* against the blueprint and any reconciliations.
     drew the door/window as multi-segment "boxes" inside one step; here **every
     step is exactly one segment** so guidance ghosts precisely one move per card and
     "Step X of N" maps 1:1 to drawing actions — the house finalized at **9
-    single-segment steps** (walls → roof → inverted-U door) on the 8×10 grid, the
+    single-segment steps** (walls → roof → inverted-U door) on the dot grid (8×10
+    nodes originally; rescaled ×3 to 22×28 in change log v1.8), the
     window deferred to PRD-009's task expansion. **Undo Step** both reverts the last
     segment and returns to the prior card (R06-5) in one control (the wireframe's
     single secondary action). The completion beat is shared with PRD-005, so the

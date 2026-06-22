@@ -370,8 +370,8 @@ export function migrate(persisted: unknown, from: number): unknown {
         },
         "mode_2_drawing_data": {
           "kind": "grid",
-          "segments": [{ "from": { "col": 2, "row": 1 }, "to": { "col": 2, "row": 5 } }],
-          "grid": { "cols": 8, "rows": 10 }
+          "segments": [{ "from": { "col": 6, "row": 3 }, "to": { "col": 6, "row": 15 } }],
+          "grid": { "cols": 22, "rows": 28 }
         },
         "mode_1_stress_level": 7,
         "mode_2_stress_level": 2,
