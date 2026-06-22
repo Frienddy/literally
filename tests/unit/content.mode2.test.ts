@@ -4,10 +4,12 @@ import {
   droidTarget,
   alienSteps,
   alienTarget,
-  monsterSteps,
-  monsterTarget,
+  marioSteps,
+  marioTarget,
   fighterSteps,
   fighterTarget,
+  monalisaSteps,
+  monalisaTarget,
 } from '../../src/content/mode2.steps';
 import { resolveTask, TASK_CONTENT } from '../../src/content/tasks';
 import { config } from '../../src/config';
@@ -36,8 +38,9 @@ const SUBJECTS: Array<{ id: string; steps: Mode2Step[]; target: GridDrawing }> =
   [
     { id: 'droid', steps: droidSteps, target: droidTarget },
     { id: 'alien', steps: alienSteps, target: alienTarget },
-    { id: 'monster', steps: monsterSteps, target: monsterTarget },
+    { id: 'mario', steps: marioSteps, target: marioTarget },
     { id: 'fighter', steps: fighterSteps, target: fighterTarget },
+    { id: 'monalisa', steps: monalisaSteps, target: monalisaTarget },
   ];
 
 describe.each(SUBJECTS)('$id step sequence (FR-20)', ({ steps, target }) => {
@@ -97,18 +100,17 @@ describe('alien geometry (FR-20)', () => {
   });
 });
 
-describe('monster geometry (FR-20)', () => {
-  it('is a detailed square-headed monster in 32 steps', () => {
-    expect(monsterSteps).toHaveLength(32);
+describe('mario geometry (FR-20)', () => {
+  it('is a detailed jumping Mario in 35 steps', () => {
+    expect(marioSteps).toHaveLength(35);
   });
 
-  it('head, both eyes, both pupils, and the Π-mouth are closed loops', () => {
-    expectClosedLoop(monsterSteps, 0, 3); // head
-    expectClosedLoop(monsterSteps, 8, 11); // left eye
-    expectClosedLoop(monsterSteps, 12, 15); // right eye
-    expectClosedLoop(monsterSteps, 16, 19); // left pupil
-    expectClosedLoop(monsterSteps, 20, 23); // right pupil
-    expectClosedLoop(monsterSteps, 24, 31); // mouth (8-segment Π)
+  it('cap, cap emblem, face, nose, and body are each closed loops', () => {
+    expectClosedLoop(marioSteps, 0, 3); // cap
+    expectClosedLoop(marioSteps, 4, 7); // cap emblem
+    expectClosedLoop(marioSteps, 8, 11); // face
+    expectClosedLoop(marioSteps, 14, 17); // nose
+    expectClosedLoop(marioSteps, 19, 22); // body
   });
 });
 
@@ -128,16 +130,37 @@ describe('fighter geometry (FR-20)', () => {
   });
 });
 
+describe('monalisa geometry (FR-20)', () => {
+  it('is a highly detailed portrait in 53 steps', () => {
+    expect(monalisaSteps).toHaveLength(53);
+  });
+
+  it('the face, both eyes, the dress, and the folded hands are each closed loops', () => {
+    expectClosedLoop(monalisaSteps, 10, 17); // face oval (8 sides)
+    expectClosedLoop(monalisaSteps, 20, 23); // left eye
+    expectClosedLoop(monalisaSteps, 24, 27); // right eye
+    expectClosedLoop(monalisaSteps, 35, 43); // dress / body
+    expectClosedLoop(monalisaSteps, 44, 49); // folded hands
+  });
+});
+
 describe('task resolver (FR-20)', () => {
   it('resolves every subject to its own authored content', () => {
     expect(resolveTask('droid').steps).toBe(droidSteps);
     expect(resolveTask('alien').steps).toBe(alienSteps);
-    expect(resolveTask('monster').steps).toBe(monsterSteps);
+    expect(resolveTask('mario').steps).toBe(marioSteps);
     expect(resolveTask('fighter').steps).toBe(fighterSteps);
+    expect(resolveTask('monalisa').steps).toBe(monalisaSteps);
   });
 
   it('every pool subject is authored — none undefined', () => {
-    for (const id of ['droid', 'alien', 'monster', 'fighter'] as const) {
+    for (const id of [
+      'droid',
+      'alien',
+      'mario',
+      'fighter',
+      'monalisa',
+    ] as const) {
       expect(TASK_CONTENT[id]).toBeDefined();
       expect(TASK_CONTENT[id].id).toBe(id);
       expect(TASK_CONTENT[id].vague.block.length).toBeGreaterThan(0);

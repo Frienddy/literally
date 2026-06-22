@@ -33,7 +33,6 @@ beforeEach(() => {
       session('older', Date.parse('2026-06-18'), 6, 3),
     ],
     selectedSessionId: null,
-    reducedIntensity: false,
   });
 });
 

@@ -21,5 +21,3 @@ export const useReflectionSession = () =>
         ? s.sessions.find((x) => x.id === s.selectedSessionId)
         : s.sessions[0]) ?? null,
   );
-export const useReducedIntensity = () =>
-  useGameStore((s) => s.reducedIntensity);

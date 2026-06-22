@@ -20,7 +20,6 @@ export const config = {
   /** Haptic pattern presets (PRD-003, _docs/05 §4). Durations in ms. */
   haptics: {
     click: 15, // "snap": crisp, satisfying confirm on each new node
-    softClick: 8, // reduced-intensity variant
   },
 } as const;
 

@@ -9,9 +9,9 @@
  *
  * Deferring the *topic* is deliberate pedagogy — but the **sensory risk is never
  * deferred** (doc 07 §1, ethics consent): we disclose up front that the first part
- * is intentionally busy and that the player can dial it down or stop at any time,
- * and we honestly promise an explanation at the end. That is not deception — we
- * never claim the game is something it isn't.
+ * is intentionally busy and that the player can stop at any time, and we honestly
+ * promise an explanation at the end. That is not deception — we never claim the
+ * game is something it isn't.
  */
 export const welcome = {
   /** One-line hook — no lecture, no spoiler. */
@@ -20,17 +20,15 @@ export const welcome = {
 
   /**
    * Sensory-safety note (consent, R09-2 / doc 07 §1/§3). Discloses the deliberate
-   * Mode 1 intensity and the always-available opt-out/exit — plainly, with no
-   * spoiler. Pairs with the "Reduce intensity" control below it.
+   * Mode 1 intensity and the always-available exit — plainly, with no spoiler.
    */
   sensoryNote:
-    'Heads-up: the first part is meant to feel a little busy and fiddly. You can turn that down whenever you like — or stop any time.',
+    'Heads-up: the first part is meant to feel a little busy and fiddly. You can stop any time.',
 
   /** Honest "we'll explain after" line — names nothing, promises a debrief. */
   afterNote: 'We’ll explain what it’s about at the very end.',
 
-  /** The sensory-safety opt-out control + the history entry point. */
-  reduceIntensity: 'Reduce intensity',
+  /** The history entry point. */
   viewHistory: 'View past sessions',
   /** Entry point to the standalone gallery of every task's finished drawing. */
   viewExamples: 'See drawing examples',

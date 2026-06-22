@@ -5,9 +5,9 @@
  * share one `task_id` (picked in the store), and this is where that id resolves to
  * authored content.
  *
- * The pool is four "I-know-it-but-can't-draw-it" subjects — **droid, alien, monster
- * and fighter** are all authored end to end, so a randomly-picked subject drives a
- * coherent vague ask (M1), step sequence (M2), and target (Reflection).
+ * The pool is five "I-know-it-but-can't-draw-it" subjects — **droid, alien, mario,
+ * fighter and monalisa** are all authored end to end, so a randomly-picked subject
+ * drives a coherent vague ask (M1), step sequence (M2), and target (Reflection).
  */
 import type { GridDrawing, TaskId } from '../types/session';
 import { config } from '../config';
@@ -16,17 +16,20 @@ import {
   droidTarget,
   alienSteps,
   alienTarget,
-  monsterSteps,
-  monsterTarget,
+  marioSteps,
+  marioTarget,
   fighterSteps,
   fighterTarget,
+  monalisaSteps,
+  monalisaTarget,
   type Mode2Step,
 } from './mode2.steps';
 import {
   droidVague,
   alienVague,
-  monsterVague,
+  marioVague,
   fighterVague,
+  monalisaVague,
   type VagueInstruction,
 } from './mode1.instructions';
 
@@ -64,12 +67,12 @@ const alien: TaskContent = {
   grid,
 };
 
-const monster: TaskContent = {
-  id: 'monster',
-  label: 'a blocky monster',
-  vague: monsterVague,
-  steps: monsterSteps,
-  target: monsterTarget,
+const mario: TaskContent = {
+  id: 'mario',
+  label: 'a jumping Mario',
+  vague: marioVague,
+  steps: marioSteps,
+  target: marioTarget,
   grid,
 };
 
@@ -82,12 +85,22 @@ const fighter: TaskContent = {
   grid,
 };
 
+const monalisa: TaskContent = {
+  id: 'monalisa',
+  label: 'the Mona Lisa',
+  vague: monalisaVague,
+  steps: monalisaSteps,
+  target: monalisaTarget,
+  grid,
+};
+
 /** Authored content per subject — every `TaskId` in the pool is authored. */
 export const TASK_CONTENT: Record<TaskId, TaskContent> = {
   droid,
   alien,
-  monster,
+  mario,
   fighter,
+  monalisa,
 };
 
 /** Fallback when a (possibly legacy) id isn't in the current pool. */

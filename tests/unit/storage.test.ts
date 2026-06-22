@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { gameStorage, QUOTA_EXCEEDED_EVENT } from '../../src/store/storage';
 
 const KEY = 'literally:test';
-const value = { state: { sessions: [], reducedIntensity: false }, version: 1 };
+const value = { state: { sessions: [] }, version: 1 };
 
 beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());

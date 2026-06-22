@@ -35,8 +35,6 @@ interface GameState {
    * session from History. Runtime-only — never persisted (not in `partialize`).
    */
   selectedSessionId: string | null;
-  /** Sensory-safety: user can dial down Mode 1 intensity (see doc 07). */
-  reducedIntensity: boolean;
 
   // --- navigation ---
   go: (screen: Screen) => void;
@@ -61,7 +59,6 @@ interface GameState {
    * `clearAllData`, the newest session, the draft, and the current screen survive.
    */
   clearOldSessions: () => void;
-  setReducedIntensity: (v: boolean) => void;
 }
 
 /** Clamp to an integer in [1,10]. Shared by stress and confidence. */
@@ -69,7 +66,13 @@ const clamp1to10 = (n: number): number =>
   Math.max(1, Math.min(10, Math.round(n)));
 
 /** Task pool — both modes of a session share one subject (PRD-002 R02-4). */
-export const TASKS: TaskId[] = ['droid', 'alien', 'monster', 'fighter'];
+export const TASKS: TaskId[] = [
+  'droid',
+  'alien',
+  'mario',
+  'fighter',
+  'monalisa',
+];
 // Math.random is fine at app runtime (only disallowed inside Workflow scripts).
 const pickTask = (): TaskId => TASKS[Math.floor(Math.random() * TASKS.length)];
 
@@ -96,7 +99,6 @@ export const useGameStore = create<GameState>()(
       draft: null,
       sessions: [],
       selectedSessionId: null,
-      reducedIntensity: false,
 
       go: (screen) => set({ screen }),
 
@@ -167,8 +169,6 @@ export const useGameStore = create<GameState>()(
       // session the player just finished (sessions[0]) is preserved.
       clearOldSessions: () =>
         set((s) => ({ sessions: s.sessions.slice(0, 1) })),
-
-      setReducedIntensity: (v) => set({ reducedIntensity: v }),
     }),
     {
       name: 'literally:game', // storage key
@@ -179,7 +179,6 @@ export const useGameStore = create<GameState>()(
       // After a reload mid-session the app lands on Welcome, not mid-mode (OQ-7).
       partialize: (s) => ({
         sessions: s.sessions,
-        reducedIntensity: s.reducedIntensity,
       }),
       migrate: (persisted, fromVersion) => migrate(persisted, fromVersion),
     },

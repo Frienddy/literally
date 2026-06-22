@@ -21,7 +21,6 @@ const reset = () =>
     draft: null,
     sessions: [],
     selectedSessionId: null,
-    reducedIntensity: false,
   });
 
 beforeEach(() => {
@@ -150,7 +149,6 @@ describe('history & privacy', () => {
   it('clearAllData wipes sessions + draft and returns to Welcome', () => {
     useGameStore.getState().startNewSession();
     useGameStore.getState().finalizeSession();
-    useGameStore.getState().setReducedIntensity(true);
 
     useGameStore.getState().clearAllData();
     const state = useGameStore.getState();
@@ -161,11 +159,6 @@ describe('history & privacy', () => {
     // The persisted blob no longer carries any session.
     const blob = JSON.parse(localStorage.getItem('literally:game') ?? '{}');
     expect(blob.state.sessions).toEqual([]);
-  });
-
-  it('setReducedIntensity toggles the flag', () => {
-    useGameStore.getState().setReducedIntensity(true);
-    expect(useGameStore.getState().reducedIntensity).toBe(true);
   });
 
   it('clearOldSessions keeps the newest and drops the rest (quota recovery)', () => {
@@ -226,15 +219,11 @@ describe('viewing a past session (PRD-008)', () => {
 });
 
 describe('persistence (partialize)', () => {
-  it('persists only sessions + reducedIntensity, never screen/draft', () => {
+  it('persists only sessions, never screen/draft', () => {
     useGameStore.getState().startNewSession(); // sets screen=mode1 + a draft
-    useGameStore.getState().setReducedIntensity(true);
 
     const blob = JSON.parse(localStorage.getItem('literally:game') ?? '{}');
-    expect(Object.keys(blob.state).sort()).toEqual([
-      'reducedIntensity',
-      'sessions',
-    ]);
+    expect(Object.keys(blob.state)).toEqual(['sessions']);
     expect(blob.state).not.toHaveProperty('screen');
     expect(blob.state).not.toHaveProperty('draft');
   });
@@ -256,7 +245,7 @@ describe('persistence (partialize)', () => {
     localStorage.setItem(
       'literally:game',
       JSON.stringify({
-        state: { sessions: [session], reducedIntensity: true },
+        state: { sessions: [session] },
         version: 1,
       }),
     );
@@ -266,7 +255,6 @@ describe('persistence (partialize)', () => {
     const state = useGameStore.getState();
     expect(state.sessions).toHaveLength(1);
     expect(state.sessions[0].id).toBe('seed-1');
-    expect(state.reducedIntensity).toBe(true);
     expect(state.screen).toBe('welcome'); // screen is never restored
   });
 
@@ -296,7 +284,7 @@ describe('quota guard', () => {
 
     expect(() =>
       gameStorage.setItem('literally:game', {
-        state: { sessions: [], reducedIntensity: false },
+        state: { sessions: [] },
         version: 1,
       }),
     ).not.toThrow();

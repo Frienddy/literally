@@ -25,7 +25,10 @@ const COARSE_QUERY = '(pointer: coarse)';
 const PHONE_MAX_SHORT_SIDE = 600;
 
 function detectPhone(): boolean {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+  if (
+    typeof window === 'undefined' ||
+    typeof window.matchMedia !== 'function'
+  ) {
     return false;
   }
   const shortSide = Math.min(window.innerWidth, window.innerHeight);

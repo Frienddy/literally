@@ -8,16 +8,15 @@ export const SCHEMA_VERSION = 2;
 /** The subset of store state that is actually persisted (see `partialize`). */
 export interface PersistedState {
   sessions: GameSession[];
-  reducedIntensity: boolean;
 }
 
-const EMPTY: PersistedState = { sessions: [], reducedIntensity: false };
+const EMPTY: PersistedState = { sessions: [] };
 
 /** Defensive shape check — a persisted blob can be anything (old/corrupt). */
 function isPersistedState(value: unknown): value is PersistedState {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
-  return Array.isArray(v.sessions) && typeof v.reducedIntensity === 'boolean';
+  return Array.isArray(v.sessions);
 }
 
 /**

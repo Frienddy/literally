@@ -16,7 +16,6 @@ const reset = () =>
     draft: null,
     sessions: [],
     selectedSessionId: null,
-    reducedIntensity: false,
   });
 
 beforeEach(() => {
@@ -156,12 +155,6 @@ describe('ScreenRouter — the flow is walkable with stubs', () => {
     expect(screen.getByTestId('screen-mode1')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Exit'));
     expect(screen.getByTestId('screen-welcome')).toBeInTheDocument();
-  });
-
-  it('Welcome reduce-intensity toggle persists to the store (FR-22)', () => {
-    render(<ScreenRouter />);
-    fireEvent.click(screen.getByTestId('welcome-reduce-intensity'));
-    expect(useGameStore.getState().reducedIntensity).toBe(true);
   });
 
   it('History delete-all needs a confirm, then wipes + returns to Welcome (FR-15)', () => {
