@@ -15,6 +15,13 @@ export const config = {
     rows: 28,
     /** Snap radius as a fraction of cell size. */
     snapTolerance: 0.45,
+    /**
+     * Breathing room (px) between the dot field and the canvas edge. Smaller =
+     * bigger cells (more space *between* dots) for a fixed node count — the lever
+     * for the cramped-dots-on-phones fix, where vertical space is tight and the
+     * 22×28 grid stays fixed (its authored Mode-2 coordinates depend on it).
+     */
+    pad: 12,
   },
 
   /** Haptic pattern presets (PRD-003, _docs/05 §4). Durations in ms. */

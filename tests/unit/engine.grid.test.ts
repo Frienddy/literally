@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { computeGridSpec } from '../../src/engine/grid';
 import { nodeToPixel, snapToNode } from '../../src/engine/snap';
+import { config } from '../../src/config';
+
+const PAD = config.grid.pad; // default breathing room used when no pad is passed
 
 /**
  * `computeGridSpec` is the single grid-layout helper shared by the live canvas,
@@ -18,13 +21,13 @@ describe('computeGridSpec', () => {
     expect(g.originX).toBeCloseTo((320 - spanX) / 2);
     expect(g.originY).toBeCloseTo((400 - spanY) / 2);
     // Limiting dimension fits within the padded area.
-    expect(spanY).toBeLessThanOrEqual(400 - 24 * 2 + 1e-9);
+    expect(spanY).toBeLessThanOrEqual(400 - PAD * 2 + 1e-9);
   });
 
   it('uses one square cell sized by the tighter axis', () => {
     const g = computeGridSpec(320, 400, 8, 10);
-    const byW = (320 - 48) / (8 - 1);
-    const byH = (400 - 48) / (10 - 1);
+    const byW = (320 - PAD * 2) / (8 - 1);
+    const byH = (400 - PAD * 2) / (10 - 1);
     expect(g.cell).toBeCloseTo(Math.min(byW, byH));
   });
 

@@ -11,13 +11,16 @@
  * is centered in `w × h` with `pad` px of breathing room on every edge.
  */
 import type { GridSpec } from './snap';
+import { config } from '../config';
 
 export function computeGridSpec(
   w: number,
   h: number,
   cols: number,
   rows: number,
-  pad = 24,
+  // Default lives in config.ts so non-engineers can tune the dot spacing; callers
+  // that need a different margin (small previews, export) pass their own.
+  pad: number = config.grid.pad,
 ): GridSpec {
   const cell = Math.min((w - pad * 2) / (cols - 1), (h - pad * 2) / (rows - 1));
   const span = (n: number) => cell * (n - 1);
