@@ -29,7 +29,7 @@ export function WelcomeScreen() {
           actions move to the right column (ADR-014). */}
       <div className="flex flex-col items-center wide:flex-1">
         <header className="flex flex-col items-center gap-3">
-          <GuideMascot mood="clear" />
+          <GuideMascot mood="clear" size="lg" />
           <h1 className="text-3xl font-semibold tracking-tight">
             {strings.app.name}
           </h1>
