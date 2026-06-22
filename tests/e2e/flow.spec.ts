@@ -5,6 +5,21 @@ import { test, expect, type Page } from '@playwright/test';
  * single-document FSM means browser-back does nothing destructive (R04-6 / SC-4).
  */
 
+type GridSpec = {
+  cols: number;
+  rows: number;
+  cell: number;
+  originX: number;
+  originY: number;
+};
+type GridNode = { col: number; row: number };
+type Segment = { from: GridNode; to: GridNode };
+
+async function readJson<T>(page: Page, testId: string): Promise<T> {
+  const text = await page.getByTestId(testId).textContent();
+  return JSON.parse(text ?? 'null') as T;
+}
+
 async function rate(page: Page) {
   await page.getByTestId('feedback-stress').getByRole('radio').nth(4).click();
   await page
@@ -12,6 +27,30 @@ async function rate(page: Page) {
     .getByRole('radio')
     .nth(2)
     .click();
+}
+
+/**
+ * Build the Mode 2 subject by drawing each authored step on the snap grid. There
+ * is no Next button — each finished line auto-advances (ADR-015), and the final
+ * line opens the completion beat we then confirm.
+ */
+async function buildMode2(page: Page) {
+  const g = await readJson<GridSpec>(page, 'mode2-grid-spec');
+  const steps = await readJson<Segment[]>(page, 'mode2-steps');
+  const box = (await page.getByTestId('mode2-canvas').boundingBox())!;
+  const px = (n: GridNode) => ({
+    x: box.x + g.originX + n.col * g.cell,
+    y: box.y + g.originY + n.row * g.cell,
+  });
+  for (const { from, to } of steps) {
+    const a = px(from);
+    const b = px(to);
+    await page.mouse.move(a.x, a.y);
+    await page.mouse.down();
+    await page.mouse.move(b.x, b.y, { steps: 12 });
+    await page.mouse.up();
+  }
+  await page.getByTestId('mode2-complete-continue').click();
 }
 
 test.describe('walkable flow (FSM)', () => {
@@ -31,15 +70,11 @@ test.describe('walkable flow (FSM)', () => {
     await rate(page);
     await page.getByTestId('feedback-continue').click();
 
-    // Mode 2: step through the literal steps at our own pace (no timers), then
-    // confirm the completion beat.
+    // Mode 2: draw the literal steps (each line auto-advances), then confirm the
+    // completion beat.
     await expect(page.getByTestId('screen-mode2')).toBeVisible();
-    for (let i = 0; i < 15; i++) {
-      const next = page.getByTestId('mode2-next');
-      if (await next.isVisible().catch(() => false)) await next.click();
-      else break;
-    }
-    await page.getByTestId('mode2-complete-continue').click();
+    await expect(page.getByTestId('mode2-canvas')).toBeVisible();
+    await buildMode2(page);
 
     // Feedback #2 → Reflection
     await expect(page.getByTestId('screen-feedback')).toHaveAttribute(

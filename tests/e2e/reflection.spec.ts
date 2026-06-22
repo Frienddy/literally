@@ -73,7 +73,7 @@ async function playFullSession(page: Page) {
     await page.mouse.down();
     await page.mouse.move(b.x, b.y, { steps: 12 });
     await page.mouse.up();
-    await page.getByTestId('mode2-next').click();
+    // Each finished line auto-advances; the last opens the completion beat.
   }
   await page.getByTestId('mode2-complete-continue').click();
   await rate(page, 0, 4); // low stress, high confidence

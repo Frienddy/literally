@@ -2,9 +2,11 @@ import { test, expect, type Page } from '@playwright/test';
 
 /**
  * Drives the real Anchor Point screen (PRD-006): the player builds the house via
- * literal, one-at-a-time steps on the snap-to-grid canvas, Undo reverts, and the
- * completion beat advances to Feedback #2. Snap math itself is covered by the
- * engine harness E2E (canvas.spec.ts); here we verify the *screen* wiring.
+ * literal, one-at-a-time steps on the snap-to-grid canvas. Each finished line
+ * auto-advances to the next step (ADR-015); Undo reverts the last line and the
+ * card with it; drawing the final line opens the completion beat that advances to
+ * Feedback #2. Snap math itself is covered by the engine harness E2E
+ * (canvas.spec.ts); here we verify the *screen* wiring.
  */
 
 type GridSpec = {
@@ -114,11 +116,10 @@ test.describe('Mode 2 — Anchor Point', () => {
       expect(Number.isInteger(seg.to.row)).toBe(true);
       expect(seg.from).not.toEqual(seg.to);
 
-      // Advance at our own pace; the final step opens the completion beat.
-      await page.getByTestId('mode2-next').click();
+      // No Next button — drawing the line is what advances the step (ADR-015).
     }
 
-    // Completion moment → confirm → Feedback #2.
+    // Drawing the final line opens the completion moment → confirm → Feedback #2.
     await expect(page.getByTestId('mode2-complete')).toBeVisible();
     await page.getByTestId('mode2-complete-continue').click();
     await expect(page.getByTestId('screen-feedback')).toHaveAttribute(
@@ -146,22 +147,22 @@ test.describe('Mode 2 — Anchor Point', () => {
       await page.mouse.up();
     };
 
-    // Step 1: draw, advance to step 2.
+    // Step 1: drawing the first line auto-advances to step 2 (ADR-015).
     await draw(HOUSE[0]);
-    await page.getByTestId('mode2-next').click();
     await expect(page.getByText('Step 2 of 9')).toBeVisible();
 
-    // Step 2: draw the second segment.
+    // Step 2: drawing the second line auto-advances to step 3.
     await draw(HOUSE[1]);
     expect(
       (await readJson<Drawing>(page, 'mode2-drawing')).segments,
     ).toHaveLength(2);
+    await expect(page.getByText('Step 3 of 9')).toBeVisible();
 
     // Undo: reverts the last segment AND returns to the prior card (R06-5).
     await page.getByTestId('mode2-undo').click();
     expect(
       (await readJson<Drawing>(page, 'mode2-drawing')).segments,
     ).toHaveLength(1);
-    await expect(page.getByText('Step 1 of 9')).toBeVisible();
+    await expect(page.getByText('Step 2 of 9')).toBeVisible();
   });
 });

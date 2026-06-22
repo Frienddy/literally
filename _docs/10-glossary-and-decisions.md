@@ -294,6 +294,16 @@ screens; doc 06 §4/§D.)
   deleted the now-vestigial dark-theme machinery (`ModeTheme`, `tokens.theme`,
   storm-era motion tokens). Touches `styles/tokens.ts`, `tailwind.config.ts`,
   `index.html`, `vite.config.ts`, the mode screens, doc 06/10.
+- **v1.7:** **Mode 2 advances on the line, not a button; no on-grid hint** (amends
+  PRD-006 R06-3…R06-7). Each finished segment auto-advances to the next step and the
+  last one opens the completion beat, so the literal instructions — not a Next CTA —
+  drive the rhythm; the **Next** button is gone (Undo stays). The on-grid guidance
+  overlay (pulsing start node + ghosted target) is removed: the step text still says
+  what to draw, but the canvas no longer shows where. Reverses PRD-006's "no
+  auto-advance" principle and retires R06-7's visual guidance. `StepGuidanceCanvas`
+  deleted; `drawStepGuidance` kept (pure, still unit-tested). Touches
+  `screens/mode2/AnchorPointScreen.tsx`, `components/StepInstruction.tsx`, doc 10 +
+  the affected tests.
 
 ## 5. Implementation log
 First code lands; docs above remain the source of truth. Entries here record what
@@ -700,3 +710,27 @@ was *built* against the blueprint and any reconciliations.
     incl. the axe gate on Welcome/Mode 1/Stress/Mode 2/Reflection — every scanned
     light surface clears WCAG AA. No behavior/data change. **Pending hardware:**
     on-device check of the light status bar / PWA splash colors (`_docs/09` §6).
+- **2026-06-22 — Mode 2 auto-advances on each line; on-grid hint removed (amends
+  PRD-006 R06-3…R06-7).** Per product direction, Mode 2 now advances the step pager
+  on each *finished line* rather than on a button, and drops the on-grid guidance
+  hint — a deliberate reversal of the documented "no auto-advance" + "show the move"
+  design, trading hand-holding for a draw-driven rhythm. The literal step text
+  remains the instruction; the canvas no longer ghosts the target.
+  - **`AnchorPointScreen`:** the visible step is now derived from the committed
+    segment count (`min(segments.length, total-1)`), so drawing a line advances and
+    Undo regresses with no separate step state. `onChange` opens the completion beat
+    once `segments.length` reaches `total`. The `StepGuidanceCanvas` overlay is gone.
+  - **`StepInstruction`:** dropped the **Next** CTA and its `nextLabel`/`onNext`
+    props — the control row is now Undo-only (still hidden during the beat).
+  - **Deletions:** `components/StepGuidanceCanvas.tsx` (now unused). The engine's
+    pure `drawStepGuidance` + `tokens.guidance` are kept (still unit-tested) in case
+    guidance returns.
+  - **Tests:** `stepInstruction` unit rewritten for the Undo-only API; `mode2` E2E
+    no longer clicks Next and asserts the auto-advanced step labels; `flow`/`a11y`
+    E2E now *draw* the authored steps (the old click-through-without-drawing path is
+    gone); `reflection` E2E drops its per-step Next click; `navigation` unit (jsdom,
+    no canvas geometry) drives the store through the completion transition.
+  - Verified: `tsc --noEmit`, ESLint clean, **140 Vitest unit tests** green; the
+    affected E2E (mode2/flow/reflection/a11y) pass on Mobile Chrome. **Pending
+    sign-off:** confirm the draw-driven Mode 2 still reads as calm/in-control without
+    the on-grid hint (the SC-2 instruction-clarity contrast it anchors).

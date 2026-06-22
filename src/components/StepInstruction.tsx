@@ -2,13 +2,14 @@
  * Mode 2 one-step-at-a-time pagination (PRD-006 R06-3…R06-6, _docs/06 §3.4).
  *
  * Lays out the structured experience: a single persistent, re-readable step card
- * on top, the drawing surface (`children`) in the middle, and the full-control
- * row — secondary **Undo** + the dominant **Next** CTA — on the bottom. Exactly
- * one card shows at a time and it never decays; advancing is the player's choice,
- * with **no timer and no auto-advance** (the deliberate opposite of Mode 1).
+ * on top, the drawing surface (`children`) in the middle, and the control row —
+ * just **Undo** — on the bottom. Exactly one card shows at a time and it never
+ * decays. Advancing is driven by the drawing itself: each finished line moves the
+ * screen to the next step (the screen owns that wiring), with **no timer** — the
+ * deliberate opposite of Mode 1.
  *
  * Presentational/controlled: the screen owns the step index and drawing state and
- * passes resolved labels + handlers. "Undo Step" reverts the last segment *and*
+ * passes resolved labels + handlers. "Undo" reverts the last segment *and*
  * returns to the prior card in one action (R06-5) — the screen wires both.
  */
 import type { ReactNode } from 'react';
@@ -21,13 +22,10 @@ export interface StepInstructionProps {
   label: string;
   /** The literal instruction for the current step. */
   instruction: string;
-  /** Resolved primary CTA label ("Next step", or "Finish" on the last step). */
-  nextLabel: string;
-  /** Resolved secondary control label ("Undo"). */
+  /** Resolved Undo control label. */
   undoLabel: string;
   /** Whether the Undo control is enabled (a drawn segment exists to revert). */
   canUndo: boolean;
-  onNext: () => void;
   onUndo: () => void;
   /** The Grown-up's expression beside the card (calm/clear by default). */
   mascotMood?: GuideMood;
@@ -43,10 +41,8 @@ export interface StepInstructionProps {
 export function StepInstruction({
   label,
   instruction,
-  nextLabel,
   undoLabel,
   canUndo,
-  onNext,
   onUndo,
   mascotMood = 'clear',
   mascotLabel,
@@ -57,7 +53,7 @@ export function StepInstruction({
   // Layout reflows between portrait and landscape via grid-template-areas (ADR-014)
   // without changing DOM order: portrait stacks card → canvas → controls; the
   // `wide:` landscape variant puts the canvas on the left (spanning both rows) with
-  // the persistent step card top-right and the Undo/Next controls bottom-right.
+  // the persistent step card top-right and the Undo control bottom-right.
   return (
     <section
       className={
@@ -79,7 +75,7 @@ export function StepInstruction({
       <div className="relative min-h-0 [grid-area:canvas]">{children}</div>
 
       {!hideControls && (
-        <div className="flex gap-3 [grid-area:controls] wide:self-end">
+        <div className="flex [grid-area:controls] wide:self-end">
           <Button
             variant="secondary"
             onClick={onUndo}
@@ -88,13 +84,6 @@ export function StepInstruction({
             className="flex-1"
           >
             {undoLabel}
-          </Button>
-          <Button
-            onClick={onNext}
-            data-testid="mode2-next"
-            className="flex-[2]"
-          >
-            {nextLabel}
           </Button>
         </div>
       )}

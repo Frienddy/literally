@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, act } from '@testing-library/react';
 import { ScreenRouter } from '../../src/app/ScreenRouter';
 import { useGameStore } from '../../src/store/gameStore';
 import {
@@ -85,14 +85,21 @@ describe('ScreenRouter — the flow is walkable with stubs', () => {
     fireEvent.click(screen.getByTestId('feedback-continue'));
     expect(screen.getByTestId('screen-mode2')).toBeInTheDocument();
 
-    // Step through Mode 2's literal steps; the final step opens the completion
-    // beat (Next is replaced), which we confirm to advance to Feedback #2.
-    for (let i = 0; i < 15; i++) {
-      if (screen.queryByTestId('mode2-next')) {
-        fireEvent.click(screen.getByTestId('mode2-next'));
-      }
-    }
-    fireEvent.click(screen.getByTestId('mode2-complete-continue'));
+    // Mode 2's snap canvas needs real layout geometry to commit segments (drawing
+    // a line is what advances the step now — ADR-015), which jsdom can't provide:
+    // with no canvas measurement there's no grid and nothing to draw. That
+    // screen-level wiring is covered by tests/e2e/mode2.spec.ts; here we drive the
+    // store through the transition the completed screen performs, to keep walking
+    // the FSM into Feedback #2.
+    act(() => {
+      const store = useGameStore.getState();
+      store.saveMode2Drawing({
+        kind: 'grid',
+        segments: [],
+        grid: { cols: 8, rows: 10 },
+      });
+      store.go('stress2');
+    });
     const fb2 = screen.getByTestId('screen-feedback');
     expect(fb2).toHaveAttribute('data-mode', '2');
 

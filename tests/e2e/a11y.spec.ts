@@ -41,6 +41,21 @@ async function scan(page: Page, label: string) {
 
 // --- flow helpers (mirror tests/e2e/flow.spec.ts) -------------------------------
 
+type GridSpec = {
+  cols: number;
+  rows: number;
+  cell: number;
+  originX: number;
+  originY: number;
+};
+type GridNode = { col: number; row: number };
+type Segment = { from: GridNode; to: GridNode };
+
+async function readJson<T>(page: Page, testId: string): Promise<T> {
+  const text = await page.getByTestId(testId).textContent();
+  return JSON.parse(text ?? 'null') as T;
+}
+
 async function rate(page: Page) {
   await page.getByTestId('feedback-stress').getByRole('radio').nth(4).click();
   await page
@@ -82,13 +97,25 @@ async function gotoMode2(page: Page) {
   await expect(page.getByTestId('mode2-canvas')).toBeVisible();
 }
 
-/** …step through Mode 2 → confirm beat → rate Feedback #2 → Reflection. */
+/** …draw Mode 2's steps → confirm beat → rate Feedback #2 → Reflection. */
 async function gotoReflection(page: Page) {
   await gotoMode2(page);
-  for (let i = 0; i < 15; i++) {
-    const next = page.getByTestId('mode2-next');
-    if (await next.isVisible().catch(() => false)) await next.click();
-    else break;
+  // No Next button — each finished line auto-advances (ADR-015); draw all the
+  // authored steps, then confirm the completion beat.
+  const g = await readJson<GridSpec>(page, 'mode2-grid-spec');
+  const steps = await readJson<Segment[]>(page, 'mode2-steps');
+  const box = (await page.getByTestId('mode2-canvas').boundingBox())!;
+  const px = (n: GridNode) => ({
+    x: box.x + g.originX + n.col * g.cell,
+    y: box.y + g.originY + n.row * g.cell,
+  });
+  for (const { from, to } of steps) {
+    const a = px(from);
+    const b = px(to);
+    await page.mouse.move(a.x, a.y);
+    await page.mouse.down();
+    await page.mouse.move(b.x, b.y, { steps: 12 });
+    await page.mouse.up();
   }
   await page.getByTestId('mode2-complete-continue').click();
   await expect(page.getByTestId('screen-feedback')).toHaveAttribute(

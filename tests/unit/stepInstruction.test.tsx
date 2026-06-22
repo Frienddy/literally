@@ -4,17 +4,17 @@ import { StepInstruction } from '../../src/components/StepInstruction';
 
 /**
  * The structured experience hinges on this card behaving as the opposite of Mode
- * 1: exactly one persistent card, explicit progress, full control, and crucially
- * **no timer / no auto-advance** (PRD-006 R06-3…R06-6).
+ * 1: exactly one persistent card, explicit progress, full control via Undo, and
+ * **no timer**. Advancing is driven by the drawing itself — the screen moves to
+ * the next step on each finished line — so this card exposes no Next CTA
+ * (PRD-006 R06-3…R06-6, as amended by ADR-015's auto-advance).
  */
 function renderStep(overrides = {}) {
   const props = {
     label: 'Step 3 of 9',
     instruction: 'Go right 4 squares.',
-    nextLabel: 'Next step',
     undoLabel: 'Undo',
     canUndo: true,
-    onNext: vi.fn(),
     onUndo: vi.fn(),
     ...overrides,
   };
@@ -31,11 +31,9 @@ describe('StepInstruction (PRD-006)', () => {
     expect(screen.getByText('Go right 4 squares.')).toBeInTheDocument();
   });
 
-  it('advances only on an explicit Next press', () => {
-    const { onNext } = renderStep();
-    expect(onNext).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByTestId('mode2-next'));
-    expect(onNext).toHaveBeenCalledTimes(1);
+  it('exposes no Next CTA — drawing a line advances the step, not a button', () => {
+    renderStep();
+    expect(screen.queryByTestId('mode2-next')).not.toBeInTheDocument();
   });
 
   it('Undo reverts on an explicit press', () => {
@@ -49,16 +47,15 @@ describe('StepInstruction (PRD-006)', () => {
     expect(screen.getByTestId('mode2-undo')).toBeDisabled();
   });
 
-  it('never auto-advances — time passing does not call onNext (no timer)', () => {
+  it('never auto-advances on a timer — time passing changes nothing here', () => {
     vi.useFakeTimers();
-    const { onNext } = renderStep();
+    const { onUndo } = renderStep();
     act(() => vi.advanceTimersByTime(60_000));
-    expect(onNext).not.toHaveBeenCalled();
+    expect(onUndo).not.toHaveBeenCalled();
   });
 
   it('hides the control row while the completion beat plays', () => {
     renderStep({ hideControls: true });
-    expect(screen.queryByTestId('mode2-next')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mode2-undo')).not.toBeInTheDocument();
   });
 });
