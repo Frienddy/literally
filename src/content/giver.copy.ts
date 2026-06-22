@@ -12,7 +12,7 @@
  *    what I meant", never as scolding the player.
  *  - No autism/ASD here (show-don't-tell, ADR-008): the giver never names the point.
  *
- * The *subject* of the vague ask (droid / alien / mario / fighter) lives with the
+ * The *subject* of the vague ask (droid / alien / mario / fighter / monalisa) lives with the
  * task in `content/mode1.instructions.ts`; these lines are subject-agnostic so
  * they're reused across the whole task pool.
  */

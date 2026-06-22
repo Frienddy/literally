@@ -8,7 +8,7 @@
  * Every step is exactly **one segment** so the start-node highlight anchors precisely
  * one move per card and the "Step X of N" progress maps 1:1 to drawing actions.
  *
- * The pool is four "I-know-it-but-can't-draw-it" subjects — things everyone pictures
+ * The pool is five "I-know-it-but-can't-draw-it" subjects — things everyone pictures
  * instantly yet freezes on *how* to begin (the sharpest version of the lesson: a
  * vague ask leaves you stranded on procedure, a literal one dissolves it). Each is
  * drawn in detail so the structured build feels like a real little picture:
@@ -21,6 +21,10 @@
  *    legs with feet. Asymmetry is intentional here: it sells the leap.
  *  - **fighter** (26 steps): a space fighter — diamond cockpit with a window → two
  *    struts → two hexagonal wing panels with radial spokes.
+ *  - **monalisa** (53 steps): the portrait — centre-parted hair framing an oval face
+ *    → brows, two almond eyes, nose and the faint smile → neck → the pyramidal dress
+ *    with its scoop neckline → the folded hands with finger lines. The most detailed
+ *    subject: a half-length Renaissance portrait built dot by dot.
  *
  * Coordinates are `(col,row)` nodes on the 22-col × 28-row grid (cols 0–21, rows
  * 0–27; `config.grid`), all comfortably inside the bounds. Orthogonal moves are
@@ -361,6 +365,205 @@ export const fighterSteps: Mode2Step[] = [
   },
 ];
 
+/**
+ * The Mona Lisa — a half-length Renaissance portrait, the most detailed subject.
+ * Centred about col 11, built top-down so each part reads as it lands:
+ *  - hair crown (steps 1–4): a centre-parted arc over the head
+ *  - hair locks (steps 5–7 right, 8–10 left): two strands falling past the cheeks to
+ *    the shoulders
+ *  - face (steps 11–18, closed loop): an eight-sided oval — forehead, temples, cheeks,
+ *    jaw and chin
+ *  - brows (steps 19–20): two faint strokes
+ *  - eyes (steps 21–24 left, 25–28 right, closed loops): two small almond diamonds
+ *  - nose (steps 29–31): a bridge down the centre with two nostril flares
+ *  - smile (steps 32–33): the famous faint upward curve
+ *  - neck (steps 34–35): two short strokes down to the shoulders
+ *  - dress (steps 36–44, closed loop): the pyramidal body with a scooped neckline
+ *  - folded hands (steps 45–50, closed loop): the lozenge of crossed hands in her lap
+ *  - fingers (steps 51–53): three short strokes across the top hand
+ */
+export const monalisaSteps: Mode2Step[] = [
+  {
+    text: 'From the dot, go up-right (right 1, up 3) to the top of the hair.',
+    segment: seg(7, 4, 8, 1),
+  },
+  {
+    text: 'Go down-right (right 3, down 1) to the centre parting.',
+    segment: seg(8, 1, 11, 2),
+  },
+  {
+    text: 'Go up-right (right 3, up 1) to the other side of the crown.',
+    segment: seg(11, 2, 14, 1),
+  },
+  {
+    text: 'Go down-right (right 1, down 3). The crown of hair is done.',
+    segment: seg(14, 1, 15, 4),
+  },
+  {
+    text: 'Right lock: go down-right (right 2, down 3) past the temple.',
+    segment: seg(15, 4, 17, 7),
+  },
+  {
+    text: 'Go ⬇️ down 5 squares beside the cheek.',
+    segment: seg(17, 7, 17, 12),
+  },
+  {
+    text: 'Go down-left (left 1, down 4) to the shoulder. The lock falls.',
+    segment: seg(17, 12, 16, 16),
+  },
+  {
+    text: 'Left lock: from the crown, go down-left (left 2, down 3).',
+    segment: seg(7, 4, 5, 7),
+  },
+  { text: 'Go ⬇️ down 5 squares beside the cheek.', segment: seg(5, 7, 5, 12) },
+  {
+    text: 'Go down-right (right 1, down 4) to the other shoulder.',
+    segment: seg(5, 12, 6, 16),
+  },
+  {
+    text: 'Face: from the hairline, go ➡️ right 4 squares across the forehead.',
+    segment: seg(9, 3, 13, 3),
+  },
+  {
+    text: 'Go down-right (right 2, down 2) to the right temple.',
+    segment: seg(13, 3, 15, 5),
+  },
+  { text: 'Go ⬇️ down 4 squares down the cheek.', segment: seg(15, 5, 15, 9) },
+  {
+    text: 'Go down-left (left 3, down 5) along the jaw to the chin.',
+    segment: seg(15, 9, 12, 14),
+  },
+  {
+    text: 'Go ⬅️ left 2 squares across the chin.',
+    segment: seg(12, 14, 10, 14),
+  },
+  {
+    text: 'Go up-left (left 3, up 5) up the other jaw.',
+    segment: seg(10, 14, 7, 9),
+  },
+  { text: 'Go ⬆️ up 4 squares up the cheek.', segment: seg(7, 9, 7, 5) },
+  {
+    text: 'Go up-right (right 2, up 2) to close the face.',
+    segment: seg(7, 5, 9, 3),
+  },
+  { text: 'Left brow: go ➡️ right 2 squares.', segment: seg(8, 6, 10, 6) },
+  { text: 'Right brow: go ➡️ right 2 squares.', segment: seg(12, 6, 14, 6) },
+  {
+    text: 'Left eye: go up-right (right 1, up 1).',
+    segment: seg(8, 8, 9, 7),
+  },
+  { text: 'Go down-right (right 1, down 1).', segment: seg(9, 7, 10, 8) },
+  { text: 'Go down-left (left 1, down 1).', segment: seg(10, 8, 9, 9) },
+  {
+    text: 'Go up-left (left 1, up 1) to close the eye.',
+    segment: seg(9, 9, 8, 8),
+  },
+  {
+    text: 'Right eye: go up-right (right 1, up 1).',
+    segment: seg(12, 8, 13, 7),
+  },
+  { text: 'Go down-right (right 1, down 1).', segment: seg(13, 7, 14, 8) },
+  { text: 'Go down-left (left 1, down 1).', segment: seg(14, 8, 13, 9) },
+  {
+    text: 'Go up-left (left 1, up 1) to close the eye.',
+    segment: seg(13, 9, 12, 8),
+  },
+  {
+    text: 'Nose: from between the eyes, go ⬇️ down 3 squares.',
+    segment: seg(11, 7, 11, 10),
+  },
+  {
+    text: 'Left nostril: go down-left (left 1, down 1).',
+    segment: seg(11, 10, 10, 11),
+  },
+  {
+    text: 'Right nostril: from the nose tip, go down-right (right 1, down 1).',
+    segment: seg(11, 10, 12, 11),
+  },
+  {
+    text: 'Smile: go down-right (right 2, down 1).',
+    segment: seg(9, 12, 11, 13),
+  },
+  {
+    text: 'Go up-right (right 2, up 1). The faint smile is done.',
+    segment: seg(11, 13, 13, 12),
+  },
+  {
+    text: 'Left neck: from the jaw, go ⬇️ down 3 squares.',
+    segment: seg(9, 14, 9, 17),
+  },
+  {
+    text: 'Right neck: from the jaw, go ⬇️ down 3 squares.',
+    segment: seg(13, 14, 13, 17),
+  },
+  {
+    text: 'Dress: from the left shoulder, go down-left (left 3, down 4).',
+    segment: seg(7, 17, 4, 21),
+  },
+  {
+    text: 'Go down-left (left 1, down 5) to the hem.',
+    segment: seg(4, 21, 3, 26),
+  },
+  {
+    text: 'Go ➡️ right 16 squares across the hem.',
+    segment: seg(3, 26, 19, 26),
+  },
+  {
+    text: 'Go up-left (left 1, up 5) up the side.',
+    segment: seg(19, 26, 18, 21),
+  },
+  {
+    text: 'Go up-left (left 3, up 4) to the right shoulder.',
+    segment: seg(18, 21, 15, 17),
+  },
+  {
+    text: 'Go ⬅️ left 2 squares to the neckline.',
+    segment: seg(15, 17, 13, 17),
+  },
+  {
+    text: 'Go down-left (left 2, down 2) into the scoop neckline.',
+    segment: seg(13, 17, 11, 19),
+  },
+  {
+    text: 'Go up-left (left 2, up 2) out of the scoop.',
+    segment: seg(11, 19, 9, 17),
+  },
+  {
+    text: 'Go ⬅️ left 2 squares. The dress is done.',
+    segment: seg(9, 17, 7, 17),
+  },
+  {
+    text: 'Hands: go ➡️ right 6 squares across the top of the folded hands.',
+    segment: seg(8, 20, 14, 20),
+  },
+  {
+    text: 'Go down-right (right 2, down 2) round the right end.',
+    segment: seg(14, 20, 16, 22),
+  },
+  {
+    text: 'Go down-left (left 2, down 2) to the bottom.',
+    segment: seg(16, 22, 14, 24),
+  },
+  {
+    text: 'Go ⬅️ left 6 squares along the bottom.',
+    segment: seg(14, 24, 8, 24),
+  },
+  {
+    text: 'Go up-left (left 2, up 2) round the left end.',
+    segment: seg(8, 24, 6, 22),
+  },
+  {
+    text: 'Go up-right (right 2, up 2) to close the hands.',
+    segment: seg(6, 22, 8, 20),
+  },
+  { text: 'Finger: go ⬇️ down 2 squares.', segment: seg(9, 21, 9, 23) },
+  { text: 'Finger: go ⬇️ down 2 squares.', segment: seg(11, 21, 11, 23) },
+  {
+    text: 'Last finger: go ⬇️ down 2 squares. All done!',
+    segment: seg(13, 21, 13, 23),
+  },
+];
+
 /** Each subject's intended result — the ordered step segments on the shared grid. */
 const targetOf = (steps: Mode2Step[]): GridDrawing => ({
   kind: 'grid',
@@ -372,3 +575,4 @@ export const droidTarget: GridDrawing = targetOf(droidSteps);
 export const alienTarget: GridDrawing = targetOf(alienSteps);
 export const marioTarget: GridDrawing = targetOf(marioSteps);
 export const fighterTarget: GridDrawing = targetOf(fighterSteps);
+export const monalisaTarget: GridDrawing = targetOf(monalisaSteps);
