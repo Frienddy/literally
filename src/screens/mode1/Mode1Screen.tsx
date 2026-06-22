@@ -32,7 +32,6 @@ import { ExitButton } from '../../components/ExitButton';
 import { FlowProgress } from '../../components/FlowProgress';
 import { GuideMascot } from '../../components/GuideMascot';
 import { GiverBeat } from '../../components/GiverBeat';
-import { ModeTheme } from '../../components/ModeTheme';
 import { StepCard } from '../../components/StepCard';
 import { resolveTask } from '../../content/tasks';
 import { giver } from '../../content/giver.copy';
@@ -102,91 +101,89 @@ export function Mode1Screen() {
   }, [saveMode1Drawing, drawing, go]);
 
   return (
-    <ModeTheme mode="anchor">
-      <main
-        data-testid="screen-mode1"
-        className="relative flex h-full flex-col px-5 pb-6 pt-4"
-      >
-        {/* Top chrome — the calm Exit safety rail stays reachable (R05-10). */}
-        <div className="flex items-center justify-between">
-          <FlowProgress />
-          <ExitButton onExit={() => go('welcome')} />
-        </div>
+    <main
+      data-testid="screen-mode1"
+      className="relative flex h-full flex-col px-5 pb-6 pt-4"
+    >
+      {/* Top chrome — the calm Exit safety rail stays reachable (R05-10). */}
+      <div className="flex items-center justify-between">
+        <FlowProgress />
+        <ExitButton onExit={() => go('welcome')} />
+      </div>
 
-        {/* Inspection seam for E2E: live grid geometry + committed drawing. */}
-        {grid && (
-          <div data-testid="mode1-grid-spec" hidden>
-            {JSON.stringify(grid)}
-          </div>
-        )}
-        <div data-testid="mode1-drawing" hidden>
-          {JSON.stringify(drawing)}
+      {/* Inspection seam for E2E: live grid geometry + committed drawing. */}
+      {grid && (
+        <div data-testid="mode1-grid-spec" hidden>
+          {JSON.stringify(grid)}
         </div>
+      )}
+      <div data-testid="mode1-drawing" hidden>
+        {JSON.stringify(drawing)}
+      </div>
 
-        {/* Same layout grammar as Mode 2 (ADR-014), minus the step pager: a single
+      {/* Same layout grammar as Mode 2 (ADR-014), minus the step pager: a single
             persistent vague card, the shared snap canvas, and Undo + Done. */}
-        <section
-          className={
-            'mt-4 grid min-h-0 flex-1 grid-cols-1 gap-4 ' +
-            "grid-rows-[auto_minmax(0,1fr)_auto] [grid-template-areas:'card'_'canvas'_'controls'] " +
-            'wide:grid-cols-[minmax(0,1fr)_20rem] wide:grid-rows-[auto_minmax(0,1fr)] wide:gap-x-6 ' +
-            "wide:[grid-template-areas:'canvas_card'_'canvas_controls']"
-          }
-        >
-          <div className="[grid-area:card]">
-            <StepCard
-              label={strings.mode1.taskLabel}
-              hint={task.vague.block}
-              lead={<GuideMascot mood="vague" label={giver.vagueAsk} />}
-            />
-          </div>
-
-          <div
-            ref={areaRef}
-            className="relative min-h-0 overflow-hidden rounded-card bg-anchorBg [grid-area:canvas]"
-          >
-            {grid && (
-              <canvas
-                ref={setCanvas}
-                data-testid="mode1-canvas"
-                aria-label={strings.mode1.canvasLabel}
-                className="absolute inset-0 h-full w-full touch-none"
-              />
-            )}
-          </div>
-
-          {!completing && (
-            <div className="flex gap-3 [grid-area:controls] wide:self-end">
-              <Button
-                variant="secondary"
-                onClick={undo}
-                disabled={!canUndo}
-                data-testid="mode1-undo"
-                className="flex-1"
-              >
-                {strings.common.undo}
-              </Button>
-              <Button
-                onClick={onDone}
-                data-testid="mode1-done"
-                className="flex-[2]"
-              >
-                {strings.mode1.doneLabel}
-              </Button>
-            </div>
-          )}
-        </section>
-
-        {completing && (
-          <GiverBeat
-            mood="puzzled"
-            line={giver.notQuiteRight}
-            continueLabel={strings.common.continue}
-            onDone={finish}
-            testId="mode1-complete"
+      <section
+        className={
+          'mt-4 grid min-h-0 flex-1 grid-cols-1 gap-4 ' +
+          "grid-rows-[auto_minmax(0,1fr)_auto] [grid-template-areas:'card'_'canvas'_'controls'] " +
+          'wide:grid-cols-[minmax(0,1fr)_20rem] wide:grid-rows-[auto_minmax(0,1fr)] wide:gap-x-6 ' +
+          "wide:[grid-template-areas:'canvas_card'_'canvas_controls']"
+        }
+      >
+        <div className="[grid-area:card]">
+          <StepCard
+            label={strings.mode1.taskLabel}
+            hint={task.vague.block}
+            lead={<GuideMascot mood="vague" label={giver.vagueAsk} />}
           />
+        </div>
+
+        <div
+          ref={areaRef}
+          className="relative min-h-0 overflow-hidden rounded-card bg-anchorBg [grid-area:canvas]"
+        >
+          {grid && (
+            <canvas
+              ref={setCanvas}
+              data-testid="mode1-canvas"
+              aria-label={strings.mode1.canvasLabel}
+              className="absolute inset-0 h-full w-full touch-none"
+            />
+          )}
+        </div>
+
+        {!completing && (
+          <div className="flex gap-3 [grid-area:controls] wide:self-end">
+            <Button
+              variant="secondary"
+              onClick={undo}
+              disabled={!canUndo}
+              data-testid="mode1-undo"
+              className="flex-1"
+            >
+              {strings.common.undo}
+            </Button>
+            <Button
+              onClick={onDone}
+              data-testid="mode1-done"
+              className="flex-[2]"
+            >
+              {strings.mode1.doneLabel}
+            </Button>
+          </div>
         )}
-      </main>
-    </ModeTheme>
+      </section>
+
+      {completing && (
+        <GiverBeat
+          mood="puzzled"
+          line={giver.notQuiteRight}
+          continueLabel={strings.common.continue}
+          onDone={finish}
+          testId="mode1-complete"
+        />
+      )}
+    </main>
   );
 }

@@ -4,30 +4,30 @@
  * so every screen styles itself through Tailwind utilities (`bg-bg`, `text-text`,
  * `rounded-card`, …) with **no magic hex in components**.
  *
- * The palette deliberately encodes the game's thesis as two visual worlds: the
- * Mode 1 "storm" colors are desaturated and low-contrast (uneasy); the Mode 2
- * "anchor" colors are bright and high-contrast (trustworthy). See `tokens.theme`
- * for the per-mode wrapper treatment (ADR-013, FR-23).
+ * A single **light** theme (ADR-016): a soft light page, white cards, near-black
+ * ink. The earlier dark shell + "two visual worlds" per-mode treatment is gone —
+ * both modes already share one bright canvas (ADR-015), so the app is uniformly
+ * light. Neutrals + accents are tuned to clear WCAG AA on the light surfaces the
+ * axe gate scans (Welcome, both modes, Stress, Reflection).
  */
 export const tokens = {
   color: {
-    // Shared shell
-    bg: '#0b1020', // deep calm navy
-    surface: '#141a33',
-    text: '#e7ecff',
-    textMuted: '#8b93b8',
-    // Destructive-action warning text (History "delete everything"). A muted red
-    // that reads as caution without alarm.
-    stormWarn: '#b45a5a',
-    // Mode 2 (anchor) — high contrast, trustworthy
+    // Shared shell — light
+    bg: '#eef2f7', // soft light page
+    surface: '#ffffff', // white cards / chips / buttons
+    text: '#0f172a', // near-black ink (matches the drawing `ink`)
+    textMuted: '#475569', // slate-600 — ≥4.5:1 on bg/surface
+    // Destructive-action text (History "delete everything"). red-700: ≥4.5:1 on
+    // the light surfaces it sits on.
+    danger: '#b91c1c',
+    // Drawing canvas + Mode 2 accents (already designed for the light canvas).
     gridNode: '#1f6feb',
-    ink: '#0f172a', // drawing stroke on light canvas
+    ink: '#0f172a', // drawing stroke on the light canvas
     anchorBg: '#f8fafc', // bright, clear canvas
-    success: '#1f9d57',
+    success: '#166534', // green-800 — ≥4.5:1 for the small "Saved" text on light
     // Primary CTA fill. Carries white button text, so it must clear WCAG AA for
-    // normal text (≥4.5:1): #2563eb on #ffffff is 5.17:1. The previous #3b82f6 was
-    // only 3.67:1 — a serious contrast failure axe caught on the Start/Next CTAs
-    // (PRD-010 R10-7). Still ≥3:1 against #141a33 for the RatingScale selection ring.
+    // normal text (≥4.5:1): #2563eb on #ffffff is 5.17:1. Also ≥3:1 against the
+    // white surface for the RatingScale selection ring.
     primary: '#2563eb',
   },
   radius: { card: '16px', button: '14px' },
@@ -46,17 +46,8 @@ export const tokens = {
     lineRelaxed: '1.6',
   },
   motion: {
-    fadeMs: 12000, // Mode 1 instruction decay
-    notifyEveryMs: [4000, 8000], // jittered distraction cadence
-    notifyVisibleMs: 2200,
     giverBeatMs: 2000, // "not quite right" / "Perfect!" beat duration
-    themeTransitionMs: 900, // storm → anchor "fog clearing"
     snapPopMs: 140, // node snap micro-pop
-  },
-  // Two visual worlds (_docs/06 §D). Apply as a wrapper filter/overlay per mode.
-  theme: {
-    storm: { canvas: '#11162a', vignette: 0.45, saturate: 0.6, blurPx: 0.4 },
-    anchor: { canvas: '#f8fafc', vignette: 0.0, saturate: 1.0, blurPx: 0.0 },
   },
   // Mode 2 on-grid guidance (_docs/06 §3.4).
   guidance: {
@@ -67,5 +58,3 @@ export const tokens = {
 } as const;
 
 export type Tokens = typeof tokens;
-export type ModeTheme = keyof Tokens['theme'];
-export type ThemeValues = Tokens['theme'][ModeTheme];

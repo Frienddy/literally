@@ -11,7 +11,7 @@ export function PortraitGuard() {
       <p className="text-lg font-medium">
         Please rotate your phone to portrait.
       </p>
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-textMuted">
         Literally is designed to be held upright.
       </p>
     </div>

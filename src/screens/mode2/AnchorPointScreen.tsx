@@ -23,7 +23,6 @@ import { computeGridSpec } from '../../engine/grid';
 import type { GridSpec } from '../../engine/snap';
 import type { GridDrawing } from '../../types/session';
 import { FlowProgress } from '../../components/FlowProgress';
-import { ModeTheme } from '../../components/ModeTheme';
 import { StepInstruction } from '../../components/StepInstruction';
 import { StepGuidanceCanvas } from '../../components/StepGuidanceCanvas';
 import { GiverBeat } from '../../components/GiverBeat';
@@ -112,73 +111,71 @@ export function AnchorPointScreen() {
   }, [saveMode2Drawing, drawing, go]);
 
   return (
-    <ModeTheme mode="anchor">
-      <main
-        data-testid="screen-mode2"
-        className="relative flex h-full flex-col px-5 pb-6 pt-4"
-      >
-        <FlowProgress className="self-start" />
+    <main
+      data-testid="screen-mode2"
+      className="relative flex h-full flex-col px-5 pb-6 pt-4"
+    >
+      <FlowProgress className="self-start" />
 
-        {/* Inspection seam for E2E: the live grid geometry + committed drawing. */}
-        {grid && (
-          <div data-testid="mode2-grid-spec" hidden>
-            {JSON.stringify(grid)}
-          </div>
-        )}
-        <div data-testid="mode2-drawing" hidden>
-          {JSON.stringify(drawing)}
+      {/* Inspection seam for E2E: the live grid geometry + committed drawing. */}
+      {grid && (
+        <div data-testid="mode2-grid-spec" hidden>
+          {JSON.stringify(grid)}
         </div>
-        {/* The session's authored step segments — lets E2E drive any subject in
+      )}
+      <div data-testid="mode2-drawing" hidden>
+        {JSON.stringify(drawing)}
+      </div>
+      {/* The session's authored step segments — lets E2E drive any subject in
             the (now-closed) task pool without hard-coding one. */}
-        <div data-testid="mode2-steps" hidden>
-          {JSON.stringify(steps.map((s) => s.segment))}
-        </div>
+      <div data-testid="mode2-steps" hidden>
+        {JSON.stringify(steps.map((s) => s.segment))}
+      </div>
 
-        <StepInstruction
-          className="mt-4 flex-1"
-          label={strings.mode2.stepLabel(step + 1, total)}
-          instruction={steps[step]?.text ?? ''}
-          nextLabel={isLast ? strings.mode2.finish : strings.common.next}
-          undoLabel={strings.common.undo}
-          canUndo={canUndo}
-          onNext={onNext}
-          onUndo={onUndo}
-          mascotMood="clear"
-          mascotLabel={step === 0 ? giver.clearIntro : undefined}
-          hideControls={completing}
+      <StepInstruction
+        className="mt-4 flex-1"
+        label={strings.mode2.stepLabel(step + 1, total)}
+        instruction={steps[step]?.text ?? ''}
+        nextLabel={isLast ? strings.mode2.finish : strings.common.next}
+        undoLabel={strings.common.undo}
+        canUndo={canUndo}
+        onNext={onNext}
+        onUndo={onUndo}
+        mascotMood="clear"
+        mascotLabel={step === 0 ? giver.clearIntro : undefined}
+        hideControls={completing}
+      >
+        <div
+          ref={areaRef}
+          className="absolute inset-0 overflow-hidden rounded-card bg-anchorBg"
         >
-          <div
-            ref={areaRef}
-            className="absolute inset-0 overflow-hidden rounded-card bg-anchorBg"
-          >
-            {grid && (
-              <>
-                <canvas
-                  ref={setCanvas}
-                  data-testid="mode2-canvas"
-                  aria-label={strings.mode2.canvasLabel}
-                  className="absolute inset-0 h-full w-full touch-none"
-                />
-                <StepGuidanceCanvas
-                  grid={grid}
-                  segment={currentSegment}
-                  className="absolute inset-0 h-full w-full"
-                />
-              </>
-            )}
-          </div>
-        </StepInstruction>
+          {grid && (
+            <>
+              <canvas
+                ref={setCanvas}
+                data-testid="mode2-canvas"
+                aria-label={strings.mode2.canvasLabel}
+                className="absolute inset-0 h-full w-full touch-none"
+              />
+              <StepGuidanceCanvas
+                grid={grid}
+                segment={currentSegment}
+                className="absolute inset-0 h-full w-full"
+              />
+            </>
+          )}
+        </div>
+      </StepInstruction>
 
-        {completing && (
-          <GiverBeat
-            mood="beaming"
-            line={giver.perfect}
-            continueLabel={strings.common.continue}
-            onDone={finish}
-            testId="mode2-complete"
-          />
-        )}
-      </main>
-    </ModeTheme>
+      {completing && (
+        <GiverBeat
+          mood="beaming"
+          line={giver.perfect}
+          continueLabel={strings.common.continue}
+          onDone={finish}
+          testId="mode2-complete"
+        />
+      )}
+    </main>
   );
 }

@@ -35,8 +35,7 @@ const config: Config = {
         relaxed: tokens.font.lineRelaxed,
       },
       transitionDuration: {
-        // storm → anchor "fog clearing"; node snap micro-pop; giver beat
-        theme: `${tokens.motion.themeTransitionMs}ms`,
+        // node snap micro-pop; giver beat
         snap: `${tokens.motion.snapPopMs}ms`,
         beat: `${tokens.motion.giverBeatMs}ms`,
       },

@@ -9,7 +9,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-primary text-white active:brightness-95',
-  secondary: 'bg-surface text-text active:brightness-110',
+  secondary: 'bg-surface text-text ring-1 ring-black/10 active:brightness-95',
   ghost: 'bg-transparent text-textMuted active:text-text',
 };
 

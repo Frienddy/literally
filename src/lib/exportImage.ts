@@ -13,11 +13,13 @@ import type { DrawingData, GameSession, GridDrawing } from '../types/session';
 import type { TaskContent } from '../content/tasks';
 import { computeGridSpec } from '../engine/grid';
 import { drawGridDrawing, drawTargetGhost } from '../engine/render';
+import { tokens } from '../styles/tokens';
 
-const BG = '#0b1020';
-const CARD = '#f8fafc';
-const TEXT = '#e7ecff';
-const MUTED = '#8b93b8';
+// Sourced from the design tokens so the exported PNG tracks the (light) theme.
+const BG = tokens.color.bg;
+const CARD = tokens.color.anchorBg;
+const TEXT = tokens.color.text;
+const MUTED = tokens.color.textMuted;
 const PAD = 16;
 
 /** True only when a real 2D canvas + toBlob + object URLs are available. */

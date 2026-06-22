@@ -36,7 +36,7 @@ function SessionRow({
         type="button"
         onClick={onOpen}
         aria-label={strings.history.openAria(date)}
-        className="flex min-h-touch w-full items-center gap-3 rounded-card bg-surface px-4 py-3 text-left active:brightness-110"
+        className="flex min-h-touch w-full items-center gap-3 rounded-card bg-surface px-4 py-3 text-left ring-1 ring-black/5 active:brightness-95"
       >
         <span className="flex-1 text-sm">
           {strings.history.arc(
@@ -131,7 +131,7 @@ export function HistoryScreen() {
                 type="button"
                 onClick={clearAllData}
                 data-testid="history-delete-confirm"
-                className="min-h-touch flex-1 rounded-button px-3 text-sm font-medium text-stormWarn active:brightness-110"
+                className="min-h-touch flex-1 rounded-button px-3 text-sm font-medium text-danger active:brightness-95"
               >
                 {strings.history.confirmYes}
               </button>
@@ -142,7 +142,7 @@ export function HistoryScreen() {
             type="button"
             onClick={() => setConfirming(true)}
             data-testid="history-delete-all"
-            className="mt-4 min-h-touch text-sm text-stormWarn active:brightness-110"
+            className="mt-4 min-h-touch text-sm text-danger active:brightness-95"
           >
             {strings.history.deleteAll}
           </button>

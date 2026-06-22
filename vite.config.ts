@@ -22,8 +22,8 @@ export default defineConfig({
               short_name: 'Literally',
               description:
                 'An empathy game: feel the difference between vague, overloaded instructions and clear, structured ones.',
-              theme_color: '#0b1020',
-              background_color: '#0b1020',
+              theme_color: '#eef2f7',
+              background_color: '#eef2f7',
               display: 'standalone', // removes browser chrome → fixes edge-swipe-back
               orientation: 'portrait', // honored when installed
               start_url: '/',

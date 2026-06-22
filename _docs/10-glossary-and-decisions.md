@@ -32,7 +32,7 @@ questions tracked across the docs.
 | **Feedback check** | The post-mode screen capturing both **stress** and **confidence** (emoji faces). |
 | **Confidence gap** | Lower confidence after Mode 1 than Mode 2 — the cleanest measure of "couldn't tell if I did it right." |
 | **Task pool** | The set of simple subjects (house / cat / flower) picked at random per session; both modes share one. |
-| **Two visual worlds** | *(Superseded, ADR-015.)* The modes no longer differ aesthetically — both render in the bright Anchor world; the contrast is now purely instructional, not visual. |
+| **Two visual worlds** | *(Removed, ADR-015 + ADR-016.)* The modes don't differ aesthetically; the app now ships a single **light** theme (no dark shell, no per-mode `ModeTheme`). The contrast is purely instructional. |
 
 ## 2. Architecture Decision Records
 
@@ -220,6 +220,27 @@ reduce-intensity toggle and the per-mode storm theme are gone. **Cost:** the les
 rests entirely on instruction quality rather than sensory load — a deliberate narrowing;
 ADR-005 (no audio) is unaffected. (Touches docs 01, 03, 04, 05, 06, 07.)
 
+### ADR-016 — A single light theme
+**Status:** Accepted (supersedes the remaining "two visual worlds" / dark-shell
+aesthetic of ADR-013; completes what ADR-015 started).
+**Context:** With both modes already sharing one bright snap-to-grid canvas
+(ADR-015), the dark navy shell (`bg #0b1020`, light text) and the per-mode
+`ModeTheme` filter system (storm vs. anchor) were vestigial — `theme.storm` was
+unused and the anchor filter was a no-op. A dark shell wrapping bright canvases
+also read as visually incoherent.
+**Decision:** Ship **one light theme**. Repaint the neutral tokens to a light
+palette (soft light page, white cards, near-black ink) and tune the accent tokens
+(`primary`, `danger`, `success`) to clear WCAG AA on those light surfaces. Delete
+the `ModeTheme` component, the `tokens.theme` system, and the storm-era motion
+tokens (`themeTransitionMs`, `fadeMs`, `notify*`); the mode screens render their
+`<main>` directly. Update the PWA manifest + iOS status-bar meta to light.
+**Consequences:** A coherent, calm, high-contrast light UI; Mode 1 (now in the axe
+gate, ADR-015) and every other scanned surface pass AA. Less code (the dual-theme
+machinery is gone). No behavior/data change. If a dark mode is ever wanted it would
+return as a *user preference*, not the per-mode "two worlds" mechanism. (Touches
+`styles/tokens.ts`, `tailwind.config.ts`, `index.html`, `vite.config.ts`, the mode
+screens; doc 06 §4/§D.)
+
 ## 3. Open questions (live)
 
 | ID | Question | Leaning | Owner/where decided |
@@ -268,6 +289,11 @@ ADR-005 (no audio) is unaffected. (Touches docs 01, 03, 04, 05, 06, 07.)
   notifications, erratic haptics, no-undo). `mode_1_drawing_data` → `GridDrawing`
   (schema v2 + migration). Retires OQ-6 (wobble) and the "two visual worlds" /
   Wobble glossary terms. Touches docs 01, 03, 04, 05, 06, 07, 10 + CLAUDE.md.
+- **v1.6:** **Single light theme** (ADR-016). Repainted the neutral tokens to a
+  light palette (was a dark navy shell), tuned accents for WCAG AA on light, and
+  deleted the now-vestigial dark-theme machinery (`ModeTheme`, `tokens.theme`,
+  storm-era motion tokens). Touches `styles/tokens.ts`, `tailwind.config.ts`,
+  `index.html`, `vite.config.ts`, the mode screens, doc 06/10.
 
 ## 5. Implementation log
 First code lands; docs above remain the source of truth. Entries here record what
@@ -650,3 +676,27 @@ was *built* against the blueprint and any reconciliations.
     reflection specs green). **Pending sign-off (unchanged):** the SC-2 newcomer
     playtest now hinges entirely on instruction clarity (the sensory-load angle is
     retired for v1) — worth confirming the Mode 1→Mode 2 confidence gap still lands.
+- **2026-06-22 — ADR-016: single light theme.** Replaced the dark navy shell with a
+  single **light** theme — the natural finish to ADR-015 (both modes already shared
+  one bright canvas, so the dark shell + per-mode `ModeTheme` filters were vestigial
+  and visually incoherent).
+  - **Palette:** repainted the neutral tokens — `bg #eef2f7` (soft light page),
+    `surface #ffffff` (white cards), `text #0f172a` (near-black, = the drawing `ink`),
+    `textMuted #475569`. Tuned accents for WCAG AA on light: `success` → green-800
+    `#166534` (the small "Saved" text), and renamed the storm-era `stormWarn` →
+    `danger` `#b91c1c` (red-700, History delete). `primary #2563eb` unchanged (white
+    CTA text 5.17:1; selection ring ≥3:1 on white).
+  - **Removed the dual-theme machinery:** deleted `components/ModeTheme.tsx`, the
+    `tokens.theme` block, the `ModeTheme`/`ThemeValues` types, and the storm-era
+    motion tokens (`themeTransitionMs`, `fadeMs`, `notify*`) + the tailwind
+    `duration-theme`. Both mode screens now render `<main>` directly.
+  - **Surface fixes for light:** `Button` secondary darkens on press (`brightness-95`)
+    + a hairline `ring-black/10`; History rows/delete actions likewise; `GiverBeat`
+    modal scrim `bg-bg/70` → `bg-black/40`; `PortraitGuard` `text-slate-400` →
+    `text-textMuted`. PWA manifest + iOS status-bar meta switched to light
+    (`theme_color`/`background_color #eef2f7`, status bar `default`).
+  - Verified: `tsc --noEmit`, ESLint, Prettier clean, **140 Vitest unit tests**,
+    production `vite build` (62.23 KB gzip JS, budget-checked), **39 Playwright E2E**
+    incl. the axe gate on Welcome/Mode 1/Stress/Mode 2/Reflection — every scanned
+    light surface clears WCAG AA. No behavior/data change. **Pending hardware:**
+    on-device check of the light status bar / PWA splash colors (`_docs/09` §6).

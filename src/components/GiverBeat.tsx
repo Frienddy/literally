@@ -56,7 +56,7 @@ export function GiverBeat({
     <div
       data-testid={testId}
       role="status"
-      className="absolute inset-0 z-10 grid place-items-center bg-bg/70 p-6"
+      className="absolute inset-0 z-10 grid place-items-center bg-black/40 p-6"
     >
       <div className="max-w-xs rounded-card bg-surface p-6 text-center">
         <div className="flex justify-center">
