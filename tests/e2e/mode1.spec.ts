@@ -1,18 +1,24 @@
 import { test, expect, type Page } from '@playwright/test';
 
 /**
- * Drives the real Sensory Storm screen (PRD-005): a blank wobbly freehand canvas
- * with **no undo**, a slightly-too-small Done that opens the gently-puzzled beat
- * and advances to Feedback #1, and the persistent sensory-safety rails (calm Exit
- * + reduce-intensity) that survive the chaos. The wobble/haptic mechanics
- * themselves are covered by the engine harness E2E (canvas.spec.ts); here we
- * verify the *screen* wiring.
+ * Drives the real Mode 1 screen (PRD-005, ADR-015): the "without clear
+ * instruction" half. It shares Mode 2's snap-to-grid canvas — the only difference
+ * is the instruction (a single vague ask vs. literal counted steps). Here we
+ * verify the *screen* wiring: a snapped segment commits, Undo reverts, the
+ * slightly-understated Done opens the gently-puzzled beat and advances to
+ * Feedback #1, and the calm Exit safety rail is reachable. Snap math itself is
+ * covered by the engine harness E2E (canvas.spec.ts).
  */
 
-type FreehandDrawing = {
-  kind: string;
-  strokes: { points: { x: number; y: number }[]; width: number }[];
+type GridSpec = {
+  cols: number;
+  rows: number;
+  cell: number;
+  originX: number;
+  originY: number;
 };
+type GridNode = { col: number; row: number };
+type Drawing = { kind: string; segments: { from: GridNode; to: GridNode }[] };
 
 async function readJson<T>(page: Page, testId: string): Promise<T> {
   const text = await page.getByTestId(testId).textContent();
@@ -26,37 +32,48 @@ async function reachMode1(page: Page) {
   await expect(page.getByTestId('mode1-canvas')).toBeVisible();
 }
 
-/** Draw a multi-point stroke in the canvas, away from the bottom-right Done. */
-async function drawStroke(page: Page) {
+/** Drag node→node on the shared grid, returning after the segment commits. */
+async function drawSegment(page: Page, from: GridNode, to: GridNode) {
+  const g = await readJson<GridSpec>(page, 'mode1-grid-spec');
   const box = (await page.getByTestId('mode1-canvas').boundingBox())!;
-  const cx = box.x + box.width * 0.35;
-  const cy = box.y + box.height * 0.55;
-  await page.mouse.move(cx, cy);
+  const px = (n: GridNode) => ({
+    x: box.x + g.originX + n.col * g.cell,
+    y: box.y + g.originY + n.row * g.cell,
+  });
+  const a = px(from);
+  const b = px(to);
+  await page.mouse.move(a.x, a.y);
   await page.mouse.down();
-  await page.mouse.move(cx + 40, cy + 30, { steps: 8 });
-  await page.mouse.move(cx + 80, cy - 10, { steps: 8 });
-  await page.mouse.move(cx + 120, cy + 25, { steps: 8 });
+  await page.mouse.move(b.x, b.y, { steps: 12 });
   await page.mouse.up();
 }
 
-test.describe('Mode 1 — Sensory Storm', () => {
-  test('wobbly stroke + no undo → Done → beat → Feedback #1', async ({
+test.describe('Mode 1 — without clear instruction', () => {
+  test('snapped segment + Undo → Done → beat → Feedback #1', async ({
     page,
   }) => {
     await reachMode1(page);
 
-    // No undo affordance anywhere in Mode 1 (R05-2) — mistakes are permanent.
-    await expect(page.getByRole('button', { name: /undo/i })).toHaveCount(0);
+    // Undo exists (same tools as Mode 2) but is disabled until something is drawn.
+    await expect(page.getByTestId('mode1-undo')).toBeDisabled();
 
-    await drawStroke(page);
+    await drawSegment(page, { col: 2, row: 4 }, { col: 2, row: 8 });
 
-    // The finished stroke is committed (one onChange per stroke) with >1 point.
-    const drawing = await readJson<FreehandDrawing>(page, 'mode1-drawing');
-    expect(drawing.kind).toBe('freehand');
-    expect(drawing.strokes.length).toBeGreaterThanOrEqual(1);
-    expect(drawing.strokes[0].points.length).toBeGreaterThan(1);
+    // The finished drag commits exactly one snapped segment (integer nodes).
+    let drawing = await readJson<Drawing>(page, 'mode1-drawing');
+    expect(drawing.kind).toBe('grid');
+    expect(drawing.segments).toHaveLength(1);
+    expect(Number.isInteger(drawing.segments[0].from.col)).toBe(true);
+    expect(drawing.segments[0].from).not.toEqual(drawing.segments[0].to);
 
-    // Done → the puzzled beat → confirm → Feedback #1 (R05-8/R05-9).
+    // Undo reverts the segment (R05 mirrors Mode 2's full control now).
+    await expect(page.getByTestId('mode1-undo')).toBeEnabled();
+    await page.getByTestId('mode1-undo').click();
+    drawing = await readJson<Drawing>(page, 'mode1-drawing');
+    expect(drawing.segments).toHaveLength(0);
+
+    // Redraw, then Done → the puzzled beat → confirm → Feedback #1 (R05-8/R05-9).
+    await drawSegment(page, { col: 2, row: 4 }, { col: 6, row: 4 });
     await page.getByTestId('mode1-done').click();
     await expect(page.getByTestId('mode1-complete')).toBeVisible();
     await page.getByTestId('mode1-complete-continue').click();
@@ -66,28 +83,12 @@ test.describe('Mode 1 — Sensory Storm', () => {
     );
   });
 
-  test('sensory-safety rails: reduce-intensity toggles; Exit is reachable; canvas stays drawable', async ({
+  test('calm Exit leaves to Welcome without penalty (R05-10 / FR-22)', async ({
     page,
   }) => {
     await reachMode1(page);
-
-    const toggle = page.getByTestId('mode1-reduce-intensity');
     const exit = page.getByRole('button', { name: 'Exit' });
-    await expect(toggle).toBeVisible();
     await expect(exit).toBeVisible();
-
-    // Reduce-intensity flips state and stays reachable (R05-10/R05-11).
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-    await toggle.click();
-    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-
-    // The canvas is still drawable with the rails engaged (notifications never
-    // trap input — R05-4).
-    await drawStroke(page);
-    const drawing = await readJson<FreehandDrawing>(page, 'mode1-drawing');
-    expect(drawing.strokes.length).toBeGreaterThanOrEqual(1);
-
-    // Calm Exit leaves to Welcome without penalty (R05-10 / FR-22).
     await exit.click();
     await expect(page.getByTestId('screen-welcome')).toBeVisible();
   });

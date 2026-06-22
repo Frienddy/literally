@@ -6,14 +6,14 @@
  * app is opened with `?harness=canvas` (see App.tsx), so it never ships into the
  * normal app path or the main bundle.
  *
- * Query params: `?harness=canvas` (freehand, default) · `&mode=grid`.
+ * Drives the shared snap-to-grid canvas (ADR-015) the mode screens now own.
  */
 import { useState } from 'react';
 import { Canvas } from '../components/Canvas';
 import { useHaptics, type HapticKind } from '../hooks/useHaptics';
 import { config } from '../config';
 import { computeGridSpec } from '../engine/grid';
-import type { FreehandDrawing, GridDrawing } from '../types/session';
+import type { GridDrawing } from '../types/session';
 
 // Fixed canvas CSS size so the demo grid + Playwright coordinates are
 // deterministic (no async measurement race). Real screens size to the viewport.
@@ -21,17 +21,15 @@ const CANVAS_W = 320;
 const CANVAS_H = 400;
 
 export default function CanvasDemo() {
-  const mode =
-    new URLSearchParams(window.location.search).get('mode') === 'grid'
-      ? 'grid'
-      : 'freehand';
-  const grid =
-    mode === 'grid'
-      ? computeGridSpec(CANVAS_W, CANVAS_H, config.grid.cols, config.grid.rows)
-      : undefined;
+  const grid = computeGridSpec(
+    CANVAS_W,
+    CANVAS_H,
+    config.grid.cols,
+    config.grid.rows,
+  );
 
   const { vibrate, supported } = useHaptics();
-  const [last, setLast] = useState<FreehandDrawing | GridDrawing | null>(null);
+  const [last, setLast] = useState<GridDrawing | null>(null);
   const [haptics, setHaptics] = useState<HapticKind[]>([]);
 
   const onHaptic = (kind: HapticKind) => {
@@ -42,13 +40,11 @@ export default function CanvasDemo() {
   return (
     <div className="flex h-full w-full flex-col items-center gap-2 overflow-hidden p-3 text-xs text-slate-300">
       <h1 className="text-sm font-semibold text-slate-100">
-        Canvas demo · {mode}
+        Canvas demo · grid
       </h1>
 
       <Canvas
-        mode={mode}
         grid={grid}
-        wobble={config.wobble}
         onHaptic={onHaptic}
         onChange={(d) => setLast(d)}
         showReset

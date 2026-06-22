@@ -12,11 +12,7 @@
 import type { DrawingData, GameSession, GridDrawing } from '../types/session';
 import type { TaskContent } from '../content/tasks';
 import { computeGridSpec } from '../engine/grid';
-import {
-  drawFreehand,
-  drawGridDrawing,
-  drawTargetGhost,
-} from '../engine/render';
+import { drawGridDrawing, drawTargetGhost } from '../engine/render';
 
 const BG = '#0b1020';
 const CARD = '#f8fafc';
@@ -62,27 +58,12 @@ function renderCard(
       computeGridSpec(w, h, ghost.grid.cols, ghost.grid.rows, PAD),
     );
   }
-  if (drawing?.kind === 'grid') {
+  if (drawing) {
     drawGridDrawing(
       ctx,
       drawing,
       computeGridSpec(w, h, drawing.grid.cols, drawing.grid.rows, PAD),
     );
-  } else if (drawing?.kind === 'freehand') {
-    const cap = drawing.canvas;
-    if (cap.width > 0 && cap.height > 0) {
-      const scale = Math.min(
-        (w - PAD * 2) / cap.width,
-        (h - PAD * 2) / cap.height,
-      );
-      ctx.save();
-      ctx.translate((w - cap.width * scale) / 2, (h - cap.height * scale) / 2);
-      ctx.scale(scale, scale);
-      drawFreehand(ctx, drawing);
-      ctx.restore();
-    } else {
-      drawFreehand(ctx, drawing);
-    }
   }
   ctx.restore();
 }

@@ -5,11 +5,7 @@
  * the read-only previews (reflection / history). Because both paths use these,
  * a saved drawing always re-renders exactly as it was drawn.
  */
-import type {
-  FreehandDrawing,
-  GridDrawing,
-  GridSegment,
-} from '../types/session';
+import type { GridDrawing, GridSegment } from '../types/session';
 import type { GridSpec } from './snap';
 import { nodeToPixel } from './snap';
 import { tokens } from '../styles/tokens';
@@ -18,7 +14,7 @@ import { tokens } from '../styles/tokens';
 // of truth for the visual language. `tokens.ts` is plain data with no runtime
 // deps, so the engine stays pure/framework-free while a token change now
 // propagates to the canvas instead of silently diverging.
-const INK = tokens.color.ink; // committed strokes / segments (#0f172a)
+const INK = tokens.color.ink; // committed segments (#0f172a)
 const GRID_NODE = tokens.guidance.targetNode; // high-contrast grid nodes & target
 const GUIDE_START = tokens.guidance.startNode; // pulsing start node
 const GHOST_PATH = tokens.guidance.ghostPath; // faint target hint
@@ -42,31 +38,6 @@ export function drawGrid(ctx: CanvasRenderingContext2D, g: GridSpec): void {
       ctx.arc(x, y, 3, 0, Math.PI * 2);
       ctx.fill();
     }
-  }
-  ctx.restore();
-}
-
-export function drawFreehand(
-  ctx: CanvasRenderingContext2D,
-  d: FreehandDrawing,
-  // Stroke colour. Defaults to the committed ink (used by saved previews on a
-  // light surface). The live Mode 1 canvas passes a distinct `stormInk` so the
-  // line stays legible on the dark storm background (DEBT-006).
-  ink: string = INK,
-): void {
-  ctx.save();
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.strokeStyle = ink;
-  for (const stroke of d.strokes) {
-    if (stroke.points.length < 2) continue;
-    ctx.lineWidth = stroke.width;
-    ctx.beginPath();
-    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    for (let i = 1; i < stroke.points.length; i++) {
-      ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
-    }
-    ctx.stroke();
   }
   ctx.restore();
 }
@@ -128,7 +99,7 @@ export function drawStepGuidance(
 /**
  * Reflection: draw the *intended* result faintly behind the player's Mode 1
  * attempt so the gap is visible (the target reveal). Render this FIRST, then the
- * freehand attempt on top.
+ * player's attempt on top.
  */
 export function drawTargetGhost(
   ctx: CanvasRenderingContext2D,

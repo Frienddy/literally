@@ -49,25 +49,32 @@ export function FeedbackCheckScreen() {
     <main
       data-testid="screen-feedback"
       data-mode={mode}
-      className="flex h-full flex-col gap-10 px-8 pb-8 pt-12"
+      className="flex h-full flex-col gap-10 px-8 pb-8 pt-12 wide:mx-auto wide:max-w-3xl wide:justify-center"
     >
-      <RatingScale
-        question={strings.feedback.stressQuestion}
-        scale={stressScale}
-        value={stress ?? null}
-        onChange={(v) => setStress(mode, v)}
-        data-testid="feedback-stress"
-      />
+      {/* Stacked in portrait; the two scales sit side by side on a laptop. */}
+      <div className="flex flex-col gap-10 wide:flex-row wide:gap-12">
+        <div className="wide:flex-1">
+          <RatingScale
+            question={strings.feedback.stressQuestion}
+            scale={stressScale}
+            value={stress ?? null}
+            onChange={(v) => setStress(mode, v)}
+            data-testid="feedback-stress"
+          />
+        </div>
 
-      <RatingScale
-        question={strings.feedback.confidenceQuestion}
-        scale={confidenceScale}
-        value={confidence ?? null}
-        onChange={(v) => setConfidence(mode, v)}
-        data-testid="feedback-confidence"
-      />
+        <div className="wide:flex-1">
+          <RatingScale
+            question={strings.feedback.confidenceQuestion}
+            scale={confidenceScale}
+            value={confidence ?? null}
+            onChange={(v) => setConfidence(mode, v)}
+            data-testid="feedback-confidence"
+          />
+        </div>
+      </div>
 
-      <div className="flex-1" />
+      <div className="flex-1 wide:hidden" />
 
       <Button
         fullWidth

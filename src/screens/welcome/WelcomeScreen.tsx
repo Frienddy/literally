@@ -26,37 +26,44 @@ export function WelcomeScreen() {
   return (
     <main
       data-testid="screen-welcome"
-      className="flex h-full flex-col px-8 pb-8 pt-12 text-center"
+      className="flex h-full flex-col px-8 pb-8 pt-12 text-center wide:mx-auto wide:max-w-4xl wide:flex-row wide:items-center wide:justify-center wide:gap-12 wide:px-12"
     >
-      <header className="flex flex-col items-center gap-3">
-        <GuideMascot mood="clear" />
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {strings.app.name}
-        </h1>
-      </header>
+      {/* Brand + hook + consent. On a laptop this becomes the left column; the
+          actions move to the right column (ADR-014). */}
+      <div className="flex flex-col items-center wide:flex-1">
+        <header className="flex flex-col items-center gap-3">
+          <GuideMascot mood="clear" />
+          <h1 className="text-3xl font-semibold tracking-tight">
+            {strings.app.name}
+          </h1>
+        </header>
 
-      <div className="mt-8 flex flex-col items-center gap-1">
-        <p className="text-body">{welcome.hook}</p>
-        <p className="text-body text-textMuted">{welcome.subhook}</p>
+        <div className="mt-8 flex flex-col items-center gap-1">
+          <p className="text-body">{welcome.hook}</p>
+          <p className="text-body text-textMuted">{welcome.subhook}</p>
+        </div>
+
+        {/* Consent disclosure: the sensory note + the honest "explained at the
+            end" promise. Deferring the topic is deliberate; the sensory risk
+            is not. */}
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p
+            data-testid="welcome-sensory-note"
+            className="max-w-xs text-sm leading-relaxed text-textMuted"
+          >
+            {welcome.sensoryNote}
+          </p>
+          <p className="max-w-xs text-sm leading-relaxed text-textMuted">
+            {welcome.afterNote}
+          </p>
+        </div>
       </div>
 
-      {/* Consent disclosure: the sensory note + the honest "explained at the end"
-          promise. Deferring the topic is deliberate; the sensory risk is not. */}
-      <div className="mt-6 flex flex-col items-center gap-2">
-        <p
-          data-testid="welcome-sensory-note"
-          className="max-w-xs text-sm leading-relaxed text-textMuted"
-        >
-          {welcome.sensoryNote}
-        </p>
-        <p className="max-w-xs text-sm leading-relaxed text-textMuted">
-          {welcome.afterNote}
-        </p>
-      </div>
+      {/* Thumb-reach spacer pins the CTA to the bottom in portrait; in the wide
+          two-column layout the columns are simply centered instead. */}
+      <div className="flex-1 wide:hidden" />
 
-      <div className="flex-1" />
-
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 wide:flex-1">
         <Button fullWidth onClick={startNewSession} data-testid="welcome-start">
           {strings.common.start}
         </Button>

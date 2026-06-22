@@ -7,26 +7,11 @@ export interface Point {
 }
 
 /**
- * Mode 1: freehand. A drawing is a list of strokes; each stroke is a polyline.
- * Points here are the *rendered* (wobbled) points so the saved drawing recreates
- * exactly what the player saw.
- */
-export interface FreehandStroke {
-  points: Point[];
-  /** stroke width in px at capture time (for faithful re-render). */
-  width: number;
-}
-
-export interface FreehandDrawing {
-  kind: 'freehand';
-  strokes: FreehandStroke[];
-  /** CSS size of the canvas at capture, for correct scaling on replay. */
-  canvas: { width: number; height: number };
-}
-
-/**
- * Mode 2: snap-to-grid. A drawing is a list of segments between integer grid
- * nodes (col,row), independent of pixel size so it scales to any screen.
+ * Snap-to-grid drawing. **Both modes** now draw on the same dotted grid; a drawing
+ * is a list of segments between integer grid nodes (col,row), independent of pixel
+ * size so it scales to any screen. The modes differ only in the *instruction* —
+ * Mode 1 gives one vague ask, Mode 2 gives literal directional steps — never in
+ * the canvas (see ADR-015).
  */
 export interface GridNode {
   col: number;
@@ -44,8 +29,12 @@ export interface GridDrawing {
   grid: { cols: number; rows: number };
 }
 
-/** Discriminated union — `kind` tells the renderer which path to take. */
-export type DrawingData = FreehandDrawing | GridDrawing;
+/**
+ * A saved drawing. Historically a discriminated union (freehand vs grid); since
+ * both modes share the snap-to-grid canvas (ADR-015) there is one shape. Kept as a
+ * named alias so the renderer/preview signatures read intentionally.
+ */
+export type DrawingData = GridDrawing;
 
 /** Stress is an integer 1–10 (validated on input). */
 export type StressLevel = number; // 1..10
@@ -67,7 +56,12 @@ export interface GameSession {
   schemaVersion: number;
   /** Which task subject this session used (e.g. 'house'); shared by both modes. */
   task_id: TaskId;
-  mode_1_drawing_data: FreehandDrawing | null;
+  /**
+   * Both modes draw on the shared snap-to-grid canvas (ADR-015), so each attempt
+   * is a `GridDrawing`. (Pre-ADR-015 sessions stored Mode 1 as freehand pixels;
+   * the v2 migration drops that incompatible payload to `null` — see migrations.)
+   */
+  mode_1_drawing_data: GridDrawing | null;
   mode_2_drawing_data: GridDrawing | null;
   mode_1_stress_level: StressLevel | null;
   mode_2_stress_level: StressLevel | null;

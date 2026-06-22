@@ -29,15 +29,17 @@ export const strings = {
   // `content/welcome.copy.ts` (PRD-009) — the structural show-don't-tell boundary.
   mode1: {
     // Mode 1 chrome. The vague ask + "not quite right" beat are in `giver.copy.ts`;
-    // the per-subject fading instruction block is in `mode1.instructions.ts`.
-    canvasLabel: 'Drawing area — draw with your finger.',
-    // The calm-exit safety rails survive the chaos (R05-10).
-    reduceIntensity: 'Reduce intensity',
-    intensityReduced: 'Intensity reduced',
+    // the per-subject vague instruction block is in `mode1.instructions.ts`. Mode 1
+    // shares Mode 2's snap-to-grid canvas (ADR-015); only the instruction differs.
+    canvasLabel: 'Drawing grid — tap or drag to snap a line to the dots.',
+    // The single, persistent instruction card label (the deliberate contrast with
+    // Mode 2's counted "Step 1 of 9").
+    taskLabel: 'Your task',
+    doneLabel: 'Done',
   },
-  // Mode 1's player-facing copy (the vague ask, the fading instruction, the
-  // "not quite right" beat, the fake notifications) is authored as data in
-  // `content/mode1.ts` (PRD-005); PRD-009 migrates it into the reviewed decks.
+  // Mode 1's player-facing copy (the vague ask, the single instruction, the
+  // "not quite right" beat) is authored as data in `giver.copy.ts` /
+  // `mode1.instructions.ts`; PRD-009 migrates it into the reviewed decks.
   mode2: {
     // The per-step instruction text + target coords are authored as data in
     // `content/mode2.steps.ts` (PRD-006); the Grown-up's calm intro + completion
@@ -61,9 +63,9 @@ export const strings = {
     // These reflection chrome strings stay strictly neutral (content boundary test).
     // Read-aloud summaries of the two saved drawings (a11y, PRD-008 §6).
     summaryWithout: (subject: string) =>
-      `Your freehand drawing of ${subject}, made without clear steps.`,
+      `Your drawing of ${subject}, made without clear steps.`,
     summaryWith: (subject: string) =>
-      `Your snap-to-grid drawing of ${subject}, made with clear steps.`,
+      `Your drawing of ${subject}, made with clear steps.`,
     targetSummary: (subject: string) => `The intended ${subject}.`,
     // Per-attempt score line (stress + "how sure"), never framed as a grade.
     scoreLine: (stress: number | null, confidence: number | null) =>

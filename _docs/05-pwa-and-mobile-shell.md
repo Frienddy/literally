@@ -136,18 +136,27 @@ export function usePreventGestures() {
 
 ## 2. The `AppShell` layout component — `src/layout/AppShell.tsx`
 
-Wraps the whole app: applies the JS gesture guard, enforces portrait, and pads
-for device safe-areas (notch / home indicator).
+Wraps the whole app: applies the JS gesture guard, enforces portrait **on phones**,
+and pads for device safe-areas (notch / home indicator).
+
+Portrait is enforced only on actual phones (`useIsPhone`). A phone turned sideways
+still gets `PortraitGuard`; a laptop/desktop/tablet — which is always "landscape" —
+renders the app and lays out via the `wide:` breakpoint instead (ADR-014). This
+keeps the upright, phone-shaped experience on phones while making the game playable
+on a laptop with a mouse (pointer events already cover mouse/trackpad).
 
 ```tsx
 import { ReactNode } from 'react';
 import { usePreventGestures } from '../hooks/usePreventGestures';
 import { useOrientation } from '../hooks/useOrientation';
+import { useIsPhone } from '../hooks/useDeviceClass';
 import { PortraitGuard } from './PortraitGuard';
 
 export function AppShell({ children }: { children: ReactNode }) {
   usePreventGestures();
   const orientation = useOrientation();
+  const isPhone = useIsPhone();
+  const blocked = isPhone && orientation === 'landscape';
 
   return (
     <div
@@ -165,13 +174,37 @@ export function AppShell({ children }: { children: ReactNode }) {
         paddingRight: 'env(safe-area-inset-right)',
       }}
     >
-      {orientation === 'landscape' ? <PortraitGuard /> : children}
+      {blocked ? <PortraitGuard /> : children}
     </div>
   );
 }
 ```
 
-### 2.1 Portrait enforcement — `src/hooks/useOrientation.ts` + `PortraitGuard.tsx`
+### 2.1 Portrait enforcement (phone-only) — `src/hooks/useOrientation.ts` + `useDeviceClass.ts` + `PortraitGuard.tsx`
+
+`useOrientation` reports portrait/landscape; `useIsPhone` (in
+`src/hooks/useDeviceClass.ts`) reports whether the device is an actual handheld
+phone — **touch-primary** (`(pointer: coarse)` or `navigator.maxTouchPoints > 0`)
+**and** a short viewport side `< 600px` (so tablets/iPads and touch laptops fall
+through to the wide layout).
+`AppShell` shows `PortraitGuard` only when `isPhone && landscape`. Width +
+orientation alone can't tell a large phone in landscape from a small laptop, which
+is why the gate needs the input-capability check.
+
+**Landscape layout (`wide:` breakpoint, ADR-014).** Layout is driven by a single
+Tailwind variant, `wide:`, defined from `tokens.layout.wideQuery` =
+`(min-width: 768px) and (orientation: landscape)` (mirrored into
+`tailwind.config.ts` under `theme.extend.screens`). Each screen carries `wide:`
+utilities for its side-by-side variant: Mode 2's `StepInstruction` reflows via
+`grid-template-areas` (canvas left, persistent step card + Undo/Next right);
+Welcome/Feedback go two-column; Reflection/History center within a readable
+max-width (Reflection keeps its two previews paired to protect the contrast);
+Mode 1 stays full-bleed on purpose so its sensory overload remains dominant. The
+two mechanisms compose cleanly: a large phone in landscape matches `wide:` in CSS
+but never renders children (the phone gate wins), and a narrow desktop window
+(< 768px) falls back to the single-column portrait stack.
+
+
 
 ```ts
 // useOrientation.ts
@@ -207,10 +240,11 @@ export function PortraitGuard() {
 > **Orientation lock note:** the Screen Orientation API
 > (`screen.orientation.lock('portrait')`) only works in **installed/standalone
 > fullscreen** PWAs on Android, and not at all on iOS Safari. So we *also*
-> declare `"orientation": "portrait"` in the manifest (effective when installed)
-> **and** keep `PortraitGuard` as the universal fallback in-browser. Call
-> `screen.orientation.lock?.('portrait').catch(() => {})` opportunistically on
-> first user gesture; never depend on it.
+> declare `"orientation": "portrait"` in the manifest (effective when installed
+> on a phone; desktop OSes ignore it, which is what we want) **and** keep
+> `PortraitGuard` as the universal fallback in-browser — now scoped to phones
+> (ADR-014). Call `screen.orientation.lock?.('portrait').catch(() => {})`
+> opportunistically on first user gesture; never depend on it.
 
 ## 3. PWA manifest & service worker — `vite.config.ts`
 

@@ -20,54 +20,11 @@ async function readJson<T>(page: Page, testId: string): Promise<T> {
   return JSON.parse(text ?? 'null') as T;
 }
 
-test.describe('canvas engine — freehand (Mode 1)', () => {
-  test('a drawn stroke emits a freehand DrawingData payload', async ({
-    page,
-  }) => {
-    await page.goto('/?harness=canvas');
-    const canvas = page.getByTestId('demo-canvas');
-    await expect(canvas).toBeVisible();
-    const box = (await canvas.boundingBox())!;
-
-    // Draw an L so the corner survives RDP simplification (> 1 point).
-    await page.mouse.move(box.x + 60, box.y + 60);
-    await page.mouse.down();
-    await page.mouse.move(box.x + 260, box.y + 60, { steps: 20 });
-    await page.mouse.move(box.x + 260, box.y + 320, { steps: 20 });
-    await page.mouse.up();
-
-    const drawing = await readJson<{
-      kind: string;
-      strokes: { points: unknown[] }[];
-    }>(page, 'last-change');
-    expect(drawing.kind).toBe('freehand');
-    expect(drawing.strokes.length).toBeGreaterThanOrEqual(1);
-    expect(drawing.strokes[0].points.length).toBeGreaterThan(1);
-  });
-
-  test('freehand mode shows no Undo (per GDD)', async ({ page }) => {
-    await page.goto('/?harness=canvas');
-    await expect(page.getByTestId('demo-canvas')).toBeVisible();
-    await expect(page.getByTestId('canvas-undo')).toHaveCount(0);
-  });
-
-  test('drawing on the canvas does not scroll the page', async ({ page }) => {
-    await page.goto('/?harness=canvas');
-    const canvas = page.getByTestId('demo-canvas');
-    const box = (await canvas.boundingBox())!;
-    await page.mouse.move(box.x + 40, box.y + 40);
-    await page.mouse.down();
-    await page.mouse.move(box.x + 40, box.y + 360, { steps: 20 });
-    await page.mouse.up();
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
-  });
-});
-
-test.describe('canvas engine — grid (Mode 2)', () => {
+test.describe('canvas engine — snap-to-grid (shared by both modes)', () => {
   test('dragging node→node creates exactly one snapped segment + snap haptics', async ({
     page,
   }) => {
-    await page.goto('/?harness=canvas&mode=grid');
+    await page.goto('/?harness=canvas');
     const canvas = page.getByTestId('demo-canvas');
     await expect(canvas).toBeVisible();
     const box = (await canvas.boundingBox())!;
@@ -102,8 +59,8 @@ test.describe('canvas engine — grid (Mode 2)', () => {
     expect(haptics).toContain('snap');
   });
 
-  test('Undo reverts the last segment in grid mode', async ({ page }) => {
-    await page.goto('/?harness=canvas&mode=grid');
+  test('Undo reverts the last segment', async ({ page }) => {
+    await page.goto('/?harness=canvas');
     const canvas = page.getByTestId('demo-canvas');
     await expect(canvas).toBeVisible();
     const box = (await canvas.boundingBox())!;
@@ -126,5 +83,16 @@ test.describe('canvas engine — grid (Mode 2)', () => {
     await page.getByTestId('canvas-undo').click();
     drawing = await readJson<{ segments: unknown[] }>(page, 'last-change');
     expect(drawing.segments).toHaveLength(0);
+  });
+
+  test('drawing on the canvas does not scroll the page', async ({ page }) => {
+    await page.goto('/?harness=canvas');
+    const canvas = page.getByTestId('demo-canvas');
+    const box = (await canvas.boundingBox())!;
+    await page.mouse.move(box.x + 40, box.y + 40);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 40, box.y + 360, { steps: 20 });
+    await page.mouse.up();
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
   });
 });

@@ -2,8 +2,8 @@
  * Reflection — the payoff (PRD-008, _docs/01 §6, _docs/06 §3.5). The contrast was
  * *felt* in the two modes; here it is *named*. The screen:
  *  - reveals the hidden target the player was never shown (ADR-010, R08-3);
- *  - shows both attempts side by side — the Mode 1 freehand with the target
- *    ghosted behind it so the gap is visible, the Mode 2 grid clean (R08-2);
+ *  - shows both attempts side by side — the Mode 1 attempt with the target
+ *    ghosted behind it so the gap is visible, the Mode 2 attempt clean (R08-2);
  *  - shows the personal stress + confidence deltas (R08-6);
  *  - delivers "the reveal" — the first and only place autism is named — from
  *    `content/reveal.ts` (ADR-008, R08-5), with the three required disclaimers.
@@ -84,7 +84,7 @@ export function ReflectionScreen() {
   return (
     <main
       data-testid="screen-reflection"
-      className="flex h-full flex-col gap-5 overflow-y-auto px-6 pb-10 pt-10"
+      className="flex h-full flex-col gap-5 overflow-y-auto px-6 pb-10 pt-10 wide:mx-auto wide:max-w-3xl wide:px-10"
     >
       <h1 className="text-center text-xl font-semibold">
         {strings.reflection.title(task.label)}

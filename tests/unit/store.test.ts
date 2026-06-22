@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGameStore, TASKS, type Screen } from '../../src/store/gameStore';
-import type { FreehandDrawing, GridDrawing } from '../../src/types/session';
+import type { GridDrawing } from '../../src/types/session';
 
-const fakeFreehand: FreehandDrawing = {
-  kind: 'freehand',
-  strokes: [{ points: [{ x: 1, y: 2 }], width: 3 }],
-  canvas: { width: 360, height: 520 },
+// Both modes draw on the shared snap-to-grid canvas (ADR-015) → both are grids.
+const fakeMode1: GridDrawing = {
+  kind: 'grid',
+  segments: [{ from: { col: 2, row: 4 }, to: { col: 2, row: 8 } }],
+  grid: { cols: 8, rows: 10 },
 };
 
 const fakeGrid: GridDrawing = {
@@ -34,7 +35,7 @@ describe('lifecycle', () => {
     s.startNewSession();
     expect(useGameStore.getState().screen).toBe('mode1');
 
-    useGameStore.getState().saveMode1Drawing(fakeFreehand);
+    useGameStore.getState().saveMode1Drawing(fakeMode1);
     useGameStore.getState().setStress(1, 7);
     useGameStore.getState().setConfidence(1, 3);
     useGameStore.getState().saveMode2Drawing(fakeGrid);
@@ -48,7 +49,7 @@ describe('lifecycle', () => {
     expect(state.sessions).toHaveLength(1);
 
     const session = state.sessions[0];
-    expect(session.mode_1_drawing_data).toEqual(fakeFreehand);
+    expect(session.mode_1_drawing_data).toEqual(fakeMode1);
     expect(session.mode_2_drawing_data).toEqual(fakeGrid);
     expect(session.mode_1_stress_level).toBe(7);
     expect(session.mode_2_stress_level).toBe(2);
@@ -57,7 +58,7 @@ describe('lifecycle', () => {
     expect(typeof session.started_at).toBe('number');
     expect(typeof session.completed_at).toBe('number');
     expect(session.id).toBeTruthy();
-    expect(session.schemaVersion).toBe(1);
+    expect(session.schemaVersion).toBe(2);
   });
 
   it('newest session goes to the front of the list', () => {
@@ -74,7 +75,7 @@ describe('lifecycle', () => {
   });
 
   it('drawing/stress/confidence setters no-op without a draft', () => {
-    useGameStore.getState().saveMode1Drawing(fakeFreehand);
+    useGameStore.getState().saveMode1Drawing(fakeMode1);
     useGameStore.getState().setStress(1, 5);
     useGameStore.getState().setConfidence(2, 5);
     useGameStore.getState().finalizeSession();
@@ -90,7 +91,7 @@ describe('task pool', () => {
     expect(TASKS).toContain(draftTask);
 
     // task_id must not be reassigned by any mid-session action.
-    useGameStore.getState().saveMode1Drawing(fakeFreehand);
+    useGameStore.getState().saveMode1Drawing(fakeMode1);
     useGameStore.getState().saveMode2Drawing(fakeGrid);
     expect(useGameStore.getState().draft!.task_id).toBe(draftTask);
 

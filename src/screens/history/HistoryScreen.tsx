@@ -75,7 +75,7 @@ export function HistoryScreen() {
   return (
     <main
       data-testid="screen-history"
-      className="flex h-full flex-col px-6 pb-8 pt-10"
+      className="flex h-full flex-col px-6 pb-8 pt-10 wide:mx-auto wide:w-full wide:max-w-4xl wide:px-10"
     >
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">{strings.history.title}</h1>
@@ -96,7 +96,10 @@ export function HistoryScreen() {
             {strings.history.empty}
           </p>
         ) : (
-          <ul className="flex flex-col gap-2" data-testid="history-list">
+          <ul
+            className="flex flex-col gap-2 wide:grid wide:grid-cols-2 wide:gap-3"
+            data-testid="history-list"
+          >
             {sessions.map((s) => (
               <SessionRow
                 key={s.id}
