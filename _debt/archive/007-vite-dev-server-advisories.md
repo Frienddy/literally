@@ -1,6 +1,6 @@
 # DEBT-007 — Vite dev-server advisories (require Vite-major bump)
 
-**Status:** Open (deferred) · **Severity:** Low (development-only) · **Surfaced by:** [DEBT-003](./archive/003-dev-dependency-audit-esbuild-vite.md) resolution
+**Status:** ✅ Resolved 2026-06-22 (coordinated Vite-8 toolchain upgrade) · **Severity:** Low (development-only) · **Surfaced by:** [DEBT-003](./003-dev-dependency-audit-esbuild-vite.md) resolution
 
 ## What
 
@@ -43,3 +43,35 @@ upgrade: bump `vite` → 6/7, `vite-plugin-pwa` → a release that supports it, 
 unit + e2e suites, and the PWA service-worker / offline-install checks
 (`_docs/09` §6). Until then, develop on a trusted network and a non-Windows host.
 No production action required.
+
+## Resolution (2026-06-22)
+
+Done as the coordinated upgrade above, taken to the **latest** stable line rather
+than the minimal 6/7 bump (PRD-011 had already shipped, so the deferral target was
+gone). One atomic dependency change:
+
+| Package | Was | Now |
+|---|---|---|
+| `vite` | `^5.4.10` | `^8.0.16` |
+| `@vitejs/plugin-react` | `^4.3.3` | `^6.0.2` (peer-requires Vite 8) |
+| `vite-plugin-pwa` | `^0.20.5` | `^1.3.0` (peer-supports Vite ^3…^8) |
+| `vitest` | `^2.1.4` | `^4.1.9` |
+| `@vitest/coverage-v8` | `^2.1.4` | `^4.1.9` |
+
+**`esbuild` override removed.** Vite 8 bundles via **rolldown** and vitest 4 no
+longer pulls esbuild, so `npm ls esbuild` is now empty — the `"overrides": {
+"esbuild": "^0.25.0" }` from [DEBT-003](./003-dev-dependency-audit-esbuild-vite.md)
+no longer matched anything and was deleted. DEBT-003's advisory
+(GHSA-67mh-4wv8-2f99) is now **structurally** eliminated, not merely capped.
+
+**Verified (automatable gate, `_docs/09`):** `npm audit` → **0 vulnerabilities**
+(was 6); `tsc --noEmit` + `vite build` green with SW + manifest generated (gzip
+JS **65.07 KB**, within the 200 KB NFR-3 budget — slightly *smaller* than before);
+**167** Vitest unit tests; **40** Playwright E2E on Mobile Safari + Mobile Chrome;
+ESLint clean; Vite 8 dev server boots (80 ms) and serves 200. CI Node 22 already
+satisfies the raised engine floors (Vite 8 ≥ 22.12, vitest 4 ^22).
+
+**Still requires hardware (unchanged by this upgrade):** real-device PWA
+install / true-offline / service-worker checks (`_docs/09` §6) — a `vite-plugin-pwa`
+major touches SW generation, so re-run the device matrix before release. No
+production runtime behavior changed (ADR-001: static precached files, no server).

@@ -522,3 +522,26 @@ was *built* against the blueprint and any reconciliations.
     exposure under ADR-001).
   - Verified: `tsc --noEmit`, ESLint clean, **167 Vitest unit tests** green,
     production `vite build` (64.65 KB gzip JS, budget-checked).
+- **2026-06-22 — DEBT-007 resolved (Vite-8 toolchain upgrade).** Did the coordinated
+  Vite-major migration the prior pass deferred — taken to the **latest** stable line
+  (not the minimal 6/7 bump) since PRD-011, the deferral target, had already shipped.
+  One atomic dependency change: `vite` `^5.4.10`→`^8.0.16`, `@vitejs/plugin-react`
+  `^4`→`^6` (peer-requires Vite 8), `vite-plugin-pwa` `^0.20.5`→`^1.3.0`, and
+  `vitest`/`@vitest/coverage-v8` `^2`→`^4`. No app code or config changed — the
+  `vite.config.ts` PWA/test blocks and the build/test scripts carried over as-is.
+  - **`esbuild` override removed (DEBT-003 now structurally moot).** Vite 8 bundles
+    via **rolldown** and vitest 4 dropped esbuild, so `npm ls esbuild` is empty; the
+    `overrides: { esbuild: ^0.25.0 }` that resolved DEBT-003 matched nothing and was
+    deleted. The advisory it capped (GHSA-67mh-4wv8-2f99) is now eliminated, not
+    merely overridden. No ADRs changed; ADR-001 (no runtime server) is why all of
+    this was dev-only — production ships static precached files, unchanged.
+  - Verified: `npm audit` **0 vulnerabilities** (was 6, all Vite ≤ 6.4.2); `tsc
+    --noEmit` + `vite build` green (SW + manifest generated; **65.07 KB gzip JS**,
+    *smaller* than before, within the 200 KB NFR-3 budget); **167 Vitest unit tests**;
+    **40 Playwright E2E** on Mobile Safari + Mobile Chrome; ESLint clean; Vite 8 dev
+    server boots (80 ms) → 200. CI Node 22 already meets the raised engine floors
+    (Vite 8 ≥ 22.12, vitest 4 ^22), so no workflow change.
+  - **Still pending hardware (unchanged):** a `vite-plugin-pwa` major touches
+    service-worker generation, so re-run the real-device PWA install / true-offline
+    matrix (`_docs/09` §6) before release. `_debt/001` (PWA-icon art, OQ-11 mascot)
+    stays open by design — no code action until brand art lands.
