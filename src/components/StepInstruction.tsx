@@ -54,18 +54,32 @@ export function StepInstruction({
   children,
   className = '',
 }: StepInstructionProps) {
+  // Layout reflows between portrait and landscape via grid-template-areas (ADR-014)
+  // without changing DOM order: portrait stacks card → canvas → controls; the
+  // `wide:` landscape variant puts the canvas on the left (spanning both rows) with
+  // the persistent step card top-right and the Undo/Next controls bottom-right.
   return (
-    <section className={`flex min-h-0 flex-col ${className}`}>
-      <StepCard
-        label={label}
-        hint={instruction}
-        lead={<GuideMascot mood={mascotMood} label={mascotLabel} />}
-      />
+    <section
+      className={
+        'grid min-h-0 grid-cols-1 gap-4 ' +
+        "grid-rows-[auto_minmax(0,1fr)_auto] [grid-template-areas:'card'_'canvas'_'controls'] " +
+        'wide:grid-cols-[minmax(0,1fr)_20rem] wide:grid-rows-[auto_minmax(0,1fr)] wide:gap-x-6 ' +
+        "wide:[grid-template-areas:'canvas_card'_'canvas_controls'] " +
+        className
+      }
+    >
+      <div className="[grid-area:card]">
+        <StepCard
+          label={label}
+          hint={instruction}
+          lead={<GuideMascot mood={mascotMood} label={mascotLabel} />}
+        />
+      </div>
 
-      <div className="relative mt-4 min-h-0 flex-1">{children}</div>
+      <div className="relative min-h-0 [grid-area:canvas]">{children}</div>
 
       {!hideControls && (
-        <div className="mt-4 flex gap-3">
+        <div className="flex gap-3 [grid-area:controls] wide:self-end">
           <Button
             variant="secondary"
             onClick={onUndo}

@@ -6,12 +6,13 @@
  * completion moment. Emotional target: total control, predictability, mastery —
  * the opposite of Mode 1's nothing.
  *
- * Composition: `useCanvas({mode:'grid'})` (PRD-003) owns the drawing as an
- * imperative island (ADR-006); `StepInstruction` paginates the authored
- * `mode2.steps` (PRD-006 content); `StepGuidanceCanvas` overlays the guidance for
- * the current step; `GiverBeat` plays the "Perfect — exactly right!" beat, then
- * the drawing is saved and the flow advances to Feedback #2. The anchor theme +
- * storm→anchor "fog clearing" reveal come from `ModeTheme` (PRD-004, FR-23).
+ * Composition: `useCanvas({grid})` (PRD-003) owns the drawing as an imperative
+ * island (ADR-006); `StepInstruction` paginates the authored `mode2.steps`
+ * (PRD-006 content); `StepGuidanceCanvas` overlays the guidance for the current
+ * step; `GiverBeat` plays the "Perfect — exactly right!" beat, then the drawing is
+ * saved and the flow advances to Feedback #2. Mode 1 and Mode 2 share the same
+ * snap-to-grid canvas (ADR-015) — the step pager + on-grid guidance here are the
+ * only difference the player meets.
  */
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
@@ -81,12 +82,9 @@ export function AnchorPointScreen() {
   );
 
   const { setCanvas, undo } = useCanvas({
-    mode: 'grid',
     grid: grid ?? undefined,
     onHaptic: vibrate, // crisp snap "click" on each new node (R06-8)
-    onChange: (d) => {
-      if (d.kind === 'grid') setDrawing(d);
-    },
+    onChange: (d) => setDrawing(d),
   });
 
   const isLast = step >= total - 1;
@@ -114,7 +112,7 @@ export function AnchorPointScreen() {
   }, [saveMode2Drawing, drawing, go]);
 
   return (
-    <ModeTheme mode="anchor" clearFrom="storm">
+    <ModeTheme mode="anchor">
       <main
         data-testid="screen-mode2"
         className="relative flex h-full flex-col px-5 pb-6 pt-4"

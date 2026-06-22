@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DrawingPreview } from '../../src/components/DrawingPreview';
 import { TargetReveal } from '../../src/components/TargetReveal';
-import type { FreehandDrawing, GridDrawing } from '../../src/types/session';
+import type { GridDrawing } from '../../src/types/session';
 
 const grid: GridDrawing = {
   kind: 'grid',
@@ -13,19 +13,11 @@ const grid: GridDrawing = {
   grid: { cols: 8, rows: 10 },
 };
 
-const freehand: FreehandDrawing = {
-  kind: 'freehand',
-  strokes: [
-    {
-      points: [
-        { x: 0, y: 0 },
-        { x: 10, y: 10 },
-        { x: 20, y: 0 },
-      ],
-      width: 3,
-    },
-  ],
-  canvas: { width: 300, height: 400 },
+// A Mode 1 attempt — both modes draw on the shared grid now (ADR-015).
+const attempt: GridDrawing = {
+  kind: 'grid',
+  segments: [{ from: { col: 1, row: 1 }, to: { col: 3, row: 5 } }],
+  grid: { cols: 8, rows: 10 },
 };
 
 /** Records the 2D drawing commands the engine issues (jsdom has no real ctx). */
@@ -106,20 +98,12 @@ describe('DrawingPreview (PRD-008 R08-2)', () => {
     expect(m.calls.clearRect).toBeGreaterThan(0);
   });
 
-  it('scales + renders a freehand capture (translate/scale, then stroke)', () => {
-    const { m } = withCanvas();
-    render(<DrawingPreview drawing={freehand} label="freehand" />);
-    expect(m.calls.translate).toBeGreaterThan(0);
-    expect(m.calls.scale).toBeGreaterThan(0);
-    expect(m.calls.stroke).toBe(1);
-  });
-
   it('ghosts a target faintly behind the drawing (R08-3)', () => {
     const { m } = withCanvas();
-    render(<DrawingPreview drawing={freehand} ghostTarget={grid} label="m1" />);
+    render(<DrawingPreview drawing={attempt} ghostTarget={grid} label="m1" />);
     expect(m.alphaSets).toContain(0.22); // the faint target ghost
-    // ghost (one stroke per segment) + the freehand attempt on top
-    expect(m.calls.stroke).toBe(grid.segments.length + 1);
+    // ghost (one stroke per segment) + the attempt's segments on top
+    expect(m.calls.stroke).toBe(grid.segments.length + attempt.segments.length);
   });
 });
 

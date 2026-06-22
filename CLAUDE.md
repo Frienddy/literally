@@ -23,12 +23,15 @@ Doc map (numbered = reading order): `00` product requirements · `01` game desig
 ## What the product is
 
 "Literally" is a **mobile-first, offline-only PWA empathy game**. The player draws
-the same thing twice — once under **Mode 1 "Sensory Storm"** (vague fading
-instructions, wobbly freehand strokes, erratic haptics, fake notifications, no
-undo) and once under **Mode 2 "Anchor Point"** (high-contrast grid, snap-to-grid
-drawing, one literal step at a time, crisp haptics, undo). They rate stress after
-each, then compare on a Reflection screen. The contrast builds empathy for how
-autistic people can experience instructions and sensory load.
+the same thing twice on the **same** dotted snap-to-grid canvas; the **only**
+difference is the instruction (ADR-015). **Mode 1 ("without clear instruction")**
+gives one vague, holistic ask ("draw a normal house…" — no counts, directions, or
+per-step help); **Mode 2 "Anchor Point" ("with clear instruction")** walks through
+literal, counted, directional steps with on-grid guidance and undo. They rate
+stress + confidence after each, then compare on a Reflection screen. The contrast
+builds empathy for how much clear instructions matter — and how disorienting their
+absence is. *(Mode 1 was formerly "Sensory Storm," a freehand+wobble sensory-overload
+mode; ADR-015 removed that layer so the lesson isolates instruction clarity.)*
 
 ## Architecture invariants (do not break these)
 
@@ -38,10 +41,10 @@ product's core intent. Each maps to an ADR in `_docs/10`.
 - **Local-first, network-never at runtime (ADR-001).** No backend, no `fetch` to
   app servers, no analytics SDKs. Everything runs and persists on-device; the app
   must work in airplane mode after first load. All persistence is browser storage.
-- **Refs-not-state for live drawing (ADR-006).** During a stroke, points
-  accumulate in refs inside `useCanvas` and render via `requestAnimationFrame`.
+- **Refs-not-state for live drawing (ADR-006).** During a drag, snapped state
+  accumulates in refs inside `useCanvas` and renders via `requestAnimationFrame`.
   React must **not** re-render per pointer event — the store is only touched once
-  per finished stroke/segment (`onChange`). This is the zero-latency requirement;
+  per finished segment (`onChange`). This is the zero-latency requirement;
   do not "lift drawing state into React."
 - **Show, don't tell — defer the ASD reveal (ADR-008).** The primary audience
   knows nothing about autism. The Welcome screen gives only a minimal, no-spoiler
@@ -52,13 +55,17 @@ product's core intent. Each maps to an ADR in `_docs/10`.
   autism/ASD terms (`_docs/09` §9).
 - **Haptics are enhancement, never a dependency (ADR-003).** `navigator.vibrate`
   does not exist on iOS Safari. Wrap it in `useHaptics`, feature-detect, and never
-  gate progression on it — Mode 1's discomfort and Mode 2's satisfaction must also
-  read through visual/motion channels.
+  gate progression on it — the snap confirm must also read through visual/motion
+  channels.
 - **Rigid mobile shell.** `AppShell` + global CSS block pull-to-refresh,
   overscroll, text selection, and zoom (`touch-action`, `overscroll-behavior`,
-  `user-select`, `usePreventGestures`). Portrait is enforced (`PortraitGuard` +
-  manifest `orientation`). The canvas owns its gesture (`touch-action: none` +
-  `preventDefault`). Don't reintroduce document scroll or browser-chrome gestures.
+  `user-select`, `usePreventGestures`). Portrait is enforced **on phones only**
+  (`PortraitGuard` shows when `useIsPhone` && landscape; manifest `orientation` is
+  honored on phones, ignored on desktop); laptops/desktops/tablets render a
+  responsive landscape layout via the `wide:` breakpoint, and each screen has a
+  side-by-side `wide:` variant (ADR-014). The canvas owns its gesture
+  (`touch-action: none` + `preventDefault`). Don't reintroduce document scroll or
+  browser-chrome gestures.
 - **Content is data, not JSX (ADR-007).** All player-facing strings + instruction
   sequences live in `src/content/` for ethics/sensitivity review and i18n. Don't
   hard-code copy in components.
@@ -76,13 +83,15 @@ product's core intent. Each maps to an ADR in `_docs/10`.
   swapping to IndexedDB if a session's drawing payload exceeds ~150KB.
 - **The canvas is an imperative island** wrapped by `useCanvas` (`src/hooks/`),
   with all drawing math in a pure, framework-free `src/engine/` layer
-  (`wobble.ts`, `snap.ts`, `geometry.ts`, `render.ts`). `engine/render.ts` is
-  shared by the live canvas and read-only previews, so saved drawings re-render
-  exactly as drawn. One hook, two modes via a `mode: 'freehand' | 'grid'` param.
-- **Drawing data is a discriminated union** (`DrawingData` in `src/types/`):
-  `FreehandDrawing` stores pixel strokes (+ capture canvas size); `GridDrawing`
-  stores resolution-independent `(col,row)` segments. Freehand strokes are
-  simplified (RDP) + quantized before saving to control storage size.
+  (`snap.ts`, `grid.ts`, `render.ts`). `engine/render.ts` is shared by the live
+  canvas and read-only previews, so saved drawings re-render exactly as drawn. One
+  grid-only hook drives **both** modes (ADR-015); the modes differ only in their
+  surrounding instruction UI, not in the canvas.
+- **Drawing data is `GridDrawing`** (`DrawingData` in `src/types/`): both modes
+  store resolution-independent `(col,row)` segments between grid nodes. *(Pre-ADR-015
+  Mode 1 stored `FreehandDrawing` pixel strokes; the schema-v2 migration nulls those
+  legacy payloads. The freehand engine — `wobble.ts`/`geometry.ts`/`drawFreehand` —
+  has been removed.)*
 
 ## Commands (planned — none exist yet)
 

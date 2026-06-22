@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { strings } from '../../src/content/strings';
 import { welcome } from '../../src/content/welcome.copy';
 import { giver } from '../../src/content/giver.copy';
-import { notifications } from '../../src/content/notifications';
 import { reveal } from '../../src/content/reveal';
 import { TASK_CONTENT } from '../../src/content/tasks';
 
@@ -11,7 +10,7 @@ import { TASK_CONTENT } from '../../src/content/tasks';
  * what review enforces by hand:
  *  - the show-don't-tell boundary (autism named **only** in reveal.ts);
  *  - the reveal's required disclaimers + identity-first / non-pity language;
- *  - notifications stay benign; the giver never blames the player.
+ *  - the giver never blames the player.
  */
 const FORBIDDEN =
   /\b(autis\w*|asd|neurodiver\w*|disab\w*|sensory processing|spectrum)\b/i;
@@ -34,7 +33,6 @@ describe('show-don’t-tell boundary (ADR-008, R09-2)', () => {
     strings,
     welcome,
     giver,
-    notifications,
     tasks: TASK_CONTENT, // labels, vague blocks, and every Mode 2 step text
   };
 
@@ -84,17 +82,6 @@ describe('the reveal — required disclaimers + respectful framing (R09-3/R09-10
       'what it is like to be autistic',
     ]) {
       expect(text, bad).not.toContain(bad);
-    }
-  });
-});
-
-describe('notifications stay benign (R09-8, sensory safety)', () => {
-  const ALARMING =
-    /\b(emergency|urgent|alert|warning|fire|evacuat\w*|hacked|breach|fraud|virus|danger\w*|sos|911|account locked)\b/i;
-
-  it('no alarming or potentially-triggering copy', () => {
-    for (const n of notifications) {
-      expect(`${n.title} ${n.body ?? ''}`).not.toMatch(ALARMING);
     }
   });
 });

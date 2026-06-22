@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
 import { tokens } from './src/styles/tokens';
 
 /**
@@ -41,7 +42,16 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // The one landscape breakpoint (ADR-014): `wide:` utilities switch a screen
+    // from the portrait stack to the laptop/desktop side-by-side layout. Added as
+    // a custom variant (not a `screens` entry) so Tailwind's `min-*`/`max-*`
+    // variants — e.g. Reflection's `max-[340px]:` — keep working. Media query
+    // mirrored from `tokens.layout.wideQuery`.
+    plugin(({ addVariant }) => {
+      addVariant('wide', `@media ${tokens.layout.wideQuery}`);
+    }),
+  ],
 };
 
 export default config;

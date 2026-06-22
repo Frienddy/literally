@@ -41,7 +41,7 @@ async function playFullSession(page: Page) {
   await page.goto('/');
   await page.getByTestId('welcome-start').click();
 
-  // Mode 1: one freehand stroke, then the puzzled beat → Feedback #1.
+  // Mode 1: one snapped segment on the shared grid, then the puzzled beat → FB #1.
   const m1 = (await page.getByTestId('mode1-canvas').boundingBox())!;
   await page.mouse.move(m1.x + m1.width * 0.35, m1.y + m1.height * 0.55);
   await page.mouse.down();

@@ -7,20 +7,12 @@ import type { GameSession } from '../../src/types/session';
 
 const seeded: GameSession = {
   id: 's1',
-  schemaVersion: 1,
+  schemaVersion: 2,
   task_id: 'house',
   mode_1_drawing_data: {
-    kind: 'freehand',
-    strokes: [
-      {
-        points: [
-          { x: 0, y: 0 },
-          { x: 20, y: 20 },
-        ],
-        width: 3,
-      },
-    ],
-    canvas: { width: 300, height: 400 },
+    kind: 'grid',
+    segments: [{ from: { col: 1, row: 1 }, to: { col: 3, row: 5 } }],
+    grid: { cols: 8, rows: 10 },
   },
   mode_2_drawing_data: {
     kind: 'grid',
@@ -59,12 +51,12 @@ describe('ReflectionScreen (PRD-008)', () => {
     // Both attempts, labelled for screen readers (R08-2).
     expect(
       screen.getByRole('img', {
-        name: `Your freehand drawing of ${label}, made without clear steps.`,
+        name: `Your drawing of ${label}, made without clear steps.`,
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('img', {
-        name: `Your snap-to-grid drawing of ${label}, made with clear steps.`,
+        name: `Your drawing of ${label}, made with clear steps.`,
       }),
     ).toBeInTheDocument();
   });

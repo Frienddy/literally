@@ -6,7 +6,7 @@
  */
 import { useScreen } from '../store/selectors';
 import { WelcomeScreen } from '../screens/welcome/WelcomeScreen';
-import { SensoryStormScreen } from '../screens/mode1/SensoryStormScreen';
+import { Mode1Screen } from '../screens/mode1/Mode1Screen';
 import { FeedbackCheckScreen } from '../screens/feedback/FeedbackCheckScreen';
 import { AnchorPointScreen } from '../screens/mode2/AnchorPointScreen';
 import { ReflectionScreen } from '../screens/reflection/ReflectionScreen';
@@ -19,7 +19,7 @@ export function ScreenRouter() {
     case 'welcome':
       return <WelcomeScreen />;
     case 'mode1':
-      return <SensoryStormScreen />;
+      return <Mode1Screen />;
     case 'stress1':
     case 'stress2':
       return <FeedbackCheckScreen />;

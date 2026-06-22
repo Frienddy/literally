@@ -1,7 +1,5 @@
 export type {
   Point,
-  FreehandStroke,
-  FreehandDrawing,
   GridNode,
   GridSegment,
   GridDrawing,

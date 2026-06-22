@@ -1,12 +1,12 @@
 /**
  * The zero-latency invariant (PRD-011 R11-7, ADR-006, _docs/04 §3).
  *
- * During a stroke, points accumulate in refs inside `useCanvas` and paint via
- * requestAnimationFrame. React must NOT re-render per pointer event — the store
- * is touched only once, when the stroke/segment finishes (`onChange`). This test
- * stands in for the manual profiler check in R11-7: it counts React renders of a
- * component that hosts `useCanvas` while driving a full native-pointer stroke,
- * and asserts the count never moves mid-stroke.
+ * While dragging a segment, snapped state accumulates in refs inside `useCanvas`
+ * and paints via requestAnimationFrame. React must NOT re-render per pointer
+ * event — the store is touched only once, when the segment finishes (`onChange`).
+ * This test stands in for the manual profiler check in R11-7: it counts React
+ * renders of a component that hosts `useCanvas` while driving a full native-pointer
+ * drag, and asserts the count never moves mid-drag.
  *
  * The pointer handlers are attached with addEventListener (native events, not
  * React synthetic), so we dispatch real Events on the canvas element. rAF is
@@ -15,7 +15,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useState } from 'react';
 import { render, screen, act } from '@testing-library/react';
-import { useCanvas, defaultWobble } from '../../src/hooks/useCanvas';
+import { useCanvas } from '../../src/hooks/useCanvas';
 import type { GridSpec } from '../../src/engine/snap';
 
 /** Records the 2D commands the engine issues (jsdom has no real ctx). */
@@ -98,17 +98,16 @@ afterEach(() => {
   HTMLElement.prototype.releasePointerCapture = origReleaseCapture;
 });
 
-describe('useCanvas — refs-not-state during a stroke (ADR-006)', () => {
-  it('does not re-render React across a 40-point freehand stroke', () => {
+const grid: GridSpec = { cols: 8, rows: 8, cell: 20, originX: 20, originY: 20 };
+
+describe('useCanvas — refs-not-state during a drag (ADR-006)', () => {
+  it('does not re-render React while dragging a grid segment', () => {
     let renders = 0;
     const onChange = vi.fn();
+    const onHaptic = vi.fn();
     function Host() {
       renders++;
-      const { setCanvas } = useCanvas({
-        mode: 'freehand',
-        wobble: defaultWobble,
-        onChange,
-      });
+      const { setCanvas } = useCanvas({ grid, onChange, onHaptic });
       return <canvas ref={setCanvas} data-testid="cv" />;
     }
 
@@ -116,33 +115,26 @@ describe('useCanvas — refs-not-state during a stroke (ADR-006)', () => {
     const cv = screen.getByTestId('cv');
     const baseline = renders; // one mount render
 
-    act(() => cv.dispatchEvent(pointer('pointerdown', 10, 10)));
-    for (let i = 1; i <= 40; i++) {
-      act(() => cv.dispatchEvent(pointer('pointermove', 10 + i * 4, 10 + i)));
-      expect(renders).toBe(baseline); // never mid-stroke
-    }
-    act(() => cv.dispatchEvent(pointer('pointerup', 180, 60)));
+    // Drag from node (0,0)≈(20,20) toward (4,4)≈(100,100).
+    drawStrokeGrid(cv, () => expect(renders).toBe(baseline));
 
-    // React stayed put through the whole stroke...
+    // React stayed put through the whole drag...
     expect(renders).toBe(baseline);
     // ...the store was touched exactly once, on completion...
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange.mock.calls[0][0]).toMatchObject({ kind: 'freehand' });
+    expect(onChange).toHaveBeenCalledTimes(1); // one committed segment
+    expect(onChange.mock.calls[0][0]).toMatchObject({ kind: 'grid' });
     // ...and the scene still painted off the React path (rAF → ctx).
     expect(calls.clearRect).toBeGreaterThan(0);
     expect(calls.stroke).toBeGreaterThan(0);
   });
 
-  it('re-renders at most once when stroke-end writes to state, never mid-stroke', () => {
+  it('re-renders at most once when segment-end writes to state, never mid-drag', () => {
     let renders = 0;
     function Host() {
       renders++;
       const [, setDrawing] = useState<unknown>(null);
-      const { setCanvas } = useCanvas({
-        mode: 'freehand',
-        wobble: defaultWobble,
-        onChange: (d) => setDrawing(d), // realistic: stroke-end hits React state
-      });
+      // realistic: segment-end hits React state
+      const { setCanvas } = useCanvas({ grid, onChange: (d) => setDrawing(d) });
       return <canvas ref={setCanvas} data-testid="cv" />;
     }
 
@@ -150,48 +142,8 @@ describe('useCanvas — refs-not-state during a stroke (ADR-006)', () => {
     const cv = screen.getByTestId('cv');
     const baseline = renders;
 
-    act(() => cv.dispatchEvent(pointer('pointerdown', 10, 10)));
-    for (let i = 1; i <= 30; i++) {
-      act(() => cv.dispatchEvent(pointer('pointermove', 10 + i * 4, 10 + i)));
-    }
-    expect(renders).toBe(baseline); // no re-render during the stroke
-
-    act(() => cv.dispatchEvent(pointer('pointerup', 130, 40)));
-    expect(renders).toBe(baseline + 1); // exactly one, on stroke end
-  });
-
-  it('does not re-render React while dragging a grid segment (Mode 2)', () => {
-    let renders = 0;
-    const onChange = vi.fn();
-    const onHaptic = vi.fn();
-    const grid: GridSpec = {
-      cols: 8,
-      rows: 8,
-      cell: 20,
-      originX: 20,
-      originY: 20,
-    };
-    function Host() {
-      renders++;
-      const { setCanvas } = useCanvas({
-        mode: 'grid',
-        grid,
-        onChange,
-        onHaptic,
-      });
-      return <canvas ref={setCanvas} data-testid="cv" />;
-    }
-
-    render(<Host />);
-    const cv = screen.getByTestId('cv');
-    const baseline = renders;
-
-    // Drag from node (0,0)≈(20,20) toward (4,4)≈(100,100).
-    drawStrokeGrid(cv, () => expect(renders).toBe(baseline));
-
-    expect(renders).toBe(baseline);
-    expect(onChange).toHaveBeenCalledTimes(1); // one committed segment
-    expect(onChange.mock.calls[0][0]).toMatchObject({ kind: 'grid' });
+    drawStrokeGrid(cv, () => expect(renders).toBe(baseline)); // no re-render mid-drag
+    expect(renders).toBe(baseline + 1); // exactly one, on segment end
   });
 });
 

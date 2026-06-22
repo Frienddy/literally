@@ -16,17 +16,9 @@ export const tokens = {
     surface: '#141a33',
     text: '#e7ecff',
     textMuted: '#8b93b8',
-    // Mode 1 (storm) — desaturated, low-contrast, uneasy
-    stormText: '#5b6384', // deliberately hard-to-read vague text
+    // Destructive-action warning text (History "delete everything"). A muted red
+    // that reads as caution without alarm.
     stormWarn: '#b45a5a',
-    // Mode 1 freehand stroke. A *distinct* ink (not tokens.color.ink, which is
-    // near-invisible on the storm canvas — DEBT-006): deliberately low-but-nonzero
-    // contrast so the line is legible yet effortful (≈3.1:1 on theme.storm.canvas
-    // #11162a). Raised under reduced-intensity to ≈5:1 (clearly legible), matching
-    // the fade/notification softening (R05-11). Only the live Mode 1 canvas uses
-    // these; saved previews re-render on a light surface with the committed `ink`.
-    stormInk: '#5d6486',
-    stormInkReduced: '#7e87ab',
     // Mode 2 (anchor) — high contrast, trustworthy
     gridNode: '#1f6feb',
     ink: '#0f172a', // drawing stroke on light canvas
@@ -40,6 +32,13 @@ export const tokens = {
   },
   radius: { card: '16px', button: '14px' },
   space: { touch: '44px' }, // min touch target
+  // Responsive layout (ADR-014). The single breakpoint that switches a screen
+  // from the portrait "tall" stack to the laptop/desktop "wide" side-by-side
+  // layout. Keyed off landscape + a min width so a phone in portrait never goes
+  // wide; phones in landscape are handled separately by the phone-only
+  // PortraitGuard gate (`useIsPhone`), so this query is purely about layout.
+  // Mirrored into `tailwind.config.ts` as the `wide:` variant.
+  layout: { wideQuery: '(min-width: 768px) and (orientation: landscape)' },
   font: {
     body: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
     sizeBody: '17px',

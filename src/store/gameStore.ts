@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type {
   GameSession,
-  FreehandDrawing,
   GridDrawing,
   StressLevel,
   ConfidenceLevel,
@@ -45,7 +44,7 @@ interface GameState {
 
   // --- lifecycle ---
   startNewSession: () => void;
-  saveMode1Drawing: (d: FreehandDrawing) => void;
+  saveMode1Drawing: (d: GridDrawing) => void;
   saveMode2Drawing: (d: GridDrawing) => void;
   setStress: (mode: 1 | 2, level: StressLevel) => void;
   setConfidence: (mode: 1 | 2, level: ConfidenceLevel) => void;

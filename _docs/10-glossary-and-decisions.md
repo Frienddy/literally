@@ -9,14 +9,14 @@ questions tracked across the docs.
 
 | Term | Meaning |
 |------|---------|
-| **Mode 1 / Sensory Storm** | The overload experience: blank canvas, freehand+wobble, vague fading text, erratic haptics, fake notifications, no undo. |
-| **Mode 2 / Anchor Point** | The structured experience: high-contrast grid, snap-to-grid, one literal step at a time, crisp haptics, undo, no timers. |
+| **Mode 1 / Without clear instruction** | The "without clear instruction" half: the **same** dotted snap-to-grid canvas as Mode 2, but the only guidance is one vague, holistic ask (no counts, no directions, no per-step help, no target). *(Formerly "Sensory Storm" — the freehand+wobble overload layer was removed in ADR-015.)* |
+| **Mode 2 / Anchor Point** | The structured experience: the same high-contrast snap-to-grid canvas, driven by one literal, counted, directional step at a time with on-grid guidance, crisp haptics, undo, no timers. |
 | **Stress check** | The 1–10 self-rating screen shown after each mode. |
 | **Reflection** | Final screen comparing both drawings + stress scores with a respectful debrief. |
 | **GameSession** | The persisted record of one full playthrough (doc 03 §2). |
 | **DrawingData** | Discriminated union: `FreehandDrawing` (Mode 1, pixels) or `GridDrawing` (Mode 2, grid nodes). |
-| **Wobble** | Seeded, smooth perpendicular noise added to freehand strokes (doc 04 §2.2). |
-| **Snap-to-grid** | Forcing line endpoints onto the nearest grid node (doc 04 §2.3). |
+| **Wobble** | *(Removed, ADR-015.)* Formerly seeded perpendicular noise on Mode 1's freehand strokes; Mode 1 now snaps to the grid like Mode 2. |
+| **Snap-to-grid** | Forcing line endpoints onto the nearest grid node (doc 04 §2.3). The shared drawing mechanic for **both** modes (ADR-015). |
 | **App shell** | The precached HTML/CSS/JS that makes the PWA load offline. |
 | **FSM / `screen`** | The store-driven finite state machine governing navigation. |
 | **Reduced intensity** | Persisted sensory-safety mode that softens Mode 1 (doc 07 §3). |
@@ -32,7 +32,7 @@ questions tracked across the docs.
 | **Feedback check** | The post-mode screen capturing both **stress** and **confidence** (emoji faces). |
 | **Confidence gap** | Lower confidence after Mode 1 than Mode 2 — the cleanest measure of "couldn't tell if I did it right." |
 | **Task pool** | The set of simple subjects (house / cat / flower) picked at random per session; both modes share one. |
-| **Two visual worlds** | Storm (murky, desaturated, cramped) vs Anchor (bright, airy, crisp), with a "fog-clearing" transition. |
+| **Two visual worlds** | *(Superseded, ADR-015.)* The modes no longer differ aesthetically — both render in the bright Anchor world; the contrast is now purely instructional, not visual. |
 
 ## 2. Architecture Decision Records
 
@@ -163,6 +163,63 @@ and small reduced-motion-aware micro-interactions.
 **Consequences:** Stronger felt contrast and lower input friction; more design/art
 work. (Doc 06 §1/§4/§6, doc 04 §2.5.)
 
+### ADR-014 — Responsive landscape layout for laptop/desktop; portrait-lock is phone-only
+**Status:** Accepted.
+**Context:** The shell blocked *all* landscape with `PortraitGuard`, so a laptop —
+always landscape — could never play, only see "rotate your phone." The game should
+also run on a laptop, but a real phone turned sideways should still be asked to
+rotate. Input already works on a laptop: `useCanvas` uses pointer events (mouse /
+trackpad), and the grid engine centers a square grid in any box, so no
+canvas/engine change is needed. (Amends the portrait-everywhere stance of doc 05
+§2.1; ADR-004's gesture-blocking is unchanged.)
+**Decision:** Scope `PortraitGuard` to **actual phones** via `useIsPhone`
+(touch-primary — `(pointer: coarse)` or `navigator.maxTouchPoints > 0` — **and**
+short viewport side `< 600px`) — it shows only when `isPhone && landscape`;
+everything else renders the app. Add one
+landscape breakpoint, the `wide:` Tailwind variant (from `tokens.layout.wideQuery`
+= `(min-width: 768px) and (orientation: landscape)`), and give each screen a
+side-by-side `wide:` variant: Mode 2 reflows via `grid-template-areas` (canvas +
+persistent step panel), Welcome/Feedback go two-column, Reflection/History center
+within a max-width (previews stay paired), and Mode 1 stays full-bleed so its
+overload remains dominant.
+**Consequences:** Playable on laptop/desktop/tablet with a mouse; phones keep the
+upright experience (manifest `orientation: portrait` still applies on phones, is
+ignored on desktop). Two complementary mechanisms — a JS phone gate + a CSS
+breakpoint — that compose cleanly; each screen now carries a portrait and a
+landscape arrangement. (Docs 02 §6, 05 §2/§2.1, 06.)
+
+### ADR-015 — Both modes share one snap-to-grid canvas; the instruction is the only variable
+**Status:** Accepted (supersedes the freehand/"Sensory Storm" half of Mode 1; amends
+ADR-006's "two behaviors" framing for `useCanvas`, ADR-010/011's Mode 1 mechanics, and
+the "two visual worlds" aesthetic of ADR-013).
+**Context:** The earlier design varied *two* things at once between the modes — the
+**tool** (Mode 1: blank freehand + wobble + a sensory-overload layer; Mode 2: dotted
+snap-to-grid) **and** the **instruction** (vague vs. literal steps). That confounds the
+lesson: a player can't tell whether Mode 1 felt worse because the *instructions* were
+vague or because the *drawing tool itself* was harder (wobbly strokes, no undo, noisy
+distractions). The product goal (SC-2 / the confidence gap) is specifically about
+instruction clarity, so the tool should be a controlled constant, not a second variable.
+**Decision:** Hold the canvas constant. **Both** modes draw on the *same* dotted
+snap-to-grid surface — same dots, snapping, Undo, crisp snap haptic, bright theme — and
+the **only** difference is the instruction: Mode 1 gives one vague, holistic ask
+("draw a normal house…": no counts, no directions, no per-step guidance, no target);
+Mode 2 gives literal, counted, directional steps with on-grid guidance. The "Sensory
+Storm" overload layer (freehand+wobble, fading text, fake notifications, erratic haptics,
+no-undo) is **removed**.
+**Consequences:** The empathy delta is now cleanly attributable to instruction clarity
+(a stronger SC-2 signal, the confidence gap especially). `mode_1_drawing_data` becomes a
+`GridDrawing` (schema **v2**; the migration nulls legacy freehand payloads, which can't
+re-render on the grid). The freehand engine (`engine/wobble.ts`, `engine/geometry.ts`,
+`drawFreehand`, `FreehandDrawing`/`FreehandStroke`) and the storm components
+(`VagueInstruction`, `FakeNotifications`, `Notification`, `lib/fade.ts`,
+`content/notifications.ts`) are deleted; `useCanvas` is grid-only. Mode 1 is no longer a
+deliberately low-contrast surface, so it now passes — and is held to — the axe a11y gate.
+The `reducedIntensity` flag, welcome opt-out, and calm Exit are **kept** (they still
+soften the snap haptic and offer a penalty-free exit), but Mode 1's inline
+reduce-intensity toggle and the per-mode storm theme are gone. **Cost:** the lesson now
+rests entirely on instruction quality rather than sensory load — a deliberate narrowing;
+ADR-005 (no audio) is unaffected. (Touches docs 01, 03, 04, 05, 06, 07.)
+
 ## 3. Open questions (live)
 
 | ID | Question | Leaning | Owner/where decided |
@@ -172,7 +229,7 @@ work. (Doc 06 §1/§4/§6, doc 04 §2.5.)
 | OQ-3 | Ship image export (FR-14) in v1 or v1.1? | v1.1 unless cheap | Roadmap Phase 8 |
 | OQ-4 | Any audio layer in Mode 1? | No (v1) | ADR-005 |
 | OQ-5 | Exact Mode 2 step coordinates + grid size (cols×rows) | ~8×10, finalize in Phase 5 | GDD §4 / Phase 5 |
-| OQ-6 | Wobble amplitude/frequency final values | start 3px / 0.18, tune in playtest | Phase 4 |
+| OQ-6 | ~~Wobble amplitude/frequency final values~~ | **Moot** — wobble/freehand removed (ADR-015); both modes snap to grid | ADR-015 |
 | OQ-7 | Persist in-progress draft for "resume"? | No in v1 (land on Welcome) | doc 03 §3 note |
 | OQ-8 | Default language + i18n scope for v1 | English only v1, structure ready | doc 02 §2 |
 | OQ-9 | How explicit should the reveal name autism vs "people differ" generally? | Name autism clearly, as *one slice*, never universalized | doc 07 §1 / sensitivity review |
@@ -196,6 +253,21 @@ work. (Doc 06 §1/§4/§6, doc 04 §2.5.)
   **Mode 1 exit**, and a **two-visual-worlds / custom-icon polish layer** (ADR-013).
   Added FR-16–23, SC-2c, OQ-10–12, and `engine` renderers `drawStepGuidance` /
   `drawTargetGhost`. Touches docs 00, 01, 02, 03, 04, 06, 07, 08, 09, 10 + README.
+- **v1.4:** **Laptop/desktop landscape support** (ADR-014). Scoped `PortraitGuard`
+  to actual phones (`useIsPhone` in `hooks/useDeviceClass.ts`) so a laptop — always
+  landscape — plays instead of seeing "rotate your phone," while a phone turned
+  sideways still rotates. Added the `wide:` layout breakpoint
+  (`tokens.layout.wideQuery`) and a side-by-side landscape variant per screen
+  (Mode 2 `grid-template-areas` reflow; two-column Welcome/Feedback; centered
+  Reflection/History; Mode 1 stays full-bleed). No canvas/engine change. Touches
+  docs 05, 10 + CLAUDE.md.
+- **v1.5:** **One shared canvas; instruction is the only variable** (ADR-015).
+  Collapsed both modes onto the same dotted snap-to-grid surface and made the
+  *instruction* (vague holistic ask vs. literal counted steps) the sole difference,
+  removing the "Sensory Storm" overload layer (freehand+wobble, fading text, fake
+  notifications, erratic haptics, no-undo). `mode_1_drawing_data` → `GridDrawing`
+  (schema v2 + migration). Retires OQ-6 (wobble) and the "two visual worlds" /
+  Wobble glossary terms. Touches docs 01, 03, 04, 05, 06, 07, 10 + CLAUDE.md.
 
 ## 5. Implementation log
 First code lands; docs above remain the source of truth. Entries here record what
@@ -545,3 +617,36 @@ was *built* against the blueprint and any reconciliations.
     service-worker generation, so re-run the real-device PWA install / true-offline
     matrix (`_docs/09` §6) before release. `_debt/001` (PWA-icon art, OQ-11 mascot)
     stays open by design — no code action until brand art lands.
+- **2026-06-22 — ADR-015: one shared canvas, instruction is the only variable.**
+  Collapsed Mode 1 and Mode 2 onto the *same* dotted snap-to-grid canvas so the only
+  thing that varies between them is the **instruction** — Mode 1 a single vague,
+  holistic ask; Mode 2 literal counted/directional steps. This removes the design's
+  confound (was the tool harder, or the instructions vaguer?) and sharpens the SC-2
+  confidence-gap signal. The "Sensory Storm" layer is gone.
+  - **Mode 1 rewritten** (`screens/mode1/Mode1Screen.tsx`, renamed from
+    `SensoryStormScreen`): grid `useCanvas` island + a persistent, re-readable vague
+    `StepCard` + Undo/Done, the bright `anchor` theme, and the crisp snap haptic —
+    structurally parallel to Mode 2 minus the step pager/guidance. The calm **Exit**
+    safety rail stays; the inline reduce-intensity toggle is gone (nothing storm-y
+    left to soften — the persisted `reducedIntensity` flag + welcome opt-out remain
+    and still soften the snap haptic). Mode 2 dropped its `clearFrom="storm"` reveal.
+  - **Data/model:** `mode_1_drawing_data` is now a `GridDrawing` (`saveMode1Drawing`
+    retyped); `DrawingData` is grid-only. **Schema → v2** with a `migrate` branch that
+    nulls any legacy freehand Mode 1 payload (incompatible with the grid preview);
+    everything else on the session survives.
+  - **Deletions (dead after the change):** `engine/wobble.ts`, `engine/geometry.ts`,
+    `drawFreehand`, `FreehandDrawing`/`FreehandStroke`, `components/VagueInstruction`,
+    `FakeNotifications`, `Notification`, `lib/fade.ts`, `content/notifications.ts`, and
+    the `config.{wobble,fade,notifications}` blocks + their tests. `useCanvas` is
+    grid-only (dropped the `mode` param); `useHaptics` is snap-only (dropped `'move'`
+    + `config.haptics.erratic`); the dev harness + `Canvas` are grid-only. Orphaned
+    `stormText`/`stormInk*` tokens removed (`stormWarn` kept — History delete).
+  - **a11y:** Mode 1 is no longer a deliberately low-contrast surface, so it **joins**
+    the axe gate (`a11y.spec.ts` now scans it) — the earlier R10-7 exclusion is retired.
+  - Verified: `tsc --noEmit`, ESLint, Prettier clean, **140 Vitest unit tests** green
+    (down from 167 — removed the freehand/storm suites; +1 v2-migration test), **39
+    Playwright E2E** on Mobile Safari + Mobile Chrome (new Mode 1 snapped-segment +
+    Undo + Done→beat flow; Mode 1 axe scan; all prior shell/canvas/flow/mode2/
+    reflection specs green). **Pending sign-off (unchanged):** the SC-2 newcomer
+    playtest now hinges entirely on instruction clarity (the sensory-load angle is
+    retired for v1) — worth confirming the Mode 1→Mode 2 confidence gap still lands.
