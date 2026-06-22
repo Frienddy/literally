@@ -1,8 +1,9 @@
 /**
  * Mode 2's one-step-at-a-time instruction card (PRD-004 R04-8, _docs/06 §3.4).
- * Exactly one is visible at a time; the text is big and high-contrast (`text-step`)
- * — the deliberate opposite of Mode 1's fading vague block. Presentational only;
- * the real step sequence + on-grid guidance is PRD-006.
+ * Exactly one is visible at a time; the text is small and compact (`text-sm`) so the
+ * card stays out of the canvas's way — the deliberate opposite of Mode 1's fading
+ * vague block. Presentational only; the real step sequence + on-grid guidance is
+ * PRD-006.
  */
 import type { ReactNode } from 'react';
 
@@ -18,8 +19,8 @@ export interface StepCardProps {
 
 export function StepCard({ label, hint, lead, className = '' }: StepCardProps) {
   return (
-    <div className={`rounded-card bg-surface p-4 ${className}`}>
-      <div className="flex items-center gap-2 text-sm font-medium text-textMuted">
+    <div className={`rounded-card bg-surface p-3 ${className}`}>
+      <div className="flex items-center gap-2 text-xs font-medium text-textMuted">
         {lead}
         <span>{label}</span>
       </div>
@@ -27,7 +28,7 @@ export function StepCard({ label, hint, lead, className = '' }: StepCardProps) {
           card height stays fixed as steps swap between one- and two-line
           instructions — otherwise the card grows/shrinks and the canvas below
           jumps between steps. */}
-      <p className="mt-2 min-h-[3.2em] text-step text-text">{hint}</p>
+      <p className="mt-1.5 min-h-[3.2em] text-sm text-text">{hint}</p>
     </div>
   );
 }
