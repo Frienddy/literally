@@ -32,6 +32,14 @@ export const welcome = {
   viewHistory: 'View past sessions',
   /** Entry point to the standalone gallery of every task's finished drawing. */
   viewExamples: 'See drawing examples',
+
+  /**
+   * Maker credit (no-spoiler: names a team, not the topic). The link is a plain
+   * anchor the player can choose to follow — not a runtime network call, so it
+   * holds the local-first/network-never invariant (ADR-001).
+   */
+  madeBy: 'Made by the Frienddy team',
+  madeByUrl: 'https://frienddy.me',
 } as const;
 
 export type WelcomeCopy = typeof welcome;

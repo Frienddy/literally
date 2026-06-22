@@ -29,6 +29,9 @@ export const tokens = {
     // normal text (≥4.5:1): #2563eb on #ffffff is 5.17:1. Also ≥3:1 against the
     // white surface for the RatingScale selection ring.
     primary: '#2563eb',
+    // Frienddy maker-credit link (Welcome footer). violet-700: ≥4.5:1 on the
+    // light bg/surface it sits on, so it stays AA-legible as small text.
+    brand: '#6d28d9',
   },
   radius: { card: '16px', button: '14px' },
   space: { touch: '44px' }, // min touch target

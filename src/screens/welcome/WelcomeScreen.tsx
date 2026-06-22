@@ -84,6 +84,18 @@ export function WelcomeScreen() {
         </button>
 
         <InstallHint />
+
+        {/* Maker credit — a plain, optional link, kept quiet so it never
+            competes with the Start CTA (copy in welcome.copy.ts, ADR-007). */}
+        <a
+          href={welcome.madeByUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-testid="welcome-madeby"
+          className="min-h-touch text-xs font-medium text-brand active:opacity-70"
+        >
+          {welcome.madeBy} ›
+        </a>
       </div>
     </main>
   );
