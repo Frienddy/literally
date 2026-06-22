@@ -60,6 +60,9 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const sizeRef = useRef({ w: 0, h: 0, dpr: 1 });
+  // Watches the element's own box so the backing store refits on layout reflows
+  // (not just viewport resize) — see the resize handling in `setCanvas`.
+  const roRef = useRef<ResizeObserver | null>(null);
 
   // --- live drawing state kept in refs (no React re-render per point) ---
   const drawingRef = useRef(false);
@@ -117,6 +120,15 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
       draw();
     });
   }, [draw]);
+
+  /** Cancel any pending frame AND clear the handle, so a later schedule isn't
+   *  permanently blocked by `scheduleRender`'s `if (rafRef.current) return`
+   *  guard. Without the reset, a cancel during StrictMode's mount→unmount→remount
+   *  leaves a stale non-zero handle and the canvas never repaints (blank grid). */
+  const cancelRender = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = 0;
+  }, []);
 
   /** Resize backing store for devicePixelRatio so lines stay crisp. */
   const fitToDpr = useCallback(() => {
@@ -222,7 +234,10 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
     (el: HTMLCanvasElement | null) => {
       if (canvasRef.current === el) return;
       const prev = canvasRef.current;
-      if (prev) detach(prev);
+      if (prev) {
+        detach(prev);
+        roRef.current?.unobserve(prev);
+      }
       canvasRef.current = el;
       if (el) {
         fitToDpr();
@@ -231,6 +246,16 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
         el.addEventListener('pointermove', onPointerMove, { passive: false });
         el.addEventListener('pointerup', onPointerUp, { passive: false });
         el.addEventListener('pointercancel', onPointerUp, { passive: false });
+        // Window 'resize' misses layout-driven size changes — e.g. an
+        // instruction card growing/shrinking by a line reflows the drawing area
+        // (Mode 2 swaps step text). Observe the element itself so the backing
+        // store + sizeRef refit and the grid re-renders for the new box, not
+        // just on viewport resize. Setting canvas.width/height doesn't alter the
+        // CSS-driven box, so there's no observer feedback loop.
+        if (typeof ResizeObserver !== 'undefined') {
+          roRef.current ??= new ResizeObserver(() => fitToDpr());
+          roRef.current.observe(el);
+        }
       }
     },
     [detach, fitToDpr, onPointerDown, onPointerMove, onPointerUp],
@@ -241,9 +266,17 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
     window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', onResize);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      cancelRender();
+      roRef.current?.disconnect();
     };
-  }, [fitToDpr]);
+  }, [fitToDpr, cancelRender]);
+
+  // The screen recomputes `grid` whenever the drawing area resizes; redraw so
+  // the dots track the new geometry even if no pointer event follows (covers the
+  // frame between a reflow and the next interaction).
+  useEffect(() => {
+    scheduleRender();
+  }, [opts.grid, scheduleRender]);
 
   return { setCanvas, undo, reset };
 }
