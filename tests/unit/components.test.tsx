@@ -10,7 +10,6 @@ beforeEach(() => {
     screen: 'welcome',
     draft: null,
     sessions: [],
-    reducedIntensity: false,
   });
 });
 

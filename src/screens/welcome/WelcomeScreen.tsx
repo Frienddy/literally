@@ -4,13 +4,12 @@
  * SHOW, DON'T TELL (ADR-008): this screen sets up a task and gets out of the way.
  * It must **not** name or explain autism/ASD — that happens only at Reflection.
  * Copy lives in `content/welcome.copy.ts` (no-spoiler) — a content test forbids any
- * autism/ASD term here. The sensory-safety note + opt-out are a *consent*
- * disclosure (never deferred), even though the topic is (doc 07 §1).
+ * autism/ASD term here. The sensory-safety note is a *consent* disclosure (never
+ * deferred), even though the topic is (doc 07 §1).
  *
  * Thumb-first layout: the primary Start CTA sits in the bottom third (_docs/06 §1).
  */
 import { useGameStore } from '../../store/gameStore';
-import { useReducedIntensity } from '../../store/selectors';
 import { Button } from '../../components/Button';
 import { GuideMascot } from '../../components/GuideMascot';
 import { InstallHint } from '../../components/InstallHint';
@@ -20,8 +19,6 @@ import { welcome } from '../../content/welcome.copy';
 export function WelcomeScreen() {
   const startNewSession = useGameStore((s) => s.startNewSession);
   const go = useGameStore((s) => s.go);
-  const setReducedIntensity = useGameStore((s) => s.setReducedIntensity);
-  const reducedIntensity = useReducedIntensity();
 
   return (
     <main
@@ -67,17 +64,6 @@ export function WelcomeScreen() {
         <Button fullWidth onClick={startNewSession} data-testid="welcome-start">
           {strings.common.start}
         </Button>
-
-        <label className="flex min-h-touch items-center gap-2 text-sm text-textMuted">
-          <input
-            type="checkbox"
-            checked={reducedIntensity}
-            onChange={(e) => setReducedIntensity(e.target.checked)}
-            data-testid="welcome-reduce-intensity"
-            className="h-5 w-5 accent-primary"
-          />
-          {welcome.reduceIntensity}
-        </label>
 
         <button
           type="button"

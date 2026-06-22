@@ -13,7 +13,6 @@ const reset = () =>
     screen: 'welcome',
     draft: null,
     sessions: [],
-    reducedIntensity: false,
   });
 
 /** Start a draft and land on the given feedback screen. */

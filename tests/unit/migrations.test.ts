@@ -3,7 +3,7 @@ import { migrate, SCHEMA_VERSION } from '../../src/store/migrations';
 
 describe('migrate', () => {
   it('passes a well-formed persisted blob through unchanged', () => {
-    const good = { sessions: [], reducedIntensity: true };
+    const good = { sessions: [] };
     expect(migrate(good, SCHEMA_VERSION)).toBe(good);
   });
 
@@ -15,14 +15,10 @@ describe('migrate', () => {
       42,
       {},
       { sessions: 'nope' },
-      { sessions: [], reducedIntensity: 'yes' },
       [],
     ]) {
       expect(() => migrate(bad, 0)).not.toThrow();
-      expect(migrate(bad, 0)).toEqual({
-        sessions: [],
-        reducedIntensity: false,
-      });
+      expect(migrate(bad, 0)).toEqual({ sessions: [] });
     }
   });
 
@@ -34,7 +30,7 @@ describe('migrate', () => {
       },
     });
     expect(() => migrate(evil, 0)).not.toThrow();
-    expect(migrate(evil, 0)).toEqual({ sessions: [], reducedIntensity: false });
+    expect(migrate(evil, 0)).toEqual({ sessions: [] });
   });
 
   it('SCHEMA_VERSION is a positive integer', () => {
@@ -77,7 +73,6 @@ describe('migrate', () => {
           completed_at: 4,
         },
       ],
-      reducedIntensity: false,
     };
 
     const out = migrate(v1, 1);

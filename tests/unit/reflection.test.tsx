@@ -33,7 +33,6 @@ beforeEach(() => {
     draft: null,
     sessions: [seeded],
     selectedSessionId: null,
-    reducedIntensity: false,
   });
 });
 

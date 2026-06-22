@@ -6,7 +6,6 @@ import {
   useLatestSession,
   useSessions,
   useReflectionSession,
-  useReducedIntensity,
 } from '../../src/store/selectors';
 import { useGameStore } from '../../src/store/gameStore';
 import type { GameSession } from '../../src/types/session';
@@ -31,7 +30,6 @@ beforeEach(() => {
     draft: session('draft'),
     sessions: [session('a'), session('b')],
     selectedSessionId: null,
-    reducedIntensity: true,
   });
 });
 
@@ -41,7 +39,6 @@ describe('selectors', () => {
     expect(renderHook(() => useDraft()).result.current?.id).toBe('draft');
     expect(renderHook(() => useLatestSession()).result.current?.id).toBe('a');
     expect(renderHook(() => useSessions()).result.current).toHaveLength(2);
-    expect(renderHook(() => useReducedIntensity()).result.current).toBe(true);
   });
 
   it('useLatestSession returns null when there are no sessions', () => {

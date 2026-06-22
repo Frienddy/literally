@@ -31,7 +31,6 @@ beforeEach(() => {
     draft: null,
     sessions: [session('newer', 2), session('older', 1)],
     selectedSessionId: null,
-    reducedIntensity: false,
   });
 });
 
