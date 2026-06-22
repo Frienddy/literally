@@ -10,7 +10,6 @@ PRD/phase. Resolved notes move to [`archive/`](./archive/) (kept for history).
 | # | Item | Severity | Surfaced by |
 |---|------|----------|-------------|
 | [001](./001-placeholder-pwa-icons.md) | Placeholder PWA icons (blue dot) | Low | PRD-001 |
-| [007](./007-vite-dev-server-advisories.md) | Vite dev-server advisories (need Vite-major bump) | Low (dev-only) | DEBT-003 |
 
 ## Archived (resolved)
 
@@ -21,3 +20,4 @@ PRD/phase. Resolved notes move to [`archive/`](./archive/) (kept for history).
 | [004](./archive/004-engine-palette-vs-tokens.md) | Engine palette duplicates/diverges from design tokens | Low | PRD-004 | debt pass |
 | [005](./archive/005-unauthored-task-subjects.md) | `cat`/`flower` subjects unauthored | Low | PRD-006 | PRD-009 |
 | [006](./archive/006-mode1-ink-contrast.md) | Mode 1 freehand ink near-invisible on the storm canvas | Medium | PRD-008 | debt pass |
+| [007](./archive/007-vite-dev-server-advisories.md) | Vite dev-server advisories (need Vite-major bump) | Low (dev-only) | DEBT-003 | Vite-8 toolchain upgrade |
