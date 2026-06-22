@@ -32,6 +32,8 @@ export const welcome = {
   /** The sensory-safety opt-out control + the history entry point. */
   reduceIntensity: 'Reduce intensity',
   viewHistory: 'View past sessions',
+  /** Entry point to the standalone gallery of every task's finished drawing. */
+  viewExamples: 'See drawing examples',
 } as const;
 
 export type WelcomeCopy = typeof welcome;

@@ -11,6 +11,7 @@ import { FeedbackCheckScreen } from '../screens/feedback/FeedbackCheckScreen';
 import { AnchorPointScreen } from '../screens/mode2/AnchorPointScreen';
 import { ReflectionScreen } from '../screens/reflection/ReflectionScreen';
 import { HistoryScreen } from '../screens/history/HistoryScreen';
+import { ExamplesScreen } from '../screens/examples/ExamplesScreen';
 
 export function ScreenRouter() {
   const screen = useScreen();
@@ -29,5 +30,7 @@ export function ScreenRouter() {
       return <ReflectionScreen />;
     case 'history':
       return <HistoryScreen />;
+    case 'examples':
+      return <ExamplesScreen />;
   }
 }

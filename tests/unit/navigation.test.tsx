@@ -8,6 +8,7 @@ import {
   nextScreen,
   flowStepIndex,
 } from '../../src/app/routes';
+import { TASK_CONTENT } from '../../src/content/tasks';
 
 const reset = () =>
   useGameStore.setState({
@@ -132,6 +133,20 @@ describe('ScreenRouter — the flow is walkable with stubs', () => {
     ).toHaveLength(1);
 
     fireEvent.click(screen.getByTestId('history-back'));
+    expect(screen.getByTestId('screen-welcome')).toBeInTheDocument();
+  });
+
+  it('Welcome → Examples shows every task drawing, and Back returns', () => {
+    render(<ScreenRouter />);
+
+    fireEvent.click(screen.getByTestId('welcome-examples'));
+    expect(screen.getByTestId('screen-examples')).toBeInTheDocument();
+    // One tile per authored task in the pool.
+    expect(
+      within(screen.getByTestId('examples-list')).getAllByRole('listitem'),
+    ).toHaveLength(Object.keys(TASK_CONTENT).length);
+
+    fireEvent.click(screen.getByTestId('examples-back'));
     expect(screen.getByTestId('screen-welcome')).toBeInTheDocument();
   });
 

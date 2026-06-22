@@ -88,6 +88,15 @@ export function WelcomeScreen() {
           {welcome.viewHistory} ›
         </button>
 
+        <button
+          type="button"
+          onClick={() => go('examples')}
+          data-testid="welcome-examples"
+          className="min-h-touch text-sm text-textMuted active:text-text"
+        >
+          {welcome.viewExamples} ›
+        </button>
+
         <InstallHint />
       </div>
     </main>

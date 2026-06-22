@@ -19,7 +19,8 @@ export type Screen =
   | 'mode2'
   | 'stress2'
   | 'reflection'
-  | 'history';
+  | 'history'
+  | 'examples';
 
 interface GameState {
   /** Finite-state-machine: which screen is active. */

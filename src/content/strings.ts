@@ -81,6 +81,15 @@ export const strings = {
     playAgain: 'Play again',
     history: 'View past sessions',
   },
+  // The standalone gallery of every task's finished drawing — "here's how each
+  // one is meant to look". Neutral chrome (no spoiler of the ASD point); the
+  // warm per-subject names come from `content/tasks.ts`.
+  examples: {
+    title: 'Drawing examples',
+    intro: 'Here’s how each finished drawing is meant to look.',
+    // Accessible summary for one gallery item's preview image.
+    itemAria: (subject: string) => `The finished drawing of ${subject}.`,
+  },
   history: {
     title: 'Past sessions',
     empty: 'No past sessions yet.',

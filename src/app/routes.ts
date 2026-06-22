@@ -19,13 +19,17 @@ import type { Screen } from '../store/gameStore';
  * `finalizeSession()` — but the *destinations* are the same.
  */
 export const TRANSITIONS: Record<Screen, Screen[]> = {
-  welcome: ['mode1', 'history'],
+  welcome: ['mode1', 'history', 'examples'],
   mode1: ['stress1', 'welcome'], // welcome via calm Exit (FR-22)
   stress1: ['mode2'],
   mode2: ['stress2'],
   stress2: ['reflection'],
   reflection: ['welcome', 'history'],
   history: ['welcome', 'reflection'],
+  // A standalone gallery of every task's finished drawing. Reachable only from
+  // Welcome and returns there — it sits outside the linear play flow, so it has
+  // no forward step and is not a counted FlowProgress step.
+  examples: ['welcome'],
 };
 
 /** The single linear forward step each screen's primary CTA advances to. */
