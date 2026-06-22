@@ -3,7 +3,7 @@ import {
   clear,
   drawGrid,
   drawGridDrawing,
-  drawStepGuidance,
+  drawStartHighlight,
   drawTargetGhost,
 } from '../../src/engine/render';
 import type { GridSpec } from '../../src/engine/snap';
@@ -96,27 +96,25 @@ describe('drawGridDrawing', () => {
   });
 });
 
-describe('drawStepGuidance', () => {
-  const step = { from: { col: 1, row: 1 }, to: { col: 1, row: 5 } };
+describe('drawStartHighlight', () => {
+  const node = { col: 1, row: 1 };
 
-  it('ghosts the target (dashed) and pulses the start node', () => {
+  it('draws a pulsing halo ring and a solid anchor dot', () => {
     const m = createMockCtx();
-    drawStepGuidance(m.ctx, step, g, 0);
-    // dash on for the ghost, then cleared before the node
-    expect(m.calls.setLineDash).toBe(2);
-    expect(m.calls.stroke).toBe(1); // ghost path
-    expect(m.calls.arc).toBe(1); // pulsing node
-    expect(m.calls.fill).toBe(1);
+    drawStartHighlight(m.ctx, node, g, 0);
+    expect(m.calls.arc).toBe(2); // halo ring + center dot
+    expect(m.calls.stroke).toBe(1); // the halo ring
+    expect(m.calls.fill).toBe(1); // the anchor dot
   });
 
-  it('pulse radius varies with phase', () => {
-    const radiusAt = (phase: number) => {
+  it('halo radius varies with phase', () => {
+    const haloRadiusAt = (phase: number) => {
       const m = createMockCtx();
-      drawStepGuidance(m.ctx, step, g, phase);
-      const arc = m.log.find((c) => c.name === 'arc');
-      return arc!.args[2];
+      drawStartHighlight(m.ctx, node, g, phase);
+      const halo = m.log.find((c) => c.name === 'arc'); // first arc is the ring
+      return halo!.args[2];
     };
-    expect(radiusAt(0.25)).not.toBeCloseTo(radiusAt(0.75), 5);
+    expect(haloRadiusAt(0.25)).not.toBeCloseTo(haloRadiusAt(0.75), 5);
   });
 });
 

@@ -12,7 +12,7 @@ const session = (
 ): GameSession => ({
   id,
   schemaVersion: 1,
-  task_id: 'house',
+  task_id: 'droid',
   mode_1_drawing_data: null,
   mode_2_drawing_data: null,
   mode_1_stress_level: m1,

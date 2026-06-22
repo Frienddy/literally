@@ -49,11 +49,12 @@ export const tokens = {
     giverBeatMs: 2000, // "not quite right" / "Perfect!" beat duration
     snapPopMs: 140, // node snap micro-pop
   },
-  // Mode 2 on-grid guidance (_docs/06 §3.4).
+  // Mode 2 on-grid guidance (_docs/06 §3.4): the pulsing start-node anchor that
+  // marks where each step's line begins (the ghost-the-whole-move hint was
+  // dropped — only the start point is highlighted now).
   guidance: {
-    startNode: '#1f9d57', // pulsing start node
-    ghostPath: 'rgba(31,111,235,.28)', // faint target hint
-    targetNode: '#1f6feb',
+    startNode: '#1f9d57', // pulsing start-node anchor
+    targetNode: '#1f6feb', // grid nodes
   },
 } as const;
 

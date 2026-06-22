@@ -9,11 +9,13 @@
  *
  * Composition: `useCanvas({grid})` (PRD-003) owns the drawing as an imperative
  * island (ADR-006); `StepInstruction` paginates the authored `mode2.steps`
- * (PRD-006 content) and exposes Undo; committing a segment advances the step, and
- * committing the last one opens `GiverBeat`'s "Perfect — exactly right!" beat,
- * after which the drawing is saved and the flow advances to Feedback #2. Mode 1
- * and Mode 2 share the same snap-to-grid canvas (ADR-015) — the step pager is the
- * only difference the player meets.
+ * (PRD-006 content) and exposes Undo; `StepStartHighlight` overlays a pulsing
+ * anchor on the current step's start node so the player can see where the line
+ * begins; committing a segment advances the step, and committing the last one
+ * opens `GiverBeat`'s "Perfect — exactly right!" beat, after which the drawing is
+ * saved and the flow advances to Feedback #2. Mode 1 and Mode 2 share the same
+ * snap-to-grid canvas (ADR-015) — the step pager + start anchor are the only
+ * differences the player meets.
  */
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
@@ -25,6 +27,7 @@ import type { GridSpec } from '../../engine/snap';
 import type { GridDrawing } from '../../types/session';
 import { FlowProgress } from '../../components/FlowProgress';
 import { StepInstruction } from '../../components/StepInstruction';
+import { StepStartHighlight } from '../../components/StepStartHighlight';
 import { GiverBeat } from '../../components/GiverBeat';
 import { resolveTask } from '../../content/tasks';
 import { giver } from '../../content/giver.copy';
@@ -40,7 +43,7 @@ export function AnchorPointScreen() {
   const go = useGameStore((s) => s.go);
   const saveMode2Drawing = useGameStore((s) => s.saveMode2Drawing);
   const draft = useDraft();
-  const task = resolveTask(draft?.task_id ?? 'house');
+  const task = resolveTask(draft?.task_id ?? 'droid');
   const { steps } = task;
   const total = steps.length;
 
@@ -102,6 +105,10 @@ export function AnchorPointScreen() {
   // line auto-advances and Undo regresses for free (no separate step state).
   const step = Math.min(drawing.segments.length, total - 1);
   const canUndo = drawing.segments.length > 0;
+  // Anchor the player at the current step's start node (hidden once the
+  // completion beat plays). The reference is a stable module-level content
+  // object, so the overlay only re-renders when the step actually changes.
+  const startNode = completing ? null : (steps[step]?.segment.from ?? null);
 
   const onUndo = useCallback(() => {
     undo(); // revert the last committed segment; the step card follows the count (R06-5)
@@ -150,12 +157,19 @@ export function AnchorPointScreen() {
           className="absolute inset-0 overflow-hidden rounded-card bg-anchorBg"
         >
           {grid && (
-            <canvas
-              ref={setCanvas}
-              data-testid="mode2-canvas"
-              aria-label={strings.mode2.canvasLabel}
-              className="absolute inset-0 h-full w-full touch-none"
-            />
+            <>
+              <canvas
+                ref={setCanvas}
+                data-testid="mode2-canvas"
+                aria-label={strings.mode2.canvasLabel}
+                className="absolute inset-0 h-full w-full touch-none"
+              />
+              <StepStartHighlight
+                grid={grid}
+                node={startNode}
+                className="absolute inset-0 h-full w-full"
+              />
+            </>
           )}
         </div>
       </StepInstruction>

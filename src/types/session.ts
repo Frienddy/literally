@@ -46,7 +46,7 @@ export type StressLevel = number; // 1..10
 export type ConfidenceLevel = number; // 1..10
 
 /** Which simple task subject the session used; both modes share one. */
-export type TaskId = 'house' | 'cat' | 'flower';
+export type TaskId = 'droid' | 'alien' | 'monster' | 'fighter';
 
 /** The persisted record. Matches the spec's GameSession, expanded for safety. */
 export interface GameSession {
@@ -54,7 +54,7 @@ export interface GameSession {
   id: string;
   /** Schema version for migrations. */
   schemaVersion: number;
-  /** Which task subject this session used (e.g. 'house'); shared by both modes. */
+  /** Which task subject this session used (e.g. 'droid'); shared by both modes. */
   task_id: TaskId;
   /**
    * Both modes draw on the shared snap-to-grid canvas (ADR-015), so each attempt

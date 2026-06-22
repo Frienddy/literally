@@ -68,7 +68,7 @@ const clamp1to10 = (n: number): number =>
   Math.max(1, Math.min(10, Math.round(n)));
 
 /** Task pool — both modes of a session share one subject (PRD-002 R02-4). */
-export const TASKS: TaskId[] = ['house', 'cat', 'flower'];
+export const TASKS: TaskId[] = ['droid', 'alien', 'monster', 'fighter'];
 // Math.random is fine at app runtime (only disallowed inside Workflow scripts).
 const pickTask = (): TaskId => TASKS[Math.floor(Math.random() * TASKS.length)];
 

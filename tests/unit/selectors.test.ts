@@ -14,7 +14,7 @@ import type { GameSession } from '../../src/types/session';
 const session = (id: string): GameSession => ({
   id,
   schemaVersion: 1,
-  task_id: 'cat',
+  task_id: 'alien',
   mode_1_drawing_data: null,
   mode_2_drawing_data: null,
   mode_1_stress_level: null,

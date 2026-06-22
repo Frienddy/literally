@@ -5,7 +5,7 @@
  * the read-only previews (reflection / history). Because both paths use these,
  * a saved drawing always re-renders exactly as it was drawn.
  */
-import type { GridDrawing, GridSegment } from '../types/session';
+import type { GridDrawing, GridNode } from '../types/session';
 import type { GridSpec } from './snap';
 import { nodeToPixel } from './snap';
 import { tokens } from '../styles/tokens';
@@ -17,7 +17,6 @@ import { tokens } from '../styles/tokens';
 const INK = tokens.color.ink; // committed segments (#0f172a)
 const GRID_NODE = tokens.guidance.targetNode; // high-contrast grid nodes & target
 const GUIDE_START = tokens.guidance.startNode; // pulsing start node
-const GHOST_PATH = tokens.guidance.ghostPath; // faint target hint
 
 export function clear(
   ctx: CanvasRenderingContext2D,
@@ -63,35 +62,36 @@ export function drawGridDrawing(
 }
 
 /**
- * Mode 2 guidance: pulse the current step's start node and ghost its target
- * move, so the player can SEE exactly where to go. `phase` (0..1) drives the
- * pulse — pass `(elapsed % period) / period` from the rAF loop.
+ * Mode 2 guidance: highlight the current step's *start* node so the player can
+ * SEE exactly where to begin the line (the literal step text still says where to
+ * go — ADR-015 keeps the canvas itself identical to Mode 1; only this anchor and
+ * the step pager differ). A pulsing halo expands+fades around a solid anchor dot.
+ * `phase` (0..1) drives the pulse — pass `(elapsed % period) / period` from the
+ * rAF loop; pass a fixed phase to draw a single static highlight (reduced motion).
  */
-export function drawStepGuidance(
+export function drawStartHighlight(
   ctx: CanvasRenderingContext2D,
-  step: GridSegment,
+  node: GridNode,
   g: GridSpec,
   phase: number,
 ): void {
-  const from = nodeToPixel(step.from, g);
-  const to = nodeToPixel(step.to, g);
+  const p = nodeToPixel(node, g);
+  const pulse = 0.5 + 0.5 * Math.sin(phase * Math.PI * 2); // 0..1
 
   ctx.save();
-  // faint ghost of the target move
-  ctx.strokeStyle = GHOST_PATH;
-  ctx.setLineDash([6, 6]);
-  ctx.lineWidth = 4;
+  // expanding, fading halo ring — draws the eye to "start here"
+  ctx.strokeStyle = GUIDE_START;
+  ctx.globalAlpha = 0.45 * (1 - pulse);
+  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.moveTo(from.x, from.y);
-  ctx.lineTo(to.x, to.y);
+  ctx.arc(p.x, p.y, 8 + 7 * pulse, 0, Math.PI * 2);
   ctx.stroke();
 
-  // pulsing start node
-  ctx.setLineDash([]);
+  // solid anchor dot — sits on top of the grid node, clearly the start point
+  ctx.globalAlpha = 1;
   ctx.fillStyle = GUIDE_START;
-  const r = 5 + 3 * (0.5 + 0.5 * Math.sin(phase * Math.PI * 2));
   ctx.beginPath();
-  ctx.arc(from.x, from.y, r, 0, Math.PI * 2);
+  ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }

@@ -4,7 +4,7 @@
  * The first half of the core contrast. Per ADR-015 it draws on the **same**
  * snap-to-grid dotted canvas as Mode 2 — same dots, same snapping, same Undo —
  * so the experience holds every tool constant and varies only the *instruction*:
- * here a single, vague, holistic ask ("draw a normal house…") with no counts, no
+ * here a single, vague, holistic ask ("draw a little robot droid…") with no counts, no
  * directions, no per-step guidance and no target. The player has to decide the
  * whole drawing from a fuzzy idea of the subject. Emotional target: *mild*
  * uncertainty — "I can't tell if I'm doing this right" — never distress.
@@ -47,10 +47,10 @@ export function Mode1Screen() {
   const go = useGameStore((s) => s.go);
   const saveMode1Drawing = useGameStore((s) => s.saveMode1Drawing);
 
-  // The session's shared subject drives the vague ask (so a cat session asks for a
-  // cat). Falls back to the house if somehow opened without a draft.
+  // The session's shared subject drives the vague ask (so an alien session asks for
+  // an alien). Falls back to the droid if somehow opened without a draft.
   const draft = useDraft();
-  const task = resolveTask(draft?.task_id ?? 'house');
+  const task = resolveTask(draft?.task_id ?? 'droid');
 
   const { vibrate } = useHaptics();
 

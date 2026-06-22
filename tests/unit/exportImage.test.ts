@@ -6,7 +6,7 @@ import type { GameSession } from '../../src/types/session';
 const session: GameSession = {
   id: 'x',
   schemaVersion: 2,
-  task_id: 'house',
+  task_id: 'droid',
   mode_1_drawing_data: {
     kind: 'grid',
     segments: [{ from: { col: 1, row: 1 }, to: { col: 3, row: 5 } }],
@@ -61,7 +61,7 @@ afterEach(() => vi.restoreAllMocks());
 describe('image export (PRD-008 R08-12 / FR-14)', () => {
   it('reports unsupported and fails safe under jsdom (no 2D context)', async () => {
     expect(isExportSupported()).toBe(false);
-    await expect(exportComparison(session, resolveTask('house'))).resolves.toBe(
+    await expect(exportComparison(session, resolveTask('droid'))).resolves.toBe(
       false,
     );
   });
@@ -85,7 +85,7 @@ describe('image export (PRD-008 R08-12 / FR-14)', () => {
     });
 
     expect(isExportSupported()).toBe(true);
-    await expect(exportComparison(session, resolveTask('house'))).resolves.toBe(
+    await expect(exportComparison(session, resolveTask('droid'))).resolves.toBe(
       true,
     );
     expect(click).toHaveBeenCalledTimes(1);

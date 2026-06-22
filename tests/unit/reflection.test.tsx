@@ -8,7 +8,7 @@ import type { GameSession } from '../../src/types/session';
 const seeded: GameSession = {
   id: 's1',
   schemaVersion: 2,
-  task_id: 'house',
+  task_id: 'droid',
   mode_1_drawing_data: {
     kind: 'grid',
     segments: [{ from: { col: 1, row: 1 }, to: { col: 3, row: 5 } }],
@@ -40,7 +40,7 @@ beforeEach(() => {
 describe('ReflectionScreen (PRD-008)', () => {
   it('reveals the target and renders both attempts with a11y summaries', () => {
     render(<ReflectionScreen />);
-    const label = resolveTask('house').label;
+    const label = resolveTask('droid').label;
 
     // The hidden target, revealed (R08-3).
     expect(screen.getByTestId('target-reveal')).toBeInTheDocument();
