@@ -46,7 +46,7 @@ export type StressLevel = number; // 1..10
 export type ConfidenceLevel = number; // 1..10
 
 /** Which simple task subject the session used; both modes share one. */
-export type TaskId = 'droid' | 'alien' | 'monster' | 'fighter';
+export type TaskId = 'droid' | 'alien' | 'mario' | 'fighter';
 
 /** The persisted record. Matches the spec's GameSession, expanded for safety. */
 export interface GameSession {

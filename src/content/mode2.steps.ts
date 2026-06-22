@@ -16,8 +16,9 @@
  *    → eye lens → two panel bands → a data port → two legs with feet.
  *  - **alien** (31 steps): a blocky space creature — body box → two antennae with
  *    feelers → two eyes with pupils → two side arms → three legs.
- *  - **monster** (32 steps): a square-headed creature — head → two horns → two eyes
- *    with pupils → a Π-shaped fanged mouth.
+ *  - **mario** (35 steps): the plumber mid-jump — peaked cap with an emblem → face
+ *    with eyes, a big nose and a moustache → body → two raised fists → two kicked-out
+ *    legs with feet. Asymmetry is intentional here: it sells the leap.
  *  - **fighter** (26 steps): a space fighter — diamond cockpit with a window → two
  *    struts → two hexagonal wing panels with radial spokes.
  *
@@ -195,63 +196,105 @@ export const alienSteps: Mode2Step[] = [
 ];
 
 /**
- * The monster: a square-headed creature, symmetric about col 11.
- *  - head (steps 1–4, closed loop): 12×12
- *  - horns (steps 5–8): two spikes on top
- *  - eyes (steps 9–12 left, 13–16 right): two 3×3 squares
- *  - pupils (steps 17–20 left, 21–24 right): a 1×1 square inside each eye
- *  - mouth (steps 25–32, closed loop): a Π-shaped fanged frown
+ * Mario, mid-jump — a blocky plumber leaping with both fists up. Unlike the other
+ * subjects this one is **not** mirror-symmetric in feel: the raised arms and the
+ * kicked-out legs read as a leap, which is the whole point of the pose.
+ *  - cap (steps 1–4, closed loop): a wide brim under a peaked dome
+ *  - cap emblem (steps 5–8, closed loop): the little badge on the front of the cap
+ *  - face (steps 9–12, closed loop): an 8×5 box tucked under the brim
+ *  - eyes (steps 13–14): two short vertical strokes either side of the nose
+ *  - nose (steps 15–18, closed loop): a 2×2 box — Mario's big round nose
+ *  - moustache (step 19): a wide line under the nose
+ *  - body (steps 20–23, closed loop): a 10×6 box — the overalls
+ *  - arms (steps 24–29): a bent arm up each side, each tipped with a raised fist
+ *  - legs (steps 30–35): a bent leg kicked out each side, each ending in a foot
  */
-export const monsterSteps: Mode2Step[] = [
+export const marioSteps: Mode2Step[] = [
   {
-    text: 'From the dot, go ➡️ right 12 squares.',
-    segment: seg(5, 4, 17, 4),
-  },
-  { text: 'Go ⬇️ down 12 squares.', segment: seg(17, 4, 17, 16) },
-  { text: 'Go ⬅️ left 12 squares.', segment: seg(17, 16, 5, 16) },
-  { text: 'Go ⬆️ up 12 squares. The head is done.', segment: seg(5, 16, 5, 4) },
-  { text: 'Horn: go up-right (right 1, up 3).', segment: seg(7, 4, 8, 1) },
-  { text: 'Horn: go down-right (right 1, down 3).', segment: seg(8, 1, 9, 4) },
-  {
-    text: 'Other horn: go up-right (right 1, up 3).',
-    segment: seg(13, 4, 14, 1),
+    text: 'From the dot, go ➡️ right 12 squares — the brim of the cap.',
+    segment: seg(5, 6, 17, 6),
   },
   {
-    text: 'Other horn: go down-right (right 1, down 3).',
-    segment: seg(14, 1, 15, 4),
+    text: 'Go up-left (left 2, up 3) to the peak of the cap.',
+    segment: seg(17, 6, 15, 3),
   },
-  { text: 'Left eye: go ➡️ right 3 squares.', segment: seg(7, 6, 10, 6) },
-  { text: 'Left eye: go ⬇️ down 3 squares.', segment: seg(10, 6, 10, 9) },
-  { text: 'Left eye: go ⬅️ left 3 squares.', segment: seg(10, 9, 7, 9) },
+  { text: 'Go ⬅️ left 8 squares across the top.', segment: seg(15, 3, 7, 3) },
   {
-    text: 'Left eye: go ⬆️ up 3 squares to close it.',
-    segment: seg(7, 9, 7, 6),
+    text: 'Go down-left (left 2, down 3) back to the brim. The cap is done.',
+    segment: seg(7, 3, 5, 6),
   },
-  { text: 'Right eye: go ➡️ right 3 squares.', segment: seg(12, 6, 15, 6) },
-  { text: 'Right eye: go ⬇️ down 3 squares.', segment: seg(15, 6, 15, 9) },
-  { text: 'Right eye: go ⬅️ left 3 squares.', segment: seg(15, 9, 12, 9) },
+  { text: 'Emblem: go ➡️ right 2 squares.', segment: seg(10, 4, 12, 4) },
+  { text: 'Emblem: go ⬇️ down 2 squares.', segment: seg(12, 4, 12, 6) },
+  { text: 'Emblem: go ⬅️ left 2 squares.', segment: seg(12, 6, 10, 6) },
   {
-    text: 'Right eye: go ⬆️ up 3 squares to close it.',
-    segment: seg(12, 9, 12, 6),
+    text: 'Emblem: go ⬆️ up 2 squares to close it.',
+    segment: seg(10, 6, 10, 4),
   },
-  { text: 'Left pupil: go ➡️ right 1 square.', segment: seg(8, 7, 9, 7) },
-  { text: 'Left pupil: go ⬇️ down 1 square.', segment: seg(9, 7, 9, 8) },
-  { text: 'Left pupil: go ⬅️ left 1 square.', segment: seg(9, 8, 8, 8) },
-  { text: 'Left pupil: go ⬆️ up 1 square.', segment: seg(8, 8, 8, 7) },
-  { text: 'Right pupil: go ➡️ right 1 square.', segment: seg(13, 7, 14, 7) },
-  { text: 'Right pupil: go ⬇️ down 1 square.', segment: seg(14, 7, 14, 8) },
-  { text: 'Right pupil: go ⬅️ left 1 square.', segment: seg(14, 8, 13, 8) },
-  { text: 'Right pupil: go ⬆️ up 1 square.', segment: seg(13, 8, 13, 7) },
-  { text: 'Mouth: go ➡️ right 4 squares.', segment: seg(9, 11, 13, 11) },
-  { text: 'Mouth: go ⬇️ down 4 squares.', segment: seg(13, 11, 13, 15) },
-  { text: 'Mouth: go ⬅️ left 1 square.', segment: seg(13, 15, 12, 15) },
-  { text: 'Mouth: go ⬆️ up 3 squares.', segment: seg(12, 15, 12, 12) },
-  { text: 'Mouth: go ⬅️ left 2 squares.', segment: seg(12, 12, 10, 12) },
-  { text: 'Mouth: go ⬇️ down 3 squares.', segment: seg(10, 12, 10, 15) },
-  { text: 'Mouth: go ⬅️ left 1 square.', segment: seg(10, 15, 9, 15) },
+  { text: 'Face: go ➡️ right 8 squares.', segment: seg(7, 6, 15, 6) },
+  { text: 'Face: go ⬇️ down 5 squares.', segment: seg(15, 6, 15, 11) },
+  { text: 'Face: go ⬅️ left 8 squares.', segment: seg(15, 11, 7, 11) },
   {
-    text: 'Mouth: go ⬆️ up 4 squares to close it. All done!',
-    segment: seg(9, 15, 9, 11),
+    text: 'Face: go ⬆️ up 5 squares. The face is done.',
+    segment: seg(7, 11, 7, 6),
+  },
+  { text: 'Left eye: go ⬇️ down 2 squares.', segment: seg(9, 7, 9, 9) },
+  { text: 'Right eye: go ⬇️ down 2 squares.', segment: seg(13, 7, 13, 9) },
+  { text: 'Nose: go ➡️ right 2 squares.', segment: seg(10, 7, 12, 7) },
+  { text: 'Nose: go ⬇️ down 2 squares.', segment: seg(12, 7, 12, 9) },
+  { text: 'Nose: go ⬅️ left 2 squares.', segment: seg(12, 9, 10, 9) },
+  {
+    text: 'Nose: go ⬆️ up 2 squares to close it.',
+    segment: seg(10, 9, 10, 7),
+  },
+  {
+    text: 'Moustache: go ➡️ right 6 squares under the nose.',
+    segment: seg(8, 10, 14, 10),
+  },
+  {
+    text: 'Body: go ➡️ right 10 squares for the shoulders.',
+    segment: seg(6, 11, 16, 11),
+  },
+  { text: 'Body: go ⬇️ down 6 squares.', segment: seg(16, 11, 16, 17) },
+  { text: 'Body: go ⬅️ left 10 squares.', segment: seg(16, 17, 6, 17) },
+  {
+    text: 'Body: go ⬆️ up 6 squares. The body is done.',
+    segment: seg(6, 17, 6, 11),
+  },
+  {
+    text: 'Left arm: from the shoulder, go up-left (left 3, up 2).',
+    segment: seg(6, 11, 3, 9),
+  },
+  { text: 'Go ⬆️ up 4 squares to raise the arm.', segment: seg(3, 9, 3, 5) },
+  { text: 'Left fist: go ⬅️ left 2 squares.', segment: seg(3, 5, 1, 5) },
+  {
+    text: 'Right arm: from the shoulder, go up-right (right 3, up 2).',
+    segment: seg(16, 11, 19, 9),
+  },
+  {
+    text: 'Go ⬆️ up 4 squares to raise the arm.',
+    segment: seg(19, 9, 19, 5),
+  },
+  { text: 'Right fist: go ➡️ right 2 squares.', segment: seg(19, 5, 21, 5) },
+  {
+    text: 'Left leg: from the body, go down-left (left 3, down 3).',
+    segment: seg(8, 17, 5, 20),
+  },
+  {
+    text: 'Go down-right (right 1, down 3) to the foot.',
+    segment: seg(5, 20, 6, 23),
+  },
+  { text: 'Left foot: go ⬅️ left 2 squares.', segment: seg(6, 23, 4, 23) },
+  {
+    text: 'Right leg: from the body, go down-right (right 3, down 3).',
+    segment: seg(14, 17, 17, 20),
+  },
+  {
+    text: 'Go down-left (left 1, down 3) to the foot.',
+    segment: seg(17, 20, 16, 23),
+  },
+  {
+    text: 'Right foot: go ➡️ right 2 squares. All done!',
+    segment: seg(16, 23, 18, 23),
   },
 ];
 
@@ -327,5 +370,5 @@ const targetOf = (steps: Mode2Step[]): GridDrawing => ({
 
 export const droidTarget: GridDrawing = targetOf(droidSteps);
 export const alienTarget: GridDrawing = targetOf(alienSteps);
-export const monsterTarget: GridDrawing = targetOf(monsterSteps);
+export const marioTarget: GridDrawing = targetOf(marioSteps);
 export const fighterTarget: GridDrawing = targetOf(fighterSteps);

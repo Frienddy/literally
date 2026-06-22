@@ -57,7 +57,7 @@ async function playFullSession(page: Page) {
   await rate(page, 4, 0); // high stress, low confidence
 
   // Mode 2: build whatever subject this session drew, from the authored steps
-  // (subject-agnostic — the pool is droid/alien/monster/fighter) → Feedback #2.
+  // (subject-agnostic — the pool is droid/alien/mario/fighter) → Feedback #2.
   await expect(page.getByTestId('mode2-canvas')).toBeVisible();
   const g = await readJson<GridSpec>(page, 'mode2-grid-spec');
   const steps = await readJson<Segment[]>(page, 'mode2-steps');

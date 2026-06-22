@@ -5,7 +5,7 @@
  * share one `task_id` (picked in the store), and this is where that id resolves to
  * authored content.
  *
- * The pool is four "I-know-it-but-can't-draw-it" subjects — **droid, alien, monster
+ * The pool is four "I-know-it-but-can't-draw-it" subjects — **droid, alien, mario
  * and fighter** are all authored end to end, so a randomly-picked subject drives a
  * coherent vague ask (M1), step sequence (M2), and target (Reflection).
  */
@@ -16,8 +16,8 @@ import {
   droidTarget,
   alienSteps,
   alienTarget,
-  monsterSteps,
-  monsterTarget,
+  marioSteps,
+  marioTarget,
   fighterSteps,
   fighterTarget,
   type Mode2Step,
@@ -25,7 +25,7 @@ import {
 import {
   droidVague,
   alienVague,
-  monsterVague,
+  marioVague,
   fighterVague,
   type VagueInstruction,
 } from './mode1.instructions';
@@ -64,12 +64,12 @@ const alien: TaskContent = {
   grid,
 };
 
-const monster: TaskContent = {
-  id: 'monster',
-  label: 'a blocky monster',
-  vague: monsterVague,
-  steps: monsterSteps,
-  target: monsterTarget,
+const mario: TaskContent = {
+  id: 'mario',
+  label: 'a jumping Mario',
+  vague: marioVague,
+  steps: marioSteps,
+  target: marioTarget,
   grid,
 };
 
@@ -86,7 +86,7 @@ const fighter: TaskContent = {
 export const TASK_CONTENT: Record<TaskId, TaskContent> = {
   droid,
   alien,
-  monster,
+  mario,
   fighter,
 };
 
