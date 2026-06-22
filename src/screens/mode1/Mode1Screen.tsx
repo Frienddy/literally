@@ -125,7 +125,9 @@ export function Mode1Screen() {
             persistent vague card, the shared snap canvas, and Undo + Done. */}
       <section
         className={
-          'mt-4 grid min-h-0 flex-1 grid-cols-1 gap-4 ' +
+          // Tighter top margin + row gaps on phones give the canvas more height
+          // (the binding axis on portrait); `wide:` restores the desktop spacing.
+          'mt-3 grid min-h-0 flex-1 grid-cols-1 gap-3 wide:mt-4 wide:gap-4 ' +
           "grid-rows-[auto_minmax(0,1fr)_auto] [grid-template-areas:'card'_'canvas'_'controls'] " +
           'wide:grid-cols-[minmax(0,1fr)_20rem] wide:grid-rows-[auto_minmax(0,1fr)] wide:gap-x-6 ' +
           "wide:[grid-template-areas:'canvas_card'_'canvas_controls']"

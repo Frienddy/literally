@@ -57,7 +57,9 @@ export function StepInstruction({
   return (
     <section
       className={
-        'grid min-h-0 grid-cols-1 gap-4 ' +
+        // Tighter row gaps on phones free vertical space for the canvas (the
+        // binding axis in portrait); `wide:` restores the desktop spacing.
+        'grid min-h-0 grid-cols-1 gap-3 wide:gap-4 ' +
         "grid-rows-[auto_minmax(0,1fr)_auto] [grid-template-areas:'card'_'canvas'_'controls'] " +
         'wide:grid-cols-[minmax(0,1fr)_20rem] wide:grid-rows-[auto_minmax(0,1fr)] wide:gap-x-6 ' +
         "wide:[grid-template-areas:'canvas_card'_'canvas_controls'] " +

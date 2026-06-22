@@ -23,7 +23,11 @@ export function StepCard({ label, hint, lead, className = '' }: StepCardProps) {
         {lead}
         <span>{label}</span>
       </div>
-      <p className="mt-2 text-step text-text">{hint}</p>
+      {/* Reserve a constant two-line slot (2 × lineRelaxed 1.6 = 3.2em) so the
+          card height stays fixed as steps swap between one- and two-line
+          instructions — otherwise the card grows/shrinks and the canvas below
+          jumps between steps. */}
+      <p className="mt-2 min-h-[3.2em] text-step text-text">{hint}</p>
     </div>
   );
 }

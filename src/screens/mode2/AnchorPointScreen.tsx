@@ -142,7 +142,7 @@ export function AnchorPointScreen() {
       </div>
 
       <StepInstruction
-        className="mt-4 flex-1"
+        className="mt-3 flex-1 wide:mt-4"
         label={strings.mode2.stepLabel(step + 1, total)}
         instruction={steps[step]?.text ?? ''}
         undoLabel={strings.common.undo}
