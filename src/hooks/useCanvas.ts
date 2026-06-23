@@ -1,56 +1,59 @@
 /**
  * useCanvas (PRD-003 R03-6…R03-14, _docs/04 §3).
  *
- * The shared snap-to-grid drawing surface for **both** modes (ADR-015): pointer
- * moves snap to the nearest dot and each finished drag commits exactly one
- * segment between grid nodes. The canvas is an imperative island (ADR-006): live
- * pointer state accumulates in refs and renders on `requestAnimationFrame`; React
- * never re-renders during a drag. The store is touched only via `onChange`, once
- * per finished segment (or undo/reset).
+ * The shared pixel-paint drawing surface for **both** modes (ADR-015): a pointer
+ * press fills the cell under it with the current color, and a drag keeps filling
+ * each new cell it crosses. The canvas is an imperative island (ADR-006): live
+ * paint state accumulates in refs and renders on `requestAnimationFrame`; React
+ * never re-renders during a stroke. The store is touched only via `onChange`, once
+ * per finished stroke (pointer up) — and on undo/reset.
  *
- * Reconciliation vs _docs/04 §3 reference (no ADR change): the pointer handlers
- * are stable (`useCallback` with stable deps) and read the latest options from
- * `optsRef`, instead of closing over `opts` directly. The reference attaches the
- * listeners once in `setCanvas` but its handlers close over `onChange`/`onHaptic`
- * — so an inline `onChange` from a screen would go stale. Reading through a ref
- * keeps callbacks fresh without re-binding listeners. `undo`/`reset` also emit
- * `onChange` so the persisted drawing stays in sync with what's on screen.
+ * Undo is per *stroke*: one press-and-drag is one undo step (so Mode 2's single
+ * taps undo one cell, and a Mode 1 drag undoes the whole sweep). Re-painting a cell
+ * a new color replaces it in place — it doesn't stack a second cell.
+ *
+ * The handlers are stable (`useCallback` with stable deps) and read the latest
+ * options from `optsRef`, so an inline `onChange`/`onHaptic`/`color` from a screen
+ * never goes stale without re-binding listeners.
  */
 import { useCallback, useEffect, useRef } from 'react';
 import type {
-  GridDrawing,
-  GridSegment,
+  PixelDrawing,
+  PixelCell,
   GridNode,
   Point,
 } from '../types/session';
-import {
-  snapToNode,
-  isWithinSnap,
-  nodeToPixel,
-  type GridSpec,
-} from '../engine/snap';
-import { clear, drawGrid, drawGridDrawing } from '../engine/render';
+import { pointToCell, type GridSpec } from '../engine/snap';
+import { clear, drawGrid, drawPixelDrawing } from '../engine/render';
+import { DEFAULT_COLOR } from '../config';
 import type { HapticKind } from './useHaptics';
 
 export interface UseCanvasOptions {
-  /** The grid the canvas snaps to (omit until measured; the hook no-ops). */
+  /** The cell grid the canvas paints on (omit until measured; the hook no-ops). */
   grid?: GridSpec;
-  /** Called once per movement that produces haptic-worthy feedback. */
+  /** The color each painted cell takes. Defaults to the first palette swatch. */
+  color?: string;
+  /**
+   * Tap-only painting: fill just the pressed cell, ignore drag-across (Mode 2,
+   * where each step is one deliberate square). Defaults to drag-to-paint (Mode 1).
+   */
+  singleCell?: boolean;
+  /** Called once per newly-painted cell that produces haptic-worthy feedback. */
   onHaptic?: (kind: HapticKind) => void;
-  /** Called when a segment finishes (or undo/reset), with the full drawing. */
-  onChange?: (drawing: GridDrawing) => void;
+  /** Called when a stroke finishes (or undo/reset), with the full drawing. */
+  onChange?: (drawing: PixelDrawing) => void;
 }
 
 export interface UseCanvasApi {
   /** Ref callback for the `<canvas>` element. */
   setCanvas: (el: HTMLCanvasElement | null) => void;
-  /** Remove the last committed segment. */
+  /** Remove the last painted stroke. */
   undo: () => void;
-  /** Clear all segments. */
+  /** Clear all painted cells. */
   reset: () => void;
 }
 
-const nodeKey = (n: GridNode): string => `${n.col},${n.row}`;
+const cellKey = (n: GridNode): string => `${n.col},${n.row}`;
 
 export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
   // Always read the freshest options from handlers attached once to the element.
@@ -64,12 +67,12 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
   // (not just viewport resize) — see the resize handling in `setCanvas`.
   const roRef = useRef<ResizeObserver | null>(null);
 
-  // --- live drawing state kept in refs (no React re-render per point) ---
-  const drawingRef = useRef(false);
-  const segmentsRef = useRef<GridSegment[]>([]);
-  const startNodeRef = useRef<GridNode | null>(null);
-  const rawPrevRef = useRef<Point | null>(null);
-  const lastSnapRef = useRef<string | null>(null);
+  // --- live paint state kept in refs (no React re-render per cell) ---
+  const paintingRef = useRef(false);
+  const cellsRef = useRef<PixelCell[]>([]);
+  // Index in `cells` where each stroke began — the undo boundaries (LIFO).
+  const strokeStartsRef = useRef<number[]>([]);
+  const lastCellRef = useRef<string | null>(null);
   const rafRef = useRef(0);
 
   /** Translate a pointer event to a canvas-local CSS-pixel Point. */
@@ -80,13 +83,33 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
   }, []);
 
   /** Snapshot used by `onChange` payloads. */
-  const gridSnapshot = (g: GridSpec): GridDrawing => ({
-    kind: 'grid',
-    segments: [...segmentsRef.current],
+  const snapshot = (g: GridSpec): PixelDrawing => ({
+    kind: 'pixel',
+    cells: cellsRef.current.map((c) => ({ ...c })),
     grid: { cols: g.cols, rows: g.rows },
   });
 
-  /** rAF-batched render of the whole scene (grid + committed + in-progress). */
+  /**
+   * Paint a cell with `color`, deduped by coordinate (re-paint replaces in place).
+   * Returns whether anything changed and whether a *new* cell was added (haptic).
+   */
+  const paintCell = (
+    node: GridNode,
+    color: string,
+  ): { changed: boolean; added: boolean } => {
+    const k = cellKey(node);
+    const idx = cellsRef.current.findIndex((c) => cellKey(c) === k);
+    if (idx === -1) {
+      cellsRef.current.push({ col: node.col, row: node.row, color });
+      return { changed: true, added: true };
+    }
+    if (cellsRef.current[idx].color === color)
+      return { changed: false, added: false };
+    cellsRef.current[idx] = { col: node.col, row: node.row, color };
+    return { changed: true, added: false };
+  };
+
+  /** rAF-batched render of the whole scene (grid + every painted cell). */
   const draw = useCallback(() => {
     const ctx = ctxRef.current;
     if (!ctx) return;
@@ -94,23 +117,8 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
     const { grid } = optsRef.current;
     clear(ctx, w, h);
     if (!grid) return;
-
     drawGrid(ctx, grid);
-    drawGridDrawing(ctx, gridSnapshot(grid), grid);
-    // in-progress rubber-band segment
-    if (startNodeRef.current && rawPrevRef.current) {
-      const a = nodeToPixel(startNodeRef.current, grid);
-      const n = snapToNode(rawPrevRef.current, grid);
-      const b = nodeToPixel(n, grid);
-      ctx.save();
-      ctx.strokeStyle = '#94a3b8';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.stroke();
-      ctx.restore();
-    }
+    drawPixelDrawing(ctx, snapshot(grid), grid);
   }, []);
 
   const scheduleRender = useCallback(() => {
@@ -130,7 +138,7 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
     rafRef.current = 0;
   }, []);
 
-  /** Resize backing store for devicePixelRatio so lines stay crisp. */
+  /** Resize backing store for devicePixelRatio so cells stay crisp. */
   const fitToDpr = useCallback(() => {
     const c = canvasRef.current;
     if (!c) return;
@@ -149,15 +157,16 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
   // --- pointer handlers (stable; read live opts via optsRef) ---
   const onPointerDown = useCallback(
     (e: PointerEvent) => {
-      const { grid } = optsRef.current;
+      const { grid, color, onHaptic } = optsRef.current;
       if (!grid) return;
       e.preventDefault();
+      const cell = pointToCell(toLocal(e), grid);
+      if (!cell) return; // pressed outside the cell field — nothing to paint
       canvasRef.current?.setPointerCapture(e.pointerId);
-      drawingRef.current = true;
-      const p = toLocal(e);
-      startNodeRef.current = snapToNode(p, grid);
-      rawPrevRef.current = p;
-      lastSnapRef.current = nodeKey(startNodeRef.current);
+      paintingRef.current = true;
+      strokeStartsRef.current.push(cellsRef.current.length); // undo boundary
+      lastCellRef.current = cellKey(cell);
+      if (paintCell(cell, color ?? DEFAULT_COLOR).added) onHaptic?.('snap');
       scheduleRender();
     },
     [scheduleRender, toLocal],
@@ -165,19 +174,16 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
 
   const onPointerMove = useCallback(
     (e: PointerEvent) => {
-      if (!drawingRef.current) return;
-      const { grid, onHaptic } = optsRef.current;
-      if (!grid) return;
+      if (!paintingRef.current) return;
+      const { grid, color, singleCell, onHaptic } = optsRef.current;
+      if (!grid || singleCell) return; // tap-only mode ignores drag-across
       e.preventDefault();
-      const p = toLocal(e);
-      rawPrevRef.current = p;
-      const snapped = snapToNode(p, grid);
-      const k = nodeKey(snapped);
-      // crisp haptic the instant we land on a *new* node
-      if (isWithinSnap(p, grid) && k !== lastSnapRef.current) {
-        lastSnapRef.current = k;
-        onHaptic?.('snap');
-      }
+      const cell = pointToCell(toLocal(e), grid);
+      if (!cell) return;
+      const k = cellKey(cell);
+      if (k === lastCellRef.current) return; // still on the same cell
+      lastCellRef.current = k;
+      if (paintCell(cell, color ?? DEFAULT_COLOR).added) onHaptic?.('snap');
       scheduleRender();
     },
     [scheduleRender, toLocal],
@@ -185,37 +191,31 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
 
   const onPointerUp = useCallback(
     (e: PointerEvent) => {
-      if (!drawingRef.current) return;
-      drawingRef.current = false;
+      if (!paintingRef.current) return;
+      paintingRef.current = false;
       const { grid, onChange } = optsRef.current;
       canvasRef.current?.releasePointerCapture(e.pointerId);
-      if (grid) {
-        const from = startNodeRef.current;
-        const to = snapToNode(toLocal(e), grid);
-        if (from && nodeKey(from) !== nodeKey(to)) {
-          segmentsRef.current.push({ from, to });
-          onChange?.(gridSnapshot(grid));
-        }
-      }
-      startNodeRef.current = null;
-      rawPrevRef.current = null;
+      if (grid) onChange?.(snapshot(grid)); // commit the finished stroke once
+      lastCellRef.current = null;
       scheduleRender();
     },
-    [scheduleRender, toLocal],
+    [scheduleRender],
   );
 
   // --- public actions ---
   const undo = useCallback(() => {
     const { grid, onChange } = optsRef.current;
-    segmentsRef.current.pop();
-    if (grid) onChange?.(gridSnapshot(grid));
+    const start = strokeStartsRef.current.pop();
+    if (start !== undefined) cellsRef.current.length = start; // drop that stroke
+    if (grid) onChange?.(snapshot(grid));
     scheduleRender();
   }, [scheduleRender]);
 
   const reset = useCallback(() => {
     const { grid, onChange } = optsRef.current;
-    segmentsRef.current = [];
-    if (grid) onChange?.(gridSnapshot(grid));
+    cellsRef.current = [];
+    strokeStartsRef.current = [];
+    if (grid) onChange?.(snapshot(grid));
     scheduleRender();
   }, [scheduleRender]);
 
@@ -272,7 +272,7 @@ export function useCanvas(opts: UseCanvasOptions): UseCanvasApi {
   }, [fitToDpr, cancelRender]);
 
   // The screen recomputes `grid` whenever the drawing area resizes; redraw so
-  // the dots track the new geometry even if no pointer event follows (covers the
+  // the cells track the new geometry even if no pointer event follows (covers the
   // frame between a reflow and the next interaction).
   useEffect(() => {
     scheduleRender();

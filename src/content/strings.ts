@@ -25,13 +25,19 @@ export const strings = {
     exit: 'Exit',
     back: 'Back',
   },
+  // The fixed pixel-art palette (colors themselves live in `config.palette`).
+  palette: {
+    label: 'Pick a color',
+    // Per-swatch accessible name (the colors are data in `config.palette`).
+    swatchAria: (name: string) => `Use ${name}`,
+  },
   // Welcome's no-spoiler copy (hook, sensory note, "explained at the end") lives in
   // `content/welcome.copy.ts` (PRD-009) — the structural show-don't-tell boundary.
   mode1: {
     // Mode 1 chrome. The vague ask + "not quite right" beat are in `giver.copy.ts`;
     // the per-subject vague instruction block is in `mode1.instructions.ts`. Mode 1
     // shares Mode 2's snap-to-grid canvas (ADR-015); only the instruction differs.
-    canvasLabel: 'Drawing grid — tap or drag to snap a line to the dots.',
+    canvasLabel: 'Drawing grid — tap or drag squares to fill them with color.',
     // The single, persistent instruction card label (the deliberate contrast with
     // Mode 2's counted "Step 1 of 9").
     taskLabel: 'Your task',
@@ -46,9 +52,9 @@ export const strings = {
     // beat live in `content/giver.copy.ts` (PRD-009). These are the chrome strings.
     stepLabel: (n: number, total: number) => `Step ${n} of ${total}`,
     finish: 'Finish',
-    // Names the live snap-to-grid canvas for screen readers (a11y, PRD-010 R10-9),
+    // Names the live pixel canvas for screen readers (a11y, PRD-010 R10-9),
     // mirroring Mode 1's `canvasLabel`.
-    canvasLabel: 'Drawing grid — tap or drag to snap a line to the dots.',
+    canvasLabel: 'Drawing grid — tap the highlighted square to fill it.',
   },
   feedback: {
     stressQuestion: 'How did that feel?',

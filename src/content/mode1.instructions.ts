@@ -1,16 +1,16 @@
 /**
  * Mode 1 — the vague instruction blocks, one per task subject (FR-5). Content is
- * **data, not JSX** (ADR-007). Mode 1 draws on the same snap-to-grid canvas as Mode 2
+ * **data, not JSX** (ADR-007). Mode 1 paints on the same pixel canvas as Mode 2
  * (ADR-015); the *only* difference is this single vague ask versus Mode 2's literal
- * directional steps (`content/mode2.steps.ts`).
+ * one-square-at-a-time steps (`content/mode2.steps.ts`).
  *
  * DESIGN RULE — genuinely under-specified: every clause is deliberately unanchored.
- * No counts, no coordinates, no reference image, nothing that tells you which dots to
- * connect — "normal", "the usual sort", "a sensible size". The subjects are ones
+ * No counts, no coordinates, no reference image, nothing that tells you which squares
+ * to fill — "normal", "the usual sort", "a sensible size". The subjects are ones
  * everyone can picture instantly (a robot droid, a space alien, a jumping Mario, a
  * space fighter, the Mona Lisa) yet has no idea how to *begin* drawing — so the vague
- * ask leaves you stranded on procedure, which is the point: same dots, same tools, no
- * usable instruction.
+ * ask leaves you stranded on procedure, which is the point: same canvas, same tools,
+ * no usable instruction.
  *
  * Tied to the task pool by `content/tasks.ts`. The vague *ask* itself ("just draw it
  * the usual way…") is subject-agnostic and lives in `content/giver.copy.ts`; only the

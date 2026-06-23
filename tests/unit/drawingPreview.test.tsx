@@ -2,21 +2,25 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DrawingPreview } from '../../src/components/DrawingPreview';
 import { TargetReveal } from '../../src/components/TargetReveal';
-import type { GridDrawing } from '../../src/types/session';
+import type { PixelDrawing } from '../../src/types/session';
 
-const grid: GridDrawing = {
-  kind: 'grid',
-  segments: [
-    { from: { col: 0, row: 0 }, to: { col: 0, row: 4 } },
-    { from: { col: 0, row: 4 }, to: { col: 4, row: 4 } },
+const grid: PixelDrawing = {
+  kind: 'pixel',
+  cells: [
+    { col: 0, row: 0, color: '#22c55e' },
+    { col: 0, row: 4, color: '#22c55e' },
+    { col: 4, row: 4, color: '#22c55e' },
   ],
   grid: { cols: 8, rows: 10 },
 };
 
-// A Mode 1 attempt — both modes draw on the shared grid now (ADR-015).
-const attempt: GridDrawing = {
-  kind: 'grid',
-  segments: [{ from: { col: 1, row: 1 }, to: { col: 3, row: 5 } }],
+// A Mode 1 attempt — both modes paint on the shared pixel grid now (ADR-015).
+const attempt: PixelDrawing = {
+  kind: 'pixel',
+  cells: [
+    { col: 1, row: 1, color: '#ef4444' },
+    { col: 3, row: 5, color: '#ef4444' },
+  ],
   grid: { cols: 8, rows: 10 },
 };
 
@@ -38,6 +42,8 @@ function mockCtx() {
     moveTo: rec('moveTo'),
     lineTo: rec('lineTo'),
     stroke: rec('stroke'),
+    fillRect: rec('fillRect'),
+    strokeRect: rec('strokeRect'),
     arc: rec('arc'),
     fill: rec('fill'),
     setLineDash: rec('setLineDash'),
@@ -86,24 +92,24 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('DrawingPreview (PRD-008 R08-2)', () => {
   it('exposes the drawing as a labelled image even without a 2D context', () => {
-    render(<DrawingPreview drawing={grid} label="your grid house" />);
-    const img = screen.getByRole('img', { name: 'your grid house' });
+    render(<DrawingPreview drawing={grid} label="your pixel house" />);
+    const img = screen.getByRole('img', { name: 'your pixel house' });
     expect(img.tagName).toBe('CANVAS');
   });
 
-  it('strokes one line per grid segment via the shared engine', () => {
+  it('fills one rect per painted cell via the shared engine', () => {
     const { m } = withCanvas();
-    render(<DrawingPreview drawing={grid} label="grid" />);
-    expect(m.calls.stroke).toBe(grid.segments.length);
+    render(<DrawingPreview drawing={grid} label="pixels" />);
+    expect(m.calls.fillRect).toBe(grid.cells.length);
     expect(m.calls.clearRect).toBeGreaterThan(0);
   });
 
   it('ghosts a target faintly behind the drawing (R08-3)', () => {
     const { m } = withCanvas();
     render(<DrawingPreview drawing={attempt} ghostTarget={grid} label="m1" />);
-    expect(m.alphaSets).toContain(0.22); // the faint target ghost
-    // ghost (one stroke per segment) + the attempt's segments on top
-    expect(m.calls.stroke).toBe(grid.segments.length + attempt.segments.length);
+    expect(m.alphaSets).toContain(0.25); // the faint target ghost
+    // ghost (one fill per cell) + the attempt's cells on top
+    expect(m.calls.fillRect).toBe(grid.cells.length + attempt.cells.length);
   });
 });
 

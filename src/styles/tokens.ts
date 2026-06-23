@@ -22,6 +22,7 @@ export const tokens = {
     danger: '#b91c1c',
     // Drawing canvas + Mode 2 accents (already designed for the light canvas).
     gridNode: '#1f6feb',
+    gridLine: '#e2e8f0', // faint cell outlines — the "pixel paper" on the canvas
     ink: '#0f172a', // drawing stroke on the light canvas
     anchorBg: '#f8fafc', // bright, clear canvas
     success: '#166534', // green-800 — ≥4.5:1 for the small "Saved" text on light

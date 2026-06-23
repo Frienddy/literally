@@ -13,7 +13,7 @@ import { Canvas } from '../components/Canvas';
 import { useHaptics, type HapticKind } from '../hooks/useHaptics';
 import { config } from '../config';
 import { computeGridSpec } from '../engine/grid';
-import type { GridDrawing } from '../types/session';
+import type { PixelDrawing } from '../types/session';
 
 // Fixed canvas CSS size so the demo grid + Playwright coordinates are
 // deterministic (no async measurement race). Real screens size to the viewport.
@@ -29,7 +29,7 @@ export default function CanvasDemo() {
   );
 
   const { vibrate, supported } = useHaptics();
-  const [last, setLast] = useState<GridDrawing | null>(null);
+  const [last, setLast] = useState<PixelDrawing | null>(null);
   const [haptics, setHaptics] = useState<HapticKind[]>([]);
 
   const onHaptic = (kind: HapticKind) => {

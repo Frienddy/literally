@@ -7,34 +7,42 @@ export interface Point {
 }
 
 /**
- * Snap-to-grid drawing. **Both modes** now draw on the same dotted grid; a drawing
- * is a list of segments between integer grid nodes (col,row), independent of pixel
- * size so it scales to any screen. The modes differ only in the *instruction* —
- * Mode 1 gives one vague ask, Mode 2 gives literal directional steps — never in
- * the canvas (see ADR-015).
+ * Pixel-art drawing. **Both modes** now paint colored squares on the same grid of
+ * cells; a drawing is a list of filled `(col,row)` cells, each carrying a palette
+ * color (hex). It's independent of pixel size so it scales to any screen. The
+ * modes differ only in the *instruction* — Mode 1 gives one vague ask and a free
+ * palette, Mode 2 walks one literal "fill this square <color>" step at a time —
+ * never in the canvas itself (see ADR-015).
+ *
+ * (Pre-pixel sessions stored drawings as line `segments` between grid nodes; that
+ * mechanic was removed when the canvas became a pixel-paint surface — the v2→v3
+ * migration drops those incompatible payloads to `null`, see migrations.)
  */
 export interface GridNode {
   col: number;
   row: number;
 }
 
-export interface GridSegment {
-  from: GridNode;
-  to: GridNode;
+/** One painted cell: a grid coordinate plus its fill color (a hex string). */
+export interface PixelCell {
+  col: number;
+  row: number;
+  /** Fill color — a palette hex (e.g. `#ef4444`), so it renders standalone. */
+  color: string;
 }
 
-export interface GridDrawing {
-  kind: 'grid';
-  segments: GridSegment[];
+export interface PixelDrawing {
+  kind: 'pixel';
+  cells: PixelCell[];
   grid: { cols: number; rows: number };
 }
 
 /**
- * A saved drawing. Historically a discriminated union (freehand vs grid); since
- * both modes share the snap-to-grid canvas (ADR-015) there is one shape. Kept as a
- * named alias so the renderer/preview signatures read intentionally.
+ * A saved drawing. Both modes share the pixel-paint canvas (ADR-015), so there is
+ * one shape. Kept as a named alias so the renderer/preview signatures read
+ * intentionally.
  */
-export type DrawingData = GridDrawing;
+export type DrawingData = PixelDrawing;
 
 /** Stress is an integer 1–10 (validated on input). */
 export type StressLevel = number; // 1..10
@@ -57,12 +65,12 @@ export interface GameSession {
   /** Which task subject this session used (e.g. 'droid'); shared by both modes. */
   task_id: TaskId;
   /**
-   * Both modes draw on the shared snap-to-grid canvas (ADR-015), so each attempt
-   * is a `GridDrawing`. (Pre-ADR-015 sessions stored Mode 1 as freehand pixels;
-   * the v2 migration drops that incompatible payload to `null` — see migrations.)
+   * Both modes paint on the shared pixel canvas (ADR-015), so each attempt is a
+   * `PixelDrawing`. (Pre-pixel sessions stored line-segment drawings; the v3
+   * migration drops those incompatible payloads to `null` — see migrations.)
    */
-  mode_1_drawing_data: GridDrawing | null;
-  mode_2_drawing_data: GridDrawing | null;
+  mode_1_drawing_data: PixelDrawing | null;
+  mode_2_drawing_data: PixelDrawing | null;
   mode_1_stress_level: StressLevel | null;
   mode_2_stress_level: StressLevel | null;
   /** "How sure were you that you did it right?" — the goal's key signal. */

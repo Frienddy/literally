@@ -1,8 +1,8 @@
 export type {
   Point,
   GridNode,
-  GridSegment,
-  GridDrawing,
+  PixelCell,
+  PixelDrawing,
   DrawingData,
   StressLevel,
   ConfidenceLevel,

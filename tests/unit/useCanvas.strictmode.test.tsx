@@ -7,11 +7,11 @@
  * React StrictMode (dev) the mount→unmount→remount cycle reuses the same refs, so
  * a frame scheduled on the first mount is canceled on the strict unmount; if the
  * handle isn't reset, every post-remount `scheduleRender` no-ops and the canvas is
- * cleared by `fitToDpr` but never repainted — a permanently blank dot grid.
+ * cleared by `fitToDpr` but never repainted — a permanently blank cell grid.
  *
  * This drives that exact cycle with a *deferred* rAF queue (frames run only when
  * flushed, so a cancel can land while one is pending) and asserts the grid still
- * paints (clearRect + the dot `arc`s) after the strict remount.
+ * paints (clearRect + the gridline `stroke`) after the strict remount.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { StrictMode } from 'react';
@@ -113,8 +113,8 @@ describe('useCanvas — repaints after a StrictMode remount', () => {
     act(() => flushRaf()); // drain any follow-up scheduled during the first flush
 
     // With the handle wedged, no frame is ever queued post-remount and these stay
-    // 0; with the fix the grid (dots = arc) paints.
+    // 0; with the fix the grid (cell gridlines = stroke) paints.
     expect(calls.clearRect ?? 0).toBeGreaterThan(0);
-    expect(calls.arc ?? 0).toBeGreaterThan(0);
+    expect(calls.stroke ?? 0).toBeGreaterThan(0);
   });
 });

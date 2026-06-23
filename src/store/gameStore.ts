@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type {
   GameSession,
-  GridDrawing,
+  PixelDrawing,
   StressLevel,
   ConfidenceLevel,
   TaskId,
@@ -43,8 +43,8 @@ interface GameState {
 
   // --- lifecycle ---
   startNewSession: () => void;
-  saveMode1Drawing: (d: GridDrawing) => void;
-  saveMode2Drawing: (d: GridDrawing) => void;
+  saveMode1Drawing: (d: PixelDrawing) => void;
+  saveMode2Drawing: (d: PixelDrawing) => void;
   setStress: (mode: 1 | 2, level: StressLevel) => void;
   setConfidence: (mode: 1 | 2, level: ConfidenceLevel) => void;
   finalizeSession: () => void;

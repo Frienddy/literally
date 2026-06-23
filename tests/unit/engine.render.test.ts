@@ -2,16 +2,16 @@ import { describe, it, expect } from 'vitest';
 import {
   clear,
   drawGrid,
-  drawGridDrawing,
-  drawStartHighlight,
+  drawPixelDrawing,
+  drawTargetHighlight,
   drawTargetGhost,
 } from '../../src/engine/render';
 import type { GridSpec } from '../../src/engine/snap';
-import type { GridDrawing } from '../../src/types/session';
+import type { PixelDrawing } from '../../src/types/session';
 
 /**
  * jsdom has no real 2D context, so we record calls against a minimal stub. This
- * is enough to assert the engine's drawing *commands* (counts, alpha, dashes).
+ * is enough to assert the engine's drawing *commands* (counts, alpha, rect sizes).
  */
 function createMockCtx() {
   const calls: Record<string, number> = {};
@@ -34,9 +34,8 @@ function createMockCtx() {
     moveTo: record('moveTo'),
     lineTo: record('lineTo'),
     stroke: record('stroke'),
-    arc: record('arc'),
-    fill: record('fill'),
-    setLineDash: record('setLineDash'),
+    fillRect: record('fillRect'),
+    strokeRect: record('strokeRect'),
     fillStyle: '',
     strokeStyle: '',
     lineCap: '',
@@ -70,64 +69,66 @@ describe('clear', () => {
 });
 
 describe('drawGrid', () => {
-  it('draws one node dot per grid intersection', () => {
+  it('draws one gridline per cell boundary (the pixel paper)', () => {
     const m = createMockCtx();
     drawGrid(m.ctx, g);
-    expect(m.calls.arc).toBe(g.cols * g.rows);
-    expect(m.calls.fill).toBe(g.cols * g.rows);
+    // (cols+1) vertical + (rows+1) horizontal lines, batched into one stroke.
+    const lines = g.cols + 1 + (g.rows + 1);
+    expect(m.calls.moveTo).toBe(lines);
+    expect(m.calls.lineTo).toBe(lines);
+    expect(m.calls.stroke).toBe(1);
   });
 });
 
-describe('drawGridDrawing', () => {
-  it('strokes one line per segment', () => {
-    const d: GridDrawing = {
-      kind: 'grid',
-      segments: [
-        { from: { col: 0, row: 0 }, to: { col: 0, row: 4 } },
-        { from: { col: 0, row: 4 }, to: { col: 3, row: 4 } },
+describe('drawPixelDrawing', () => {
+  it('fills one rect per painted cell', () => {
+    const d: PixelDrawing = {
+      kind: 'pixel',
+      cells: [
+        { col: 0, row: 0, color: '#ef4444' },
+        { col: 3, row: 4, color: '#3b82f6' },
       ],
       grid: { cols: 8, rows: 10 },
     };
     const m = createMockCtx();
-    drawGridDrawing(m.ctx, d, g);
-    expect(m.calls.moveTo).toBe(2);
-    expect(m.calls.lineTo).toBe(2);
-    expect(m.calls.stroke).toBe(2);
+    drawPixelDrawing(m.ctx, d, g);
+    expect(m.calls.fillRect).toBe(2);
   });
 });
 
-describe('drawStartHighlight', () => {
-  const node = { col: 1, row: 1 };
+describe('drawTargetHighlight', () => {
+  const cell = { col: 1, row: 1 };
 
-  it('draws a pulsing halo ring and a solid anchor dot', () => {
+  it('draws a pulsing halo rect and a solid cell outline', () => {
     const m = createMockCtx();
-    drawStartHighlight(m.ctx, node, g, 0);
-    expect(m.calls.arc).toBe(2); // halo ring + center dot
-    expect(m.calls.stroke).toBe(1); // the halo ring
-    expect(m.calls.fill).toBe(1); // the anchor dot
+    drawTargetHighlight(m.ctx, cell, g, 0);
+    expect(m.calls.strokeRect).toBe(2); // halo + inner outline
   });
 
-  it('halo radius varies with phase', () => {
-    const haloRadiusAt = (phase: number) => {
+  it('halo size varies with phase', () => {
+    const haloSizeAt = (phase: number) => {
       const m = createMockCtx();
-      drawStartHighlight(m.ctx, node, g, phase);
-      const halo = m.log.find((c) => c.name === 'arc'); // first arc is the ring
-      return halo!.args[2];
+      drawTargetHighlight(m.ctx, cell, g, phase);
+      const halo = m.log.find((c) => c.name === 'strokeRect'); // first rect = halo
+      return halo!.args[2]; // width
     };
-    expect(haloRadiusAt(0.25)).not.toBeCloseTo(haloRadiusAt(0.75), 5);
+    expect(haloSizeAt(0.25)).not.toBeCloseTo(haloSizeAt(0.75), 5);
   });
 });
 
 describe('drawTargetGhost', () => {
-  it('renders the grid drawing at reduced alpha', () => {
-    const target: GridDrawing = {
-      kind: 'grid',
-      segments: [{ from: { col: 0, row: 0 }, to: { col: 2, row: 0 } }],
+  it('renders the pixel drawing at reduced alpha', () => {
+    const target: PixelDrawing = {
+      kind: 'pixel',
+      cells: [
+        { col: 0, row: 0, color: '#22c55e' },
+        { col: 1, row: 0, color: '#22c55e' },
+      ],
       grid: { cols: 8, rows: 10 },
     };
     const m = createMockCtx();
     drawTargetGhost(m.ctx, target, g);
-    expect(m.alphaSets).toContain(0.22); // faint
-    expect(m.calls.stroke).toBe(1); // the single target segment
+    expect(m.alphaSets).toContain(0.25); // faint
+    expect(m.calls.fillRect).toBe(2); // one per ghosted cell
   });
 });

@@ -7,16 +7,16 @@ import type { GameSession } from '../../src/types/session';
 
 const seeded: GameSession = {
   id: 's1',
-  schemaVersion: 2,
+  schemaVersion: 3,
   task_id: 'droid',
   mode_1_drawing_data: {
-    kind: 'grid',
-    segments: [{ from: { col: 1, row: 1 }, to: { col: 3, row: 5 } }],
+    kind: 'pixel',
+    cells: [{ col: 1, row: 1, color: '#ef4444' }],
     grid: { cols: 8, rows: 10 },
   },
   mode_2_drawing_data: {
-    kind: 'grid',
-    segments: [{ from: { col: 0, row: 0 }, to: { col: 0, row: 4 } }],
+    kind: 'pixel',
+    cells: [{ col: 0, row: 0, color: '#3b82f6' }],
     grid: { cols: 8, rows: 10 },
   },
   mode_1_stress_level: 7,

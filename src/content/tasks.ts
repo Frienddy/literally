@@ -9,7 +9,7 @@
  * fighter and monalisa** are all authored end to end, so a randomly-picked subject
  * drives a coherent vague ask (M1), step sequence (M2), and target (Reflection).
  */
-import type { GridDrawing, TaskId } from '../types/session';
+import type { PixelDrawing, TaskId } from '../types/session';
 import { config } from '../config';
 import {
   droidSteps,
@@ -39,11 +39,11 @@ export interface TaskContent {
   label: string;
   /** The vague, fading Mode 1 instruction block for this subject (FR-5). */
   vague: VagueInstruction;
-  /** Ordered, literal Mode 2 steps (one segment each). */
+  /** Ordered, literal Mode 2 steps (one square each). */
   steps: Mode2Step[];
   /** The intended result — the hidden target. */
-  target: GridDrawing;
-  /** Logical grid size (nodes) this task's coordinates live on. */
+  target: PixelDrawing;
+  /** Logical grid size (cells) this task's coordinates live on. */
   grid: { cols: number; rows: number };
 }
 

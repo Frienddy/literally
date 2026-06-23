@@ -24,7 +24,7 @@ import { useCanvas } from '../../hooks/useCanvas';
 import { useHaptics } from '../../hooks/useHaptics';
 import { computeGridSpec } from '../../engine/grid';
 import type { GridSpec } from '../../engine/snap';
-import type { GridDrawing } from '../../types/session';
+import type { PixelDrawing } from '../../types/session';
 import { FlowProgress } from '../../components/FlowProgress';
 import { StepInstruction } from '../../components/StepInstruction';
 import { StepStartHighlight } from '../../components/StepStartHighlight';
@@ -33,9 +33,9 @@ import { resolveTask } from '../../content/tasks';
 import { giver } from '../../content/giver.copy';
 import { strings } from '../../content/strings';
 
-const emptyGrid = (cols: number, rows: number): GridDrawing => ({
-  kind: 'grid',
-  segments: [],
+const emptyPixel = (cols: number, rows: number): PixelDrawing => ({
+  kind: 'pixel',
+  cells: [],
   grid: { cols, rows },
 });
 
@@ -50,10 +50,10 @@ export function AnchorPointScreen() {
   const { vibrate } = useHaptics();
 
   const [completing, setCompleting] = useState(false);
-  // The committed drawing is updated once per finished segment (not per pointer
+  // The committed drawing is updated once per filled square (not per pointer
   // event — ADR-006), then saved once at completion (R06-13).
-  const [drawing, setDrawing] = useState<GridDrawing>(() =>
-    emptyGrid(task.grid.cols, task.grid.rows),
+  const [drawing, setDrawing] = useState<PixelDrawing>(() =>
+    emptyPixel(task.grid.cols, task.grid.rows),
   );
 
   // Measure the drawing area → a centered grid spec for the snap canvas.
@@ -81,13 +81,13 @@ export function AnchorPointScreen() {
     [size, task.grid.cols, task.grid.rows],
   );
 
-  // Each finished segment advances one step; reaching `total` opens the
-  // completion beat (R06-12). Committing happens once per finished segment, not
-  // per pointer event (ADR-006).
+  // Each filled square advances one step; reaching `total` opens the completion
+  // beat (R06-12). Committing happens once per filled square, not per pointer
+  // event (ADR-006).
   const onCanvasChange = useCallback(
-    (d: GridDrawing) => {
+    (d: PixelDrawing) => {
       setDrawing(d);
-      if (d.segments.length >= total) {
+      if (d.cells.length >= total) {
         setCompleting(true);
         vibrate('snap'); // soft confirm pulse on completion (R06-12)
       }
@@ -95,23 +95,29 @@ export function AnchorPointScreen() {
     [total, vibrate],
   );
 
+  // The visible card is driven by how many squares are filled, so painting a
+  // square auto-advances and Undo regresses for free (no separate step state).
+  const step = Math.min(drawing.cells.length, total - 1);
+  const canUndo = drawing.cells.length > 0;
+  // Mode 2 dictates the color: each step says which swatch to use, so the canvas
+  // is pre-loaded with that color and the player just taps the highlighted square.
+  const stepColor = steps[step]?.color;
+
   const { setCanvas, undo } = useCanvas({
     grid: grid ?? undefined,
-    onHaptic: vibrate, // crisp snap "click" on each new node (R06-8)
+    color: stepColor,
+    singleCell: true, // guided: one deliberate square per step, no drag-fill
+    onHaptic: vibrate, // crisp confirm "click" on each filled square (R06-8)
     onChange: onCanvasChange,
   });
 
-  // The visible card is driven by how many segments are committed, so drawing a
-  // line auto-advances and Undo regresses for free (no separate step state).
-  const step = Math.min(drawing.segments.length, total - 1);
-  const canUndo = drawing.segments.length > 0;
-  // Anchor the player at the current step's start node (hidden once the
+  // Anchor the player on the current step's target cell (hidden once the
   // completion beat plays). The reference is a stable module-level content
   // object, so the overlay only re-renders when the step actually changes.
-  const startNode = completing ? null : (steps[step]?.segment.from ?? null);
+  const targetCell = completing ? null : (steps[step]?.cell ?? null);
 
   const onUndo = useCallback(() => {
-    undo(); // revert the last committed segment; the step card follows the count (R06-5)
+    undo(); // revert the last filled square; the step card follows the count (R06-5)
   }, [undo]);
 
   const finish = useCallback(() => {
@@ -135,10 +141,10 @@ export function AnchorPointScreen() {
       <div data-testid="mode2-drawing" hidden>
         {JSON.stringify(drawing)}
       </div>
-      {/* The session's authored step segments — lets E2E drive any subject in
-            the (now-closed) task pool without hard-coding one. */}
+      {/* The session's authored step cells + colors — lets E2E drive any subject
+            in the (now-closed) task pool without hard-coding one. */}
       <div data-testid="mode2-steps" hidden>
-        {JSON.stringify(steps.map((s) => s.segment))}
+        {JSON.stringify(steps.map((s) => ({ cell: s.cell, color: s.color })))}
       </div>
 
       <StepInstruction
@@ -166,7 +172,7 @@ export function AnchorPointScreen() {
               />
               <StepStartHighlight
                 grid={grid}
-                node={startNode}
+                cell={targetCell}
                 className="absolute inset-0 h-full w-full"
               />
             </>

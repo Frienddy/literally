@@ -49,7 +49,7 @@ type GridSpec = {
   originY: number;
 };
 type GridNode = { col: number; row: number };
-type Segment = { from: GridNode; to: GridNode };
+type Step = { cell: GridNode; color: string };
 
 async function readJson<T>(page: Page, testId: string): Promise<T> {
   const text = await page.getByTestId(testId).textContent();
@@ -100,21 +100,19 @@ async function gotoMode2(page: Page) {
 /** …draw Mode 2's steps → confirm beat → rate Feedback #2 → Reflection. */
 async function gotoReflection(page: Page) {
   await gotoMode2(page);
-  // No Next button — each finished line auto-advances (ADR-015); draw all the
-  // authored steps, then confirm the completion beat.
+  // No Next button — each filled square auto-advances (ADR-015); fill all the
+  // authored squares, then confirm the completion beat.
   const g = await readJson<GridSpec>(page, 'mode2-grid-spec');
-  const steps = await readJson<Segment[]>(page, 'mode2-steps');
+  const steps = await readJson<Step[]>(page, 'mode2-steps');
   const box = (await page.getByTestId('mode2-canvas').boundingBox())!;
-  const px = (n: GridNode) => ({
-    x: box.x + g.originX + n.col * g.cell,
-    y: box.y + g.originY + n.row * g.cell,
+  const cellPx = (n: GridNode) => ({
+    x: box.x + g.originX + (n.col + 0.5) * g.cell,
+    y: box.y + g.originY + (n.row + 0.5) * g.cell,
   });
-  for (const { from, to } of steps) {
-    const a = px(from);
-    const b = px(to);
-    await page.mouse.move(a.x, a.y);
+  for (const { cell } of steps) {
+    const p = cellPx(cell);
+    await page.mouse.move(p.x, p.y);
     await page.mouse.down();
-    await page.mouse.move(b.x, b.y, { steps: 12 });
     await page.mouse.up();
   }
   await page.getByTestId('mode2-complete-continue').click();

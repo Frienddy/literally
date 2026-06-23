@@ -34,6 +34,8 @@ function mockCtx() {
     moveTo: rec('moveTo'),
     lineTo: rec('lineTo'),
     stroke: rec('stroke'),
+    fillRect: rec('fillRect'),
+    strokeRect: rec('strokeRect'),
     arc: rec('arc'),
     fill: rec('fill'),
     setLineDash: rec('setLineDash'),
@@ -120,15 +122,15 @@ describe('useCanvas — refs-not-state during a drag (ADR-006)', () => {
 
     // React stayed put through the whole drag...
     expect(renders).toBe(baseline);
-    // ...the store was touched exactly once, on completion...
-    expect(onChange).toHaveBeenCalledTimes(1); // one committed segment
-    expect(onChange.mock.calls[0][0]).toMatchObject({ kind: 'grid' });
+    // ...the store was touched exactly once, on stroke completion...
+    expect(onChange).toHaveBeenCalledTimes(1); // one finished stroke
+    expect(onChange.mock.calls[0][0]).toMatchObject({ kind: 'pixel' });
     // ...and the scene still painted off the React path (rAF → ctx).
     expect(calls.clearRect).toBeGreaterThan(0);
-    expect(calls.stroke).toBeGreaterThan(0);
+    expect(calls.fillRect).toBeGreaterThan(0); // cells painted into the canvas
   });
 
-  it('re-renders at most once when segment-end writes to state, never mid-drag', () => {
+  it('re-renders at most once when stroke-end writes to state, never mid-drag', () => {
     let renders = 0;
     function Host() {
       renders++;

@@ -9,10 +9,10 @@
  * is simply absent where 2D canvas / `toBlob` isn't available — e.g. jsdom — and
  * `exportComparison` fails safe (returns false, never throws).
  */
-import type { DrawingData, GameSession, GridDrawing } from '../types/session';
+import type { DrawingData, GameSession, PixelDrawing } from '../types/session';
 import type { TaskContent } from '../content/tasks';
 import { computeGridSpec } from '../engine/grid';
-import { drawGridDrawing, drawTargetGhost } from '../engine/render';
+import { drawPixelDrawing, drawTargetGhost } from '../engine/render';
 import { tokens } from '../styles/tokens';
 
 // Sourced from the design tokens so the exported PNG tracks the (light) theme.
@@ -46,7 +46,7 @@ function renderCard(
   w: number,
   h: number,
   drawing: DrawingData | null,
-  ghost: GridDrawing | null,
+  ghost: PixelDrawing | null,
 ): void {
   ctx.save();
   ctx.fillStyle = CARD;
@@ -61,7 +61,7 @@ function renderCard(
     );
   }
   if (drawing) {
-    drawGridDrawing(
+    drawPixelDrawing(
       ctx,
       drawing,
       computeGridSpec(w, h, drawing.grid.cols, drawing.grid.rows, PAD),

@@ -1,17 +1,18 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGameStore, TASKS, type Screen } from '../../src/store/gameStore';
-import type { GridDrawing } from '../../src/types/session';
+import { SCHEMA_VERSION } from '../../src/store/migrations';
+import type { PixelDrawing } from '../../src/types/session';
 
-// Both modes draw on the shared snap-to-grid canvas (ADR-015) → both are grids.
-const fakeMode1: GridDrawing = {
-  kind: 'grid',
-  segments: [{ from: { col: 2, row: 4 }, to: { col: 2, row: 8 } }],
+// Both modes paint on the shared pixel canvas (ADR-015) → both are pixel drawings.
+const fakeMode1: PixelDrawing = {
+  kind: 'pixel',
+  cells: [{ col: 2, row: 4, color: '#ef4444' }],
   grid: { cols: 8, rows: 10 },
 };
 
-const fakeGrid: GridDrawing = {
-  kind: 'grid',
-  segments: [{ from: { col: 0, row: 0 }, to: { col: 1, row: 1 } }],
+const fakeGrid: PixelDrawing = {
+  kind: 'pixel',
+  cells: [{ col: 0, row: 0, color: '#3b82f6' }],
   grid: { cols: 8, rows: 10 },
 };
 
@@ -57,7 +58,7 @@ describe('lifecycle', () => {
     expect(typeof session.started_at).toBe('number');
     expect(typeof session.completed_at).toBe('number');
     expect(session.id).toBeTruthy();
-    expect(session.schemaVersion).toBe(2);
+    expect(session.schemaVersion).toBe(SCHEMA_VERSION);
   });
 
   it('newest session goes to the front of the list', () => {

@@ -26,8 +26,10 @@ import { useCanvas } from '../../hooks/useCanvas';
 import { useHaptics } from '../../hooks/useHaptics';
 import { computeGridSpec } from '../../engine/grid';
 import type { GridSpec } from '../../engine/snap';
-import type { GridDrawing } from '../../types/session';
+import type { PixelDrawing } from '../../types/session';
+import { DEFAULT_COLOR } from '../../config';
 import { Button } from '../../components/Button';
+import { ColorPalette } from '../../components/ColorPalette';
 import { ExitButton } from '../../components/ExitButton';
 import { FlowProgress } from '../../components/FlowProgress';
 import { GuideMascot } from '../../components/GuideMascot';
@@ -37,9 +39,9 @@ import { resolveTask } from '../../content/tasks';
 import { giver } from '../../content/giver.copy';
 import { strings } from '../../content/strings';
 
-const emptyGrid = (cols: number, rows: number): GridDrawing => ({
-  kind: 'grid',
-  segments: [],
+const emptyPixel = (cols: number, rows: number): PixelDrawing => ({
+  kind: 'pixel',
+  cells: [],
   grid: { cols, rows },
 });
 
@@ -55,10 +57,13 @@ export function Mode1Screen() {
   const { vibrate } = useHaptics();
 
   const [completing, setCompleting] = useState(false);
-  // The committed drawing is updated once per finished segment (not per pointer
+  // The current paint color (free choice in Mode 1 — the whole point is the player
+  // decides everything from a fuzzy idea).
+  const [color, setColor] = useState<string>(DEFAULT_COLOR);
+  // The committed drawing is updated once per finished stroke (not per pointer
   // event — ADR-006), then saved once on Done (R05-9).
-  const [drawing, setDrawing] = useState<GridDrawing>(() =>
-    emptyGrid(task.grid.cols, task.grid.rows),
+  const [drawing, setDrawing] = useState<PixelDrawing>(() =>
+    emptyPixel(task.grid.cols, task.grid.rows),
   );
 
   // Measure the drawing area → a centered grid spec (same geometry as Mode 2).
@@ -88,11 +93,12 @@ export function Mode1Screen() {
 
   const { setCanvas, undo } = useCanvas({
     grid: grid ?? undefined,
-    onHaptic: vibrate, // crisp snap on each new node — same canvas as Mode 2
+    color,
+    onHaptic: vibrate, // crisp confirm on each filled square — same canvas as Mode 2
     onChange: (d) => setDrawing(d),
   });
 
-  const canUndo = drawing.segments.length > 0;
+  const canUndo = drawing.cells.length > 0;
 
   const onDone = useCallback(() => setCompleting(true), []); // → the beat
   const finish = useCallback(() => {
@@ -156,23 +162,26 @@ export function Mode1Screen() {
         </div>
 
         {!completing && (
-          <div className="flex gap-3 [grid-area:controls] wide:self-end">
-            <Button
-              variant="secondary"
-              onClick={undo}
-              disabled={!canUndo}
-              data-testid="mode1-undo"
-              className="flex-1"
-            >
-              {strings.common.undo}
-            </Button>
-            <Button
-              onClick={onDone}
-              data-testid="mode1-done"
-              className="flex-[2]"
-            >
-              {strings.mode1.doneLabel}
-            </Button>
+          <div className="flex flex-col gap-3 [grid-area:controls] wide:self-end">
+            <ColorPalette selected={color} onSelect={setColor} />
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                onClick={undo}
+                disabled={!canUndo}
+                data-testid="mode1-undo"
+                className="flex-1"
+              >
+                {strings.common.undo}
+              </Button>
+              <Button
+                onClick={onDone}
+                data-testid="mode1-done"
+                className="flex-[2]"
+              >
+                {strings.mode1.doneLabel}
+              </Button>
+            </div>
           </div>
         )}
       </section>

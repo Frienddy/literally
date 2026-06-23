@@ -85,17 +85,17 @@ describe('ScreenRouter — the flow is walkable with stubs', () => {
     fireEvent.click(screen.getByTestId('feedback-continue'));
     expect(screen.getByTestId('screen-mode2')).toBeInTheDocument();
 
-    // Mode 2's snap canvas needs real layout geometry to commit segments (drawing
-    // a line is what advances the step now — ADR-015), which jsdom can't provide:
-    // with no canvas measurement there's no grid and nothing to draw. That
-    // screen-level wiring is covered by tests/e2e/mode2.spec.ts; here we drive the
-    // store through the transition the completed screen performs, to keep walking
-    // the FSM into Feedback #2.
+    // Mode 2's pixel canvas needs real layout geometry to commit filled cells
+    // (filling a square is what advances the step now — ADR-015), which jsdom
+    // can't provide: with no canvas measurement there's no grid and nothing to
+    // paint. That screen-level wiring is covered by tests/e2e/mode2.spec.ts; here
+    // we drive the store through the transition the completed screen performs, to
+    // keep walking the FSM into Feedback #2.
     act(() => {
       const store = useGameStore.getState();
       store.saveMode2Drawing({
-        kind: 'grid',
-        segments: [],
+        kind: 'pixel',
+        cells: [],
         grid: { cols: 8, rows: 10 },
       });
       store.go('stress2');

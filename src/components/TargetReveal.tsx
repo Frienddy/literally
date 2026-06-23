@@ -5,17 +5,17 @@
  * *instructions'* doing, not the player's.
  *
  * It fades in gently — unless `prefers-reduced-motion` is set, in which case it
- * appears instantly (R08-13 / NFR-6). The clean target is a grid drawing, so it
+ * appears instantly (R08-13 / NFR-6). The clean target is a pixel drawing, so it
  * re-renders through the shared `DrawingPreview` like every other saved drawing.
  */
 import { useEffect, useState } from 'react';
-import type { GridDrawing } from '../types/session';
+import type { PixelDrawing } from '../types/session';
 import { DrawingPreview } from './DrawingPreview';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 export interface TargetRevealProps {
   /** The clean, intended drawing for this session's task (the hidden target). */
-  target: GridDrawing;
+  target: PixelDrawing;
   /** Caption above the target (e.g. "What you were asked for — both times"). */
   heading: string;
   /** Accessible summary of the target image. */

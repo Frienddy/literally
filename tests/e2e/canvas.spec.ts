@@ -15,13 +15,16 @@ type GridSpec = {
   originY: number;
 };
 
+type PixelCell = { col: number; row: number; color: string };
+type Drawing = { kind: string; cells: PixelCell[] };
+
 async function readJson<T>(page: Page, testId: string): Promise<T> {
   const text = await page.getByTestId(testId).textContent();
   return JSON.parse(text ?? 'null') as T;
 }
 
-test.describe('canvas engine — snap-to-grid (shared by both modes)', () => {
-  test('dragging node→node creates exactly one snapped segment + snap haptics', async ({
+test.describe('canvas engine — pixel paint (shared by both modes)', () => {
+  test('dragging across cells fills them + fires fill haptics', async ({
     page,
   }) => {
     await page.goto('/?harness=canvas');
@@ -30,59 +33,56 @@ test.describe('canvas engine — snap-to-grid (shared by both modes)', () => {
     const box = (await canvas.boundingBox())!;
     const g = await readJson<GridSpec>(page, 'grid-spec');
 
-    const nodePx = (col: number, row: number) => ({
-      x: box.x + g.originX + col * g.cell,
-      y: box.y + g.originY + row * g.cell,
+    const cellPx = (col: number, row: number) => ({
+      x: box.x + g.originX + (col + 0.5) * g.cell,
+      y: box.y + g.originY + (row + 0.5) * g.cell,
     });
-    const a = nodePx(2, 1);
-    const b = nodePx(2, 5);
+    const a = cellPx(2, 1);
+    const b = cellPx(2, 5);
 
     await page.mouse.move(a.x, a.y);
     await page.mouse.down();
     await page.mouse.move(b.x, b.y, { steps: 30 });
     await page.mouse.up();
 
-    const drawing = await readJson<{
-      kind: string;
-      segments: { from: { col: number; row: number }; to: GridSpec }[];
-    }>(page, 'last-change');
-    expect(drawing.kind).toBe('grid');
-    expect(drawing.segments).toHaveLength(1);
+    const drawing = await readJson<Drawing>(page, 'last-change');
+    expect(drawing.kind).toBe('pixel');
+    // A drag down a column fills several distinct cells (integer coords + a color).
+    expect(drawing.cells.length).toBeGreaterThan(1);
+    const c = drawing.cells[0];
+    expect(Number.isInteger(c.col)).toBe(true);
+    expect(Number.isInteger(c.row)).toBe(true);
+    expect(typeof c.color).toBe('string');
 
-    const seg = drawing.segments[0];
-    expect(Number.isInteger(seg.from.col)).toBe(true);
-    expect(Number.isInteger(seg.from.row)).toBe(true);
-    expect(seg.from).not.toEqual(seg.to);
-
-    // Crossing intermediate nodes fired at least one crisp snap haptic.
+    // Each newly-filled cell fired a crisp confirm haptic.
     const haptics = (await page.getByTestId('haptic-log').textContent()) ?? '';
     expect(haptics).toContain('snap');
   });
 
-  test('Undo reverts the last segment', async ({ page }) => {
+  test('Undo reverts the last stroke', async ({ page }) => {
     await page.goto('/?harness=canvas');
     const canvas = page.getByTestId('demo-canvas');
     await expect(canvas).toBeVisible();
     const box = (await canvas.boundingBox())!;
     const g = await readJson<GridSpec>(page, 'grid-spec');
-    const nodePx = (col: number, row: number) => ({
-      x: box.x + g.originX + col * g.cell,
-      y: box.y + g.originY + row * g.cell,
+    const cellPx = (col: number, row: number) => ({
+      x: box.x + g.originX + (col + 0.5) * g.cell,
+      y: box.y + g.originY + (row + 0.5) * g.cell,
     });
 
-    const a = nodePx(1, 1);
-    const b = nodePx(5, 1);
+    const a = cellPx(1, 1);
+    const b = cellPx(5, 1);
     await page.mouse.move(a.x, a.y);
     await page.mouse.down();
     await page.mouse.move(b.x, b.y, { steps: 30 });
     await page.mouse.up();
 
-    let drawing = await readJson<{ segments: unknown[] }>(page, 'last-change');
-    expect(drawing.segments).toHaveLength(1);
+    let drawing = await readJson<Drawing>(page, 'last-change');
+    expect(drawing.cells.length).toBeGreaterThan(0);
 
     await page.getByTestId('canvas-undo').click();
-    drawing = await readJson<{ segments: unknown[] }>(page, 'last-change');
-    expect(drawing.segments).toHaveLength(0);
+    drawing = await readJson<Drawing>(page, 'last-change');
+    expect(drawing.cells).toHaveLength(0); // one drag = one undo step
   });
 
   test('drawing on the canvas does not scroll the page', async ({ page }) => {

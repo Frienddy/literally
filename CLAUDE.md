@@ -5,11 +5,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What the product is
 
 "Literally" is a **mobile-first, offline-only PWA empathy game**. The player draws
-the same thing twice on the **same** dotted snap-to-grid canvas; the **only**
-difference is the instruction (ADR-015). **Mode 1 ("without clear instruction")**
-gives one vague, holistic ask ("draw a normal house…" — no counts, directions, or
-per-step help); **Mode 2 "Anchor Point" ("with clear instruction")** walks through
-literal, counted, directional steps with on-grid guidance and undo. After each, the
+the same thing twice on the **same** pixel-paint canvas — a grid of squares you fill
+with a chosen color (pixel art); the **only** difference is the instruction
+(ADR-015). **Mode 1 ("without clear instruction")** gives one vague, holistic ask
+("draw a normal house…" — no counts, no per-step help) and a free palette; **Mode 2
+"Anchor Point" ("with clear instruction")** walks through literal, one-square-at-a-
+time steps ("fill the highlighted square red") with on-grid guidance and undo. After each, the
 player rates stress + confidence (the shared `FeedbackCheckScreen`), then compares
 on a Reflection screen. The contrast builds empathy for how much clear instructions
 matter — and how disorienting their absence is. *(Mode 1 was formerly "Sensory
@@ -69,10 +70,10 @@ product's core intent.
 - **Local-first, network-never at runtime (ADR-001).** No backend, no `fetch` to
   app servers, no analytics SDKs. Everything runs and persists on-device; the app
   must work in airplane mode after first load. All persistence is browser storage.
-- **Refs-not-state for live drawing (ADR-006).** During a drag, snapped state
-  accumulates in refs inside `useCanvas` and renders via `requestAnimationFrame`.
+- **Refs-not-state for live drawing (ADR-006).** During a drag, painted cells
+  accumulate in refs inside `useCanvas` and render via `requestAnimationFrame`.
   React must **not** re-render per pointer event — the store is touched only via
-  `onChange`, once per finished segment (and on undo/reset). This is the
+  `onChange`, once per finished stroke (and on undo/reset). This is the
   zero-latency requirement; do not "lift drawing state into React."
   `tests/unit/useCanvas.render.test.tsx` asserts no re-render during a stroke.
 - **Show, don't tell — defer the ASD reveal (ADR-008).** The primary audience knows
@@ -103,9 +104,10 @@ product's core intent.
   (`touch-action: none` + `preventDefault`). Don't reintroduce document scroll.
 - **Content is data, not JSX (ADR-007).** All player-facing strings + instruction
   sequences live in `src/content/`. Don't hard-code copy in components.
-- **Tunables live in `src/config.ts`.** Grid size (currently 22×28 nodes), snap
-  tolerance, and haptic patterns are seeded there for non-engineers to tweak — don't
-  scatter these constants into components.
+- **Tunables live in `src/config.ts`.** The pixel-grid size (currently 16×20 cells),
+  the fixed color palette (`config.palette` — 12 swatches, `name` + `hex`), and
+  haptic patterns are seeded there for non-engineers to tweak — don't scatter these
+  constants into components.
 
 ## Big-picture code structure
 
@@ -122,7 +124,7 @@ product's core intent.
   `screen`/`draft`/`selectedSessionId`) so reopening lands on Welcome, never
   mid-mode. A session is a `draft` while in progress and only joins `sessions`
   (newest-first) on `finalizeSession`. Versioned via `src/store/migrations.ts`
-  (`SCHEMA_VERSION = 2`); `migrate` never throws — corrupt blobs boot to empty.
+  (`SCHEMA_VERSION = 3`); `migrate` never throws — corrupt blobs boot to empty.
   Selectors are in `src/store/selectors.ts` (subscribe narrowly to avoid re-renders).
 - **Storage is a swappable seam** (`src/store/storage.ts`). Default is
   quota-guarded localStorage: a write failure dispatches `QUOTA_EXCEEDED_EVENT`
@@ -133,14 +135,14 @@ product's core intent.
   all drawing math in a pure, framework-free `src/engine/` layer (`snap.ts`,
   `grid.ts`, `render.ts`). `engine/render.ts` is shared by the live canvas and
   read-only `DrawingPreview`s, so saved drawings re-render exactly as drawn. **One
-  grid-only hook drives both modes** (ADR-015); modes differ only in surrounding
-  instruction UI, not in the canvas. The hook reads live options through `optsRef`
-  so inline `onChange`/`onHaptic` callbacks never go stale without re-binding
-  listeners.
-- **Drawing data is `GridDrawing`** (`src/types/session.ts`): resolution-independent
-  `(col,row)` segments between grid nodes (`DrawingData` is a kept alias). The v1→v2
-  migration nulls legacy `FreehandDrawing` pixel payloads; the freehand engine was
-  removed.
+  pixel-paint hook drives both modes** (ADR-015); modes differ only in surrounding
+  instruction UI (Mode 2 adds a per-step target highlight + auto-selected color),
+  not in the canvas. The hook reads live options through `optsRef` so inline
+  `color`/`onChange`/`onHaptic` callbacks never go stale without re-binding listeners.
+- **Drawing data is `PixelDrawing`** (`src/types/session.ts`): a resolution-
+  independent list of filled `(col,row)` cells, each carrying a palette `color` hex
+  (`DrawingData` is a kept alias). The v2→v3 migration nulls legacy line-segment /
+  freehand payloads; the line-drawing engine was removed (both modes now paint cells).
 
 ## When implementing
 

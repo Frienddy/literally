@@ -3,27 +3,27 @@
  * R08-2, _docs/04 §2.5). It calls the SAME pure `engine/render.ts` routines as the
  * live `useCanvas` loop, so a saved drawing looks exactly as it was drawn.
  *
- * Both modes draw on the shared snap-to-grid canvas (ADR-015), so a saved drawing
- * is resolution-independent `(col,row)` segments → we derive a centered
- * {@link GridSpec} for the preview box and stroke them.
+ * Both modes paint on the shared pixel canvas (ADR-015), so a saved drawing is a
+ * resolution-independent set of colored `(col,row)` cells → we derive a centered
+ * {@link GridSpec} for the preview box and fill them.
  *
  * An optional `ghostTarget` is drawn faintly *behind* the drawing — that's the
  * Mode 1 "target reveal" (R08-3), so the gap between the vague-instruction attempt
- * and the intended result is visible. Rendered on a light surface so the dark
- * engine ink reads with AA contrast.
+ * and the intended result is visible. Rendered on a light surface so the colors
+ * read with AA contrast.
  *
  * a11y: the canvas carries `role="img"` + a text `label` summary, so the drawing
  * is described even where 2D canvas is unavailable (e.g. jsdom / no-canvas).
  */
 import { useLayoutEffect, useRef, useState } from 'react';
-import type { DrawingData, GridDrawing } from '../types/session';
+import type { DrawingData, PixelDrawing } from '../types/session';
 import { computeGridSpec } from '../engine/grid';
-import { clear, drawGridDrawing, drawTargetGhost } from '../engine/render';
+import { clear, drawPixelDrawing, drawTargetGhost } from '../engine/render';
 
 export interface DrawingPreviewProps {
   drawing: DrawingData | null;
   /** A clean target to faintly ghost *behind* the drawing (Mode 1 reveal, R08-3). */
-  ghostTarget?: GridDrawing | null;
+  ghostTarget?: PixelDrawing | null;
   /** Accessible description of the rendered drawing (R08-2 a11y). */
   label: string;
   className?: string;
@@ -86,7 +86,7 @@ export function DrawingPreview({
     }
 
     if (!drawing) return;
-    drawGridDrawing(
+    drawPixelDrawing(
       ctx,
       drawing,
       computeGridSpec(

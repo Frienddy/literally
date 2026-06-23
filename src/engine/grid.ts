@@ -2,13 +2,14 @@
  * Grid layout (PRD-006 R06-10, _docs/04 §2.3).
  *
  * Pure helper that turns an available pixel area + a logical grid size
- * (cols × rows of *nodes*) into a centered {@link GridSpec} — the px `cell` size
- * and `origin` the snap math and renderer share. Kept framework-free alongside
+ * (cols × rows of *cells*) into a centered {@link GridSpec} — the px `cell` size
+ * and `origin` the paint math and renderer share. Kept framework-free alongside
  * the rest of the engine so the live canvas, the guidance overlay, and the dev
  * harness all derive identical geometry from one place (no drift).
  *
- * `cols`/`rows` count nodes, so the drawn grid spans `(n - 1)` cells. The result
- * is centered in `w × h` with `pad` px of breathing room on every edge.
+ * `cols`/`rows` count cells, so the drawn field spans exactly `cols × rows` cells.
+ * The result is centered in `w × h` with `pad` px of breathing room on every edge,
+ * and the cell is square (the smaller of the two fits).
  */
 import type { GridSpec } from './snap';
 import { config } from '../config';
@@ -18,17 +19,16 @@ export function computeGridSpec(
   h: number,
   cols: number,
   rows: number,
-  // Default lives in config.ts so non-engineers can tune the dot spacing; callers
+  // Default lives in config.ts so non-engineers can tune the cell spacing; callers
   // that need a different margin (small previews, export) pass their own.
   pad: number = config.grid.pad,
 ): GridSpec {
-  const cell = Math.min((w - pad * 2) / (cols - 1), (h - pad * 2) / (rows - 1));
-  const span = (n: number) => cell * (n - 1);
+  const cell = Math.min((w - pad * 2) / cols, (h - pad * 2) / rows);
   return {
     cols,
     rows,
     cell,
-    originX: (w - span(cols)) / 2,
-    originY: (h - span(rows)) / 2,
+    originX: (w - cell * cols) / 2,
+    originY: (h - cell * rows) / 2,
   };
 }

@@ -13,7 +13,7 @@ type GridSpec = {
   originY: number;
 };
 type GridNode = { col: number; row: number };
-type Segment = { from: GridNode; to: GridNode };
+type Step = { cell: GridNode; color: string };
 
 async function readJson<T>(page: Page, testId: string): Promise<T> {
   const text = await page.getByTestId(testId).textContent();
@@ -30,24 +30,22 @@ async function rate(page: Page) {
 }
 
 /**
- * Build the Mode 2 subject by drawing each authored step on the snap grid. There
- * is no Next button — each finished line auto-advances (ADR-015), and the final
- * line opens the completion beat we then confirm.
+ * Build the Mode 2 subject by filling each authored square on the pixel grid.
+ * There is no Next button — each filled square auto-advances (ADR-015), and the
+ * final square opens the completion beat we then confirm.
  */
 async function buildMode2(page: Page) {
   const g = await readJson<GridSpec>(page, 'mode2-grid-spec');
-  const steps = await readJson<Segment[]>(page, 'mode2-steps');
+  const steps = await readJson<Step[]>(page, 'mode2-steps');
   const box = (await page.getByTestId('mode2-canvas').boundingBox())!;
-  const px = (n: GridNode) => ({
-    x: box.x + g.originX + n.col * g.cell,
-    y: box.y + g.originY + n.row * g.cell,
+  const cellPx = (n: GridNode) => ({
+    x: box.x + g.originX + (n.col + 0.5) * g.cell,
+    y: box.y + g.originY + (n.row + 0.5) * g.cell,
   });
-  for (const { from, to } of steps) {
-    const a = px(from);
-    const b = px(to);
-    await page.mouse.move(a.x, a.y);
+  for (const { cell } of steps) {
+    const p = cellPx(cell);
+    await page.mouse.move(p.x, p.y);
     await page.mouse.down();
-    await page.mouse.move(b.x, b.y, { steps: 12 });
     await page.mouse.up();
   }
   await page.getByTestId('mode2-complete-continue').click();
