@@ -50,7 +50,7 @@ const SUBJECTS: Array<{
     id: 'monalisa',
     steps: monalisaSteps,
     target: monalisaTarget,
-    cellCount: 50,
+    cellCount: 172,
   },
   { id: 'ufo', steps: ufoSteps, target: ufoTarget, cellCount: 114 },
   {

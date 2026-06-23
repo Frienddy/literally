@@ -242,18 +242,29 @@ export const fighterSteps = fighter.steps;
 export const fighterTarget = fighter.target;
 
 /**
- * The Mona Lisa: a portrait — brown centre-parted hair framing a peach oval face
- * with two eyes, a neck, and the dark pyramidal dress. (50 squares.)
+ * The Mona Lisa, three-quarter portrait — long brown hair parts over the crown and
+ * frames a peach oval face: two dark eyes (and, famously, no eyebrows), a centred
+ * nose, and the faint half-smile. Below, a long neck drops to sloping shoulders in a
+ * black dress with a peach neckline, and her hands rest folded near the bottom.
+ * (172 squares.)
  */
 const monalisa = buildSprite([
-  '.MMMMM.',
-  'MMMMMMM',
-  'MSSSSSM',
-  'MSKSKSM',
-  'MSSSSSM',
-  '.SSSSS.',
-  '.KKKKK.',
-  'KKKKKKK',
+  '....MMMMM....',
+  '..MMMMMMMMM..',
+  '.MMMMMMMMMMM.',
+  '.MMSSSSSSSMM.',
+  '.MMSKSSSKSMM.',
+  '.MMSSSSSSSMM.',
+  '.MMSSSKSSSMM.',
+  '.MMSSKKKSSMM.',
+  '.MMSSSSSSSMM.',
+  '.MMMSSSSSMMM.',
+  '..MM.SSS.MM..',
+  '.MMMMSSSMMMM.',
+  'MMKKKSSSKKKMM',
+  'KKKKKKKKKKKKK',
+  'KKKKSSSSSKKKK',
+  'KKKKKKKKKKKKK',
 ]);
 export const monalisaSteps = monalisa.steps;
 export const monalisaTarget = monalisa.target;
