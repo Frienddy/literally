@@ -4,7 +4,7 @@
  * The first half of the core contrast. Per ADR-015 it draws on the **same**
  * snap-to-grid dotted canvas as Mode 2 — same dots, same snapping, same Undo —
  * so the experience holds every tool constant and varies only the *instruction*:
- * here a single, vague, holistic ask ("draw a little robot droid…") with no counts, no
+ * here a single, vague, holistic ask ("draw R2-D2…") with no counts, no
  * directions, no per-step guidance and no target. The player has to decide the
  * whole drawing from a fuzzy idea of the subject. Emotional target: *mild*
  * uncertainty — "I can't tell if I'm doing this right" — never distress.

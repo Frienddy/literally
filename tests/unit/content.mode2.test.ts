@@ -42,7 +42,7 @@ const SUBJECTS: Array<{
   target: PixelDrawing;
   cellCount: number;
 }> = [
-  { id: 'droid', steps: droidSteps, target: droidTarget, cellCount: 34 },
+  { id: 'droid', steps: droidSteps, target: droidTarget, cellCount: 73 },
   { id: 'alien', steps: alienSteps, target: alienTarget, cellCount: 36 },
   { id: 'mario', steps: marioSteps, target: marioTarget, cellCount: 118 },
   { id: 'fighter', steps: fighterSteps, target: fighterTarget, cellCount: 26 },

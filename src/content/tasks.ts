@@ -41,7 +41,7 @@ import {
 
 export interface TaskContent {
   id: TaskId;
-  /** Short, warm subject name for the giver's framing (e.g. "a little robot droid"). */
+  /** Short, warm subject name for the giver's framing (e.g. "R2-D2"). */
   label: string;
   /** The vague, fading Mode 1 instruction block for this subject (FR-5). */
   vague: VagueInstruction;
@@ -57,7 +57,7 @@ const grid = { cols: config.grid.cols, rows: config.grid.rows };
 
 const droid: TaskContent = {
   id: 'droid',
-  label: 'a little robot droid',
+  label: 'R2-D2',
   vague: droidVague,
   steps: droidSteps,
   target: droidTarget,

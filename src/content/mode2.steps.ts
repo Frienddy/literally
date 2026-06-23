@@ -159,18 +159,24 @@ function buildSprite(rows: string[]): {
 }
 
 /**
- * The droid: a domed-head robot — black antenna, grey dome with a blue visor, a red
- * panel on a boxy body, and two stubby legs with feet. (34 squares.)
+ * R2-D2, head-on — the astromech droid everyone pictures instantly: a black
+ * periscope nub atop a silver half-dome, the single blue camera eye, and a barrel
+ * body carrying blue side panels, a red logic-display strip and a round blue data
+ * port, standing on two legs with wide flat feet. (73 squares.)
  */
 const droid = buildSprite([
-  '..KK..',
-  '.AAAA.',
-  'ABBBBA',
-  'AAAAAA',
-  'ARRRRA',
-  'AAAAAA',
-  'A....A',
-  'K....K',
+  '...K....',
+  '..AAAA..',
+  '.AAAAAA.',
+  '.AKBBKA.',
+  '.AAAAAA.',
+  'AAAAAAAA',
+  'ABBAABBA',
+  'AAARRAAA',
+  'AABBBBAA',
+  'AAAAAAAA',
+  '.AA..AA.',
+  'KKK..KKK',
 ]);
 export const droidSteps = droid.steps;
 export const droidTarget = droid.target;
