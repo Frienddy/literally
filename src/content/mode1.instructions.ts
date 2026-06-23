@@ -7,7 +7,7 @@
  * DESIGN RULE — genuinely under-specified: every clause is deliberately unanchored.
  * No counts, no coordinates, no reference image, nothing that tells you which squares
  * to fill — "normal", "the usual sort", "a sensible size". The subjects are ones
- * everyone can picture instantly (a robot droid, a space alien, a jumping Mario, a
+ * everyone can picture instantly (a robot droid, a space alien, Mario, a
  * space fighter, the Mona Lisa) yet has no idea how to *begin* drawing — so the vague
  * ask leaves you stranded on procedure, which is the point: same canvas, same tools,
  * no usable instruction.
@@ -33,7 +33,7 @@ export const alienVague: VagueInstruction = {
 
 export const marioVague: VagueInstruction = {
   block:
-    'Draw Mario, mid-jump. You know the one — the cap, the moustache, arms up, legs kicking out as he leaps. Make it look like a proper jump. Keep it a sensible size, nothing fancy.',
+    'Draw Mario, just standing there. You know the one — the red cap, the moustache, the dungarees, stood facing one way. Make it look properly like him. Keep it a sensible size, nothing fancy.',
 };
 
 export const fighterVague: VagueInstruction = {

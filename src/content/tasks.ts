@@ -75,7 +75,7 @@ const alien: TaskContent = {
 
 const mario: TaskContent = {
   id: 'mario',
-  label: 'a jumping Mario',
+  label: 'Mario',
   vague: marioVague,
   steps: marioSteps,
   target: marioTarget,

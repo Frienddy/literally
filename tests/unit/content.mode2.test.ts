@@ -44,7 +44,7 @@ const SUBJECTS: Array<{
 }> = [
   { id: 'droid', steps: droidSteps, target: droidTarget, cellCount: 34 },
   { id: 'alien', steps: alienSteps, target: alienTarget, cellCount: 36 },
-  { id: 'mario', steps: marioSteps, target: marioTarget, cellCount: 39 },
+  { id: 'mario', steps: marioSteps, target: marioTarget, cellCount: 118 },
   { id: 'fighter', steps: fighterSteps, target: fighterTarget, cellCount: 26 },
   {
     id: 'monalisa',

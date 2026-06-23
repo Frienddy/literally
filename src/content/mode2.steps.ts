@@ -193,18 +193,28 @@ export const alienSteps = alien.steps;
 export const alienTarget = alien.target;
 
 /**
- * Mario: the plumber — a red cap, a peach face with two eyes and a brown moustache,
- * a red shirt over blue overalls, two peach hands, and brown shoes. (39 squares.)
+ * Mario, standing — the plumber's calm idle pose seen side-on, facing right (the
+ * canonical NES small-Mario sprite): a red cap with a forward brim, brown hair and a
+ * sideburn, one eye and a thick brown moustache, a red shirt under blue overalls with
+ * a yellow button and straps, peach hands resting at his sides, feet planted, and
+ * brown shoes. (118 squares.)
  */
 const mario = buildSprite([
-  '.RRRRR.',
-  'RRRRRRR',
-  '.MSSSM.',
-  '.SKSKS.',
-  '.MMMMM.',
-  '.RRRRR.',
-  'S.BBB.S',
-  '.M...M.',
+  '....RRRRR....',
+  '...RRRRRRRR..',
+  '...MMMSSSSS..',
+  '..MMSSSSKSS..',
+  '..MMMMMMMSS..',
+  '...SSSSSSS...',
+  '....SSSSS....',
+  '...RRRRRRR...',
+  '..RRRBYBRRR..',
+  '.SSRRBBBRRSS.',
+  '.SSRBBBBBRSS.',
+  '..SBBBBBBBS..',
+  '...BBB.BBB...',
+  '...MMM.MMM...',
+  '..MMMM.MMMM..',
 ]);
 export const marioSteps = mario.steps;
 export const marioTarget = mario.target;
