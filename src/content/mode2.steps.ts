@@ -241,3 +241,54 @@ const monalisa = buildSprite([
 ]);
 export const monalisaSteps = monalisa.steps;
 export const monalisaTarget = monalisa.target;
+
+/**
+ * The UFO abducting a cow: a teal-domed grey flying saucer with yellow porthole
+ * lights, a yellow tractor beam fanning down to the ground, and a little spotted
+ * cow (peach head, grey-and-brown body, four black legs dangling) caught floating
+ * inside the beam. The signature "I-know-it-but-can't-place-it" scene — everyone
+ * pictures it, nobody knows where the beam starts. (114 squares.)
+ */
+const ufo = buildSprite([
+  '.....TTT.....',
+  '....TTTTT....',
+  '...AAAAAAA...',
+  '.AAAAAAAAAAA.',
+  'AAAYAAYAAYAAA',
+  '.AAAAAAAAAAA.',
+  '...AAAAAAA...',
+  '.....YYY.....',
+  '....YYYYY....',
+  '...YYYYYYY...',
+  '..YYAMAAMAY..',
+  '..YYSSAAAAY..',
+  '.YYYKYKKYKYY.',
+  'YYYYYYYYYYYYY',
+]);
+export const ufoSteps = ufo.steps;
+export const ufoTarget = ufo.target;
+
+/**
+ * The axolotl: a derpy peach salamander seen head-on — two black dot eyes and a
+ * tiny mouth, the signature feathery red gills fanning out each side of the head,
+ * a chubby body with four little stub legs, and a tapering tail. Instantly
+ * picture-able, impossible to know where to start. (108 squares.)
+ */
+const axolotl = buildSprite([
+  '....SSSSS....',
+  '...SSSSSSS...',
+  '..RSSKSKSSR..',
+  '.RRSSSSSSSRR.',
+  '.RRSSSKSSSRR.',
+  '..RSSSSSSSR..',
+  '...SSSSSSS...',
+  '.S.SSSSSSS.S.',
+  '...SSSSSSS...',
+  '..SSSSSSSSS..',
+  '.S.SSSSSSS.S.',
+  '...SSSSSSS...',
+  '....SSSSS....',
+  '.....SSS.....',
+]);
+export const axolotlSteps = axolotl.steps;
+export const axolotlTarget = axolotl.target;

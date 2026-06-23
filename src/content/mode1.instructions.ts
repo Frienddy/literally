@@ -45,3 +45,13 @@ export const monalisaVague: VagueInstruction = {
   block:
     'Draw the Mona Lisa. You know the painting — the lady with the long hair and the little smile, her hands folded in her lap. Make it look like the proper portrait. Keep it a sensible size, nothing fancy.',
 };
+
+export const ufoVague: VagueInstruction = {
+  block:
+    'Draw a UFO beaming up a cow. You know the scene — the flying saucer up top, a beam of light coming down, and a little cow caught floating in it. Make it look like a proper abduction. Keep it a sensible size, nothing fancy.',
+};
+
+export const axolotlVague: VagueInstruction = {
+  block:
+    'Draw an axolotl. You know the little creature — the smiley pink salamander with the feathery frills round its head and its tiny legs. Make it look properly axolotl-ish. Not too big, not too small.',
+};

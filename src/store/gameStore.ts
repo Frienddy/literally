@@ -72,6 +72,8 @@ export const TASKS: TaskId[] = [
   'mario',
   'fighter',
   'monalisa',
+  'ufo',
+  'axolotl',
 ];
 // Math.random is fine at app runtime (only disallowed inside Workflow scripts).
 const pickTask = (): TaskId => TASKS[Math.floor(Math.random() * TASKS.length)];

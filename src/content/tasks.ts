@@ -22,6 +22,10 @@ import {
   fighterTarget,
   monalisaSteps,
   monalisaTarget,
+  ufoSteps,
+  ufoTarget,
+  axolotlSteps,
+  axolotlTarget,
   type Mode2Step,
 } from './mode2.steps';
 import {
@@ -30,6 +34,8 @@ import {
   marioVague,
   fighterVague,
   monalisaVague,
+  ufoVague,
+  axolotlVague,
   type VagueInstruction,
 } from './mode1.instructions';
 
@@ -94,6 +100,24 @@ const monalisa: TaskContent = {
   grid,
 };
 
+const ufo: TaskContent = {
+  id: 'ufo',
+  label: 'a UFO beaming up a cow',
+  vague: ufoVague,
+  steps: ufoSteps,
+  target: ufoTarget,
+  grid,
+};
+
+const axolotl: TaskContent = {
+  id: 'axolotl',
+  label: 'an axolotl',
+  vague: axolotlVague,
+  steps: axolotlSteps,
+  target: axolotlTarget,
+  grid,
+};
+
 /** Authored content per subject — every `TaskId` in the pool is authored. */
 export const TASK_CONTENT: Record<TaskId, TaskContent> = {
   droid,
@@ -101,6 +125,8 @@ export const TASK_CONTENT: Record<TaskId, TaskContent> = {
   mario,
   fighter,
   monalisa,
+  ufo,
+  axolotl,
 };
 
 /** Fallback when a (possibly legacy) id isn't in the current pool. */

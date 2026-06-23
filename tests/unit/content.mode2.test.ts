@@ -10,6 +10,10 @@ import {
   fighterTarget,
   monalisaSteps,
   monalisaTarget,
+  ufoSteps,
+  ufoTarget,
+  axolotlSteps,
+  axolotlTarget,
 } from '../../src/content/mode2.steps';
 import { resolveTask, TASK_CONTENT } from '../../src/content/tasks';
 import { config } from '../../src/config';
@@ -47,6 +51,13 @@ const SUBJECTS: Array<{
     steps: monalisaSteps,
     target: monalisaTarget,
     cellCount: 50,
+  },
+  { id: 'ufo', steps: ufoSteps, target: ufoTarget, cellCount: 114 },
+  {
+    id: 'axolotl',
+    steps: axolotlSteps,
+    target: axolotlTarget,
+    cellCount: 108,
   },
 ];
 
@@ -125,6 +136,8 @@ describe('task resolver (FR-20)', () => {
     expect(resolveTask('mario').steps).toBe(marioSteps);
     expect(resolveTask('fighter').steps).toBe(fighterSteps);
     expect(resolveTask('monalisa').steps).toBe(monalisaSteps);
+    expect(resolveTask('ufo').steps).toBe(ufoSteps);
+    expect(resolveTask('axolotl').steps).toBe(axolotlSteps);
   });
 
   it('every pool subject is authored — none undefined', () => {
@@ -134,6 +147,8 @@ describe('task resolver (FR-20)', () => {
       'mario',
       'fighter',
       'monalisa',
+      'ufo',
+      'axolotl',
     ] as const) {
       expect(TASK_CONTENT[id]).toBeDefined();
       expect(TASK_CONTENT[id].id).toBe(id);
