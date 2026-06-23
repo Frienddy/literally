@@ -62,7 +62,6 @@ const NAME_TO_INDEX: Record<string, number> = Object.fromEntries(
 const CHAR_TO_NAME: Record<string, string> = {
   K: 'black',
   A: 'grey',
-  W: 'white',
   R: 'red',
   O: 'orange',
   Y: 'yellow',
@@ -177,7 +176,7 @@ export const droidSteps = droid.steps;
 export const droidTarget = droid.target;
 
 /**
- * The alien: a blocky green creature — two teal antennae, a green head with a white
+ * The alien: a blocky green creature — two teal antennae, a green head with a grey
  * eye-band and two black pupils, and three little legs. (36 squares.)
  */
 const alien = buildSprite([
@@ -185,8 +184,8 @@ const alien = buildSprite([
   '.G..G.',
   '.GGGG.',
   'GGGGGG',
-  'GWWWWG',
-  'GKWWKG',
+  'GAAAAG',
+  'GKAAKG',
   'GGGGGG',
   'G.GG.G',
 ]);

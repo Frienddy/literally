@@ -38,7 +38,6 @@ export const config = {
   palette: [
     { name: 'black', hex: '#1f2937' },
     { name: 'grey', hex: '#9ca3af' },
-    { name: 'white', hex: '#ffffff' },
     { name: 'red', hex: '#ef4444' },
     { name: 'orange', hex: '#f97316' },
     { name: 'yellow', hex: '#facc15' },

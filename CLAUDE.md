@@ -105,7 +105,7 @@ product's core intent.
 - **Content is data, not JSX (ADR-007).** All player-facing strings + instruction
   sequences live in `src/content/`. Don't hard-code copy in components.
 - **Tunables live in `src/config.ts`.** The pixel-grid size (currently 16×20 cells),
-  the fixed color palette (`config.palette` — 12 swatches, `name` + `hex`), and
+  the fixed color palette (`config.palette` — 11 swatches, `name` + `hex`), and
   haptic patterns are seeded there for non-engineers to tweak — don't scatter these
   constants into components.
 
