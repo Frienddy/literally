@@ -33,6 +33,8 @@ export interface StepInstructionProps {
   mascotLabel?: string;
   /** Hide the control row (e.g. while the completion beat plays). */
   hideControls?: boolean;
+  /** Optional numbered-color legend (the key for "…with color N"). */
+  legend?: ReactNode;
   /** The drawing surface, laid out between the card and the controls. */
   children?: ReactNode;
   className?: string;
@@ -47,22 +49,24 @@ export function StepInstruction({
   mascotMood = 'clear',
   mascotLabel,
   hideControls = false,
+  legend,
   children,
   className = '',
 }: StepInstructionProps) {
   // Layout reflows between portrait and landscape via grid-template-areas (ADR-014)
-  // without changing DOM order: portrait stacks card → canvas → controls; the
-  // `wide:` landscape variant puts the canvas on the left (spanning both rows) with
-  // the persistent step card top-right and the Undo control bottom-right.
+  // without changing DOM order: portrait stacks card → canvas → legend → controls;
+  // the `wide:` landscape variant puts the canvas on the left (spanning all rows)
+  // with the step card, the numbered-color legend, and the Undo control stacked
+  // top-to-bottom on the right.
   return (
     <section
       className={
         // Tighter row gaps on phones free vertical space for the canvas (the
         // binding axis in portrait); `wide:` restores the desktop spacing.
         'grid min-h-0 grid-cols-1 gap-3 wide:gap-4 ' +
-        "grid-rows-[auto_minmax(0,1fr)_auto] [grid-template-areas:'card'_'canvas'_'controls'] " +
-        'wide:grid-cols-[minmax(0,1fr)_20rem] wide:grid-rows-[auto_minmax(0,1fr)] wide:gap-x-6 ' +
-        "wide:[grid-template-areas:'canvas_card'_'canvas_controls'] " +
+        "grid-rows-[auto_minmax(0,1fr)_auto_auto] [grid-template-areas:'card'_'canvas'_'legend'_'controls'] " +
+        'wide:grid-cols-[minmax(0,1fr)_20rem] wide:grid-rows-[auto_auto_minmax(0,1fr)] wide:gap-x-6 ' +
+        "wide:[grid-template-areas:'canvas_card'_'canvas_legend'_'canvas_controls'] " +
         className
       }
     >
@@ -75,6 +79,8 @@ export function StepInstruction({
       </div>
 
       <div className="relative min-h-0 [grid-area:canvas]">{children}</div>
+
+      {legend && <div className="[grid-area:legend]">{legend}</div>}
 
       {!hideControls && (
         <div className="flex [grid-area:controls] wide:self-end">

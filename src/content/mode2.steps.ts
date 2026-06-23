@@ -1,21 +1,25 @@
 /**
- * Mode 2 — the literal, one-at-a-time step sequences for the **task pool** (FR-20,
- * formerly _docs/01 §4.2). Content is **data, not JSX** (ADR-007): each step pairs a
- * player-facing instruction with the single grid *cell* it fills and the color to
- * fill it, so the same array drives the step cards, the on-grid target highlight,
- * and the hidden target the Reflection reveals (ADR-010).
+ * Mode 2 — the literal, coordinate-based step sequences for the **task pool** (FR-20,
+ * formerly _docs/01 §4.2). Content is **data, not JSX** (ADR-007): each step is a
+ * short horizontal **run** that pairs a player-facing, coordinate-based instruction
+ * ("start at row 6, col 3: fill 4 squares → with color 1 (black)") with the exact
+ * cells it fills and the numbered palette color to fill them, so the same array
+ * drives the step cards, the on-grid run highlight, the numbered-color legend, and
+ * the hidden target the Reflection reveals (ADR-010).
  *
- * Every step is exactly **one square** so the target highlight anchors precisely one
- * move per card and the "Step X of N" progress maps 1:1 to painting actions. The
- * subject is built square by square in reading order (top-left → bottom-right), so
- * the picture grows the way you'd colour it in.
+ * A step is a **run of one or more cells in the same row and color** — the picture
+ * is built one strip at a time, left→right, top→bottom (reading order), the way you'd
+ * colour in a pattern. Runs are the natural unit of a coordinate-based instruction:
+ * "fill N squares to the right" reads literally and maps 1:1 to the highlighted strip.
+ * The grid's rows/cols and the palette are **numbered** (1-based) so the steps can
+ * name them ("row 6", "col 3", "color 1") and the player reads them off the labelled
+ * grid + legend — the sharpest "with clear instruction" contrast to Mode 1's nothing.
  *
  * The pool is five "I-know-it-but-can't-draw-it" subjects — things everyone pictures
- * instantly yet freezes on *how* to begin (the sharpest version of the lesson: a
- * vague ask leaves you stranded on procedure, a literal one dissolves it). Each is
- * authored as a tiny ASCII sprite (one char per cell) and expanded into per-cell
- * steps + a `PixelDrawing` target by {@link buildSprite}, so the art stays editable
- * by non-engineers and the steps/target can never drift apart.
+ * instantly yet freezes on *how* to begin. Each is authored as a tiny ASCII sprite
+ * (one char per cell) and expanded into per-run steps + a `PixelDrawing` target by
+ * {@link buildSprite} (run-length-encoding each row), so the art stays editable by
+ * non-engineers and the steps/target can never drift apart.
  *
  * Sprite chars map to `config.palette` color names via {@link CHAR_TO_NAME}; `.`
  * (or space) is an empty cell. Each sprite is centered on the shared 16×20 cell grid
@@ -26,12 +30,20 @@ import type { GridNode, PixelDrawing } from '../types/session';
 import { config } from '../config';
 
 export interface Mode2Step {
-  /** The literal, unambiguous instruction shown on this step's card. */
+  /** The literal, coordinate-based instruction shown on this step's card. */
   text: string;
-  /** The single grid cell the player fills to satisfy this step. */
-  cell: GridNode;
-  /** The color to fill it (a `config.palette` hex). */
+  /** The run's start cell (0-based grid coords) — the "anchor" the player finds first. */
+  start: GridNode;
+  /** How many cells the run fills, left→right from {@link start} (same row). */
+  length: number;
+  /** Every cell the run fills, ordered left→right (the highlighted strip). */
+  cells: GridNode[];
+  /** The color the whole run is filled with (a `config.palette` hex). */
   color: string;
+  /** 1-based palette index — the "color N" the player reads off the legend. */
+  colorIndex: number;
+  /** The palette color's name, shown in the step text + legend (a11y, never color-only). */
+  colorName: string;
 }
 
 const GRID = { cols: config.grid.cols, rows: config.grid.rows };
@@ -39,6 +51,11 @@ const GRID = { cols: config.grid.cols, rows: config.grid.rows };
 /** color name → painted hex (the palette is the single source of truth). */
 const NAME_TO_HEX: Record<string, string> = Object.fromEntries(
   config.palette.map((c) => [c.name, c.hex]),
+);
+
+/** color name → 1-based palette index (the "color N" shown to the player). */
+const NAME_TO_INDEX: Record<string, number> = Object.fromEntries(
+  config.palette.map((c, i) => [c.name, i + 1]),
 );
 
 /** Sprite char → palette color name. `.`/space mean "leave this cell empty". */
@@ -58,10 +75,32 @@ const CHAR_TO_NAME: Record<string, string> = {
 };
 
 /**
- * Expand an ASCII sprite into ordered per-cell steps + the matching target. The
- * sprite is centered on the shared grid; every non-empty char becomes one "fill the
- * highlighted square <color>" step, and the target is exactly those cells — so the
- * picture the steps build IS the hidden target (ADR-010), with no chance of drift.
+ * Compose the literal, coordinate-based instruction for one run. Rows/cols/colors
+ * are shown **1-based** to match the numbers labelled on the grid + legend (the
+ * player never has to translate). The name rides along with the color number so the
+ * cue is never color-only (a11y).
+ */
+function stepText(
+  row: number,
+  startCol: number,
+  len: number,
+  colorIndex: number,
+  name: string,
+): string {
+  const r = row + 1;
+  const c = startCol + 1;
+  const color = `color ${colorIndex} (${name})`;
+  return len === 1
+    ? `Start at row ${r}, col ${c}: fill this square with ${color}.`
+    : `Start at row ${r}, col ${c}: fill ${len} squares → with ${color}.`;
+}
+
+/**
+ * Expand an ASCII sprite into ordered per-run steps + the matching target. The
+ * sprite is centered on the shared grid; each maximal horizontal stretch of one
+ * color becomes a "fill N squares → with color K" run, and the target is exactly
+ * those cells in order — so the picture the steps build IS the hidden target
+ * (ADR-010), with no chance of drift.
  */
 function buildSprite(rows: string[]): {
   steps: Mode2Step[];
@@ -74,29 +113,47 @@ function buildSprite(rows: string[]): {
 
   const steps: Mode2Step[] = [];
   rows.forEach((line, y) => {
-    for (let x = 0; x < line.length; x++) {
+    let x = 0;
+    while (x < line.length) {
       const ch = line[x];
-      if (ch === '.' || ch === ' ') continue;
+      if (ch === '.' || ch === ' ') {
+        x++;
+        continue;
+      }
       const name = CHAR_TO_NAME[ch];
       if (!name) throw new Error(`mode2.steps: unknown sprite char "${ch}"`);
       const color = NAME_TO_HEX[name];
       if (!color)
         throw new Error(`mode2.steps: "${name}" is not in config.palette`);
+      const colorIndex = NAME_TO_INDEX[name];
+
+      // Extend the run while the *same* char (= same color) continues.
+      let len = 1;
+      while (x + len < line.length && line[x + len] === ch) len++;
+
+      const startCol = offX + x;
+      const row = offY + y;
+      const cells: GridNode[] = [];
+      for (let i = 0; i < len; i++) cells.push({ col: startCol + i, row });
+
       steps.push({
-        text: `Fill the highlighted square ${name}.`,
-        cell: { col: offX + x, row: offY + y },
+        text: stepText(row, startCol, len, colorIndex, name),
+        start: { col: startCol, row },
+        length: len,
+        cells,
         color,
+        colorIndex,
+        colorName: name,
       });
+      x += len;
     }
   });
 
   const target: PixelDrawing = {
     kind: 'pixel',
-    cells: steps.map((s) => ({
-      col: s.cell.col,
-      row: s.cell.row,
-      color: s.color,
-    })),
+    cells: steps.flatMap((s) =>
+      s.cells.map((c) => ({ col: c.col, row: c.row, color: s.color })),
+    ),
     grid: { cols: GRID.cols, rows: GRID.rows },
   };
   return { steps, target };

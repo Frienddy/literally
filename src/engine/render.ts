@@ -6,8 +6,8 @@
  * these, a saved drawing always re-renders exactly as it was painted.
  *
  * The surface is a grid of square *cells* (pixel art): faint outlines mark the
- * cells, each filled cell is a solid color rectangle, and Mode 2 pulses an anchor
- * around the one cell the current step says to fill.
+ * cells, each filled cell is a solid color rectangle, and Mode 2 numbers the axes —
+ * the player reads the coordinates and finds each square (no on-grid cell highlight).
  */
 import type { PixelDrawing, GridNode } from '../types/session';
 import type { GridSpec } from './snap';
@@ -20,6 +20,9 @@ import { tokens } from '../styles/tokens';
 // propagates to the canvas instead of silently diverging.
 const GRID_LINE = tokens.color.gridLine; // faint cell outlines ("pixel paper")
 const GUIDE_START = tokens.guidance.startNode; // pulsing Mode-2 target anchor
+const AXIS_LABEL = tokens.color.textMuted; // Mode-2 row/col numbers
+const AXIS_LABEL_HI = tokens.guidance.startNode; // the current step's row/col
+const LABEL_FONT = tokens.font.body;
 
 export function clear(
   ctx: CanvasRenderingContext2D,
@@ -95,6 +98,52 @@ export function drawTargetHighlight(
   ctx.globalAlpha = 1;
   ctx.lineWidth = 3;
   ctx.strokeRect(o.x + 1.5, o.y + 1.5, g.cell - 3, g.cell - 3);
+  ctx.restore();
+}
+
+/**
+ * Mode 2 guidance: number every row + column in the gutter around the grid so the
+ * coordinate-based steps ("start at row 6, col 3") name a place the player can find.
+ * Numbers are 1-based to match the step text + color legend. `highlight` bolds the
+ * current step's start row/col so the referenced coordinates pop. Drawn on the
+ * guidance overlay (the paint canvas clears itself each frame) from the shared
+ * `GridSpec`, so the labels line up exactly with the cells they index.
+ */
+export function drawAxisLabels(
+  ctx: CanvasRenderingContext2D,
+  g: GridSpec,
+  highlight?: { row?: number | null; col?: number | null },
+): void {
+  const fontPx = Math.max(8, Math.min(12, Math.round(g.cell * 0.55)));
+  const hiRow = highlight?.row ?? null;
+  const hiCol = highlight?.col ?? null;
+  ctx.save();
+  ctx.textBaseline = 'middle';
+
+  // Column numbers, centered in the top gutter above each column.
+  for (let c = 0; c < g.cols; c++) {
+    const on = c === hiCol;
+    ctx.font = `${on ? '700 ' : ''}${fontPx}px ${LABEL_FONT}`;
+    ctx.fillStyle = on ? AXIS_LABEL_HI : AXIS_LABEL;
+    ctx.textAlign = 'center';
+    ctx.fillText(
+      String(c + 1),
+      g.originX + (c + 0.5) * g.cell,
+      g.originY - fontPx,
+    );
+  }
+  // Row numbers, right-aligned just left of each row.
+  for (let r = 0; r < g.rows; r++) {
+    const on = r === hiRow;
+    ctx.font = `${on ? '700 ' : ''}${fontPx}px ${LABEL_FONT}`;
+    ctx.fillStyle = on ? AXIS_LABEL_HI : AXIS_LABEL;
+    ctx.textAlign = 'right';
+    ctx.fillText(
+      String(r + 1),
+      g.originX - Math.max(4, fontPx * 0.4),
+      g.originY + (r + 0.5) * g.cell,
+    );
+  }
   ctx.restore();
 }
 

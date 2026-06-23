@@ -20,6 +20,13 @@ export const config = {
      * coordinates depend on it).
      */
     pad: 12,
+    /**
+     * Mode-2 only: a wider margin so the numbered row/col labels (the "with clear
+     * instruction" coordinate guides) have room in the gutter around the grid. Mode
+     * 1 keeps the tighter {@link pad}; bigger here trades a little cell size for
+     * legible axis numbers.
+     */
+    labelPad: 24,
   },
 
   /**

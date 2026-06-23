@@ -53,8 +53,14 @@ export const strings = {
     stepLabel: (n: number, total: number) => `Step ${n} of ${total}`,
     finish: 'Finish',
     // Names the live pixel canvas for screen readers (a11y, PRD-010 R10-9),
-    // mirroring Mode 1's `canvasLabel`.
-    canvasLabel: 'Drawing grid — tap the highlighted square to fill it.',
+    // mirroring Mode 1's `canvasLabel`. The grid is numbered (rows/cols); each step
+    // names the coordinates + the numbered color the player picks and fills.
+    canvasLabel:
+      'Drawing grid with numbered rows and columns — read each step’s coordinates, pick the numbered color, and fill the squares.',
+    // The numbered-color picker (ColorLegend): the swatches the player chooses from,
+    // each labelled with the number the step text names ("…with color 5").
+    legendLabel: 'Pick a color — each color has a number',
+    legendSwatchAria: (n: number, name: string) => `Color ${n}, ${name}`,
   },
   feedback: {
     stressQuestion: 'How did that feel?',
